@@ -23,10 +23,10 @@ def guardian_by_clic(event, cnv, segments_list):
     x0, y0 = event.x, event.y
     cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
     def light(x0, y0, segments_list):
-        for i in range(-100, 100, 30):
-            for j in range(-100, 100, 30):
+        for i in range(0, 400, 30):
+            for j in range(0, 600, 30):
                 A1 = (x0, y0)
-                A2 = (x0 + i, y0 + j)
+                A2 = (i, j) 
                 B1 = segments_list[0][0]
                 B2 = segments_list[0][1]
                 intersection = barycentre(A1, A2, B1, B2) 
