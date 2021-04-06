@@ -1,5 +1,5 @@
 import tkinter as tk
-from maths import barycentre, det
+from maths import barycentre, det, distance_two_points
 
 def polygon_by_clic(event, cnv):
     global coords_list
@@ -23,6 +23,7 @@ def guardian_by_clic(event, cnv, segments_list):
     cnv.delete('light')
     x0, y0 = event.x, event.y
     cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
+
     def light(x0, y0, segments_list):
         for i in range(0, 400, 100):
             for j in range(0, 600, 100):
@@ -32,13 +33,13 @@ def guardian_by_clic(event, cnv, segments_list):
                 B2 = segments_list[1]
                 intersection = barycentre(A1, A2, B1, B2) 
                 if intersection is not None:
-                    if det(B1, B2, intersection) == 0:
-                        if intersection[0] > B1[0] and intersection[0] < B2[0]:
-                            cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
-                        elif intersection[1] > B1[1] and intersection[1] < B2[1]:
-                            cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
-    for k in range(len(segments_list)):
-        light(x0, y0, segments_list[k])
+                    if intersection[0] > B1[0] and intersection[0] < B2[0]: # possibilité de mettre <= et >= 
+                        cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
+                    elif intersection[1] > B1[1] and intersection[1] < B2[1]:   # possibilité de mettre <= et >= 
+                        cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
+
+    for segment in segments_list:
+        light(x0, y0, segment)
 
 def delete_points(cnv):
     global coords_list
@@ -68,5 +69,3 @@ if __name__ == '__main__':
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
     wnd.mainloop()
-
-     
