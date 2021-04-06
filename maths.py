@@ -1,3 +1,5 @@
+from math import sqrt
+
 def det(m, n, p):
     # m, n, p tuples of 2
     det = m[0] * n[1] + m[1] * p[0] + n[0] * p[1]
@@ -14,9 +16,17 @@ def barycentre(A1, A2, B1, B2):
     I = (numerateur[0] / denominateur, numerateur[1] / denominateur)
     return I
 
+def distance_two_points(a, b):
+    # a, b tuples of 2
+    part1 = b[0] - a[0]
+    part2 = b[1] - a[1]
+    dist = sqrt(part1**2 + part2**2)
+    return dist
+
 if __name__ == '__main__':
     A1 = (-1, -1)
     A2 = (3, 1)
     B1 = (6, 0)
     B2 = (2, -2)
+    print(distance_two_points(A1, B1))
     print(barycentre(A1, A2, B1, B2))   # ça fonctionne j'ai dessiné sur papier pour comparer
