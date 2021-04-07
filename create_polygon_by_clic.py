@@ -1,5 +1,5 @@
 import tkinter as tk
-from maths import barycentre, det, distance_two_points
+from maths import barycentre, det, distance_two_points, find_direction
 
 def point_in_polygon(point, segments_list):
     side_x = (0, point[1])
@@ -29,8 +29,7 @@ def point_in_polygon(point, segments_list):
     if cpt_x % 2 != 0 and cpt_y % 2 != 0:
         return True
     else: 
-        return False
-    
+        return False    
 
 def polygon_by_clic(event, cnv):
     global coords_list
@@ -55,6 +54,7 @@ def guardian_by_clic(event, cnv, segments_list):
     x0, y0 = event.x, event.y
     is_in_polygon = point_in_polygon((x0, y0), segments_list)
     def light(x0, y0, side, segments_list):
+        light_list = []
         # side is a point (tuple) of 2
         for segment in segments_list:
             A1 = (x0, y0)
@@ -62,16 +62,37 @@ def guardian_by_clic(event, cnv, segments_list):
             B1 = segment[0]
             B2 = segment[1]
             intersection = barycentre(A1, A2, B1, B2)
+            direction1 = []
+            direction2 = []
+            distances1 = []
+            distances2 = []
             if intersection is not None:
                 if (intersection[0] > B1[0] and intersection[0] < B2[0]) or (intersection[0] < B1[0] and intersection[0] > B2[0]):
-                    cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
+                    light_list.append(intersection)
                 elif (intersection[1] > B1[1] and intersection[1] < B2[1]) or (intersection[1] < B1[1] and intersection[1] > B2[1]):
-                    cnv.create_line(A1[0], A1[1], intersection[0], intersection[1], tag='light')
+                    light_list.append(intersection)
+        if len(light_list):
+            direction = find_direction(A1, light_list[0])
+        for inter in light_list:
+            if find_direction(A1, inter) == direction:
+                direction1.append(inter)
+            else:
+                direction2.append(inter)
+        for inter in direction1:
+            distances1.append((distance_two_points(A1, inter), inter))
+        for inter in direction2:
+            distances2.append((distance_two_points(A1, inter), inter))
+        distances1.sort(key=lambda tupple: tupple[0])
+        distances2.sort(key=lambda tupple: tupple[1])
+        if len(distances1):
+            cnv.create_line(A1[0], A1[1], distances1[0][1][0], distances1[0][1][1], tags='light', fill="yellow", width=1)
+        if len(distances2):
+            cnv.create_line(A1[0], A1[1], distances2[0][1][0], distances2[0][1][1], tags='light', fill="yellow", width=1)
     if is_in_polygon:
-        cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
         for width in range(0, 601, 100):
-            for height in range(0, 601, 100):
+            for height in range(0, 401, 100):
                 light(x0, y0, (width, height), segments_list)
+        cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
 def delete_points(cnv):
     global coords_list
@@ -101,4 +122,3 @@ if __name__ == '__main__':
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
     wnd.mainloop()
-
