@@ -1,4 +1,5 @@
 from math import sqrt
+import time
 
 def det(m, n, p):
     # m, n, p tuples of 2
@@ -23,10 +24,38 @@ def distance_two_points(a, b):
     dist = sqrt(part1**2 + part2**2)
     return dist
 
+def find_direction(a, b):
+    # a, b tuples of 2
+    if a[0] > b[0]:
+        if a[1] > b[1]:
+            return "NO"
+        elif a[1] < b[1]:
+            return "SO"
+        else:
+            return "O"
+    elif a[0] < b[0]:
+        if a[1] > b[1]:
+            return "NE"
+        elif a[1] < b[1]:
+            return "SE"
+        else:
+            return "E"
+    else:
+        if a[1] > b[1]:
+            return "N"
+        elif a[1] < b[1]:
+            return "S"
+        else:
+            return None
+
+
 if __name__ == '__main__':
     A1 = (-1, -1)
     A2 = (3, 1)
     B1 = (6, 0)
     B2 = (2, -2)
+    t1 = time.time()
     print(distance_two_points(A1, B1))
     print(barycentre(A1, A2, B1, B2))   # ça fonctionne j'ai dessiné sur papier pour comparer
+    t2 = time.time()
+    print("temps d'execution", t2-t1, 'secondes')
