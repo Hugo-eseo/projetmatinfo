@@ -2,11 +2,9 @@ import tkinter as tk
 from maths import barycentre, det, distance_two_points, find_direction
 
 def point_in_polygon(point, segments_list):
-    side_x = (0, point[1])
-    side_y = (point[0], 0)
+    side_x, side_y = (0, point[1]), (point[0], 0)
     cpt_x, cpt_y = 0, 0
-    intersections_x_list = []
-    intersections_y_list = []
+    intersections_x_list, intersections_y_list = [], []
     for segment in segments_list:
         intersection_x = barycentre(side_x, point, segment[0], segment[1])
         intersection_y = barycentre(side_y, point, segment[0], segment[1])
@@ -54,18 +52,14 @@ def guardian_by_clic(event, cnv, segments_list):
     x0, y0 = event.x, event.y
     is_in_polygon = point_in_polygon((x0, y0), segments_list)
     def light(x0, y0, side, segments_list):
-        light_list = []
         # side is a point (tuple) of 2
+        light_list = []
         for segment in segments_list:
-            A1 = (x0, y0)
-            A2 = side
-            B1 = segment[0]
-            B2 = segment[1]
+            A1, A2 = (x0, y0), side
+            B1, B2 = segment[0], segment[1]
             intersection = barycentre(A1, A2, B1, B2)
-            direction1 = []
-            direction2 = []
-            distances1 = []
-            distances2 = []
+            direction1, direction2 = [], []
+            distances1, distances2 = [], []
             if intersection is not None:
                 if (intersection[0] > B1[0] and intersection[0] < B2[0]) or (intersection[0] < B1[0] and intersection[0] > B2[0]):
                     light_list.append(intersection)
