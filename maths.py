@@ -54,8 +54,9 @@ if __name__ == '__main__':
     A2 = (3, 1)
     B1 = (6, 0)
     B2 = (2, -2)
-    t1 = time.time()
     print(distance_two_points(A1, B1))
-    print(barycentre(A1, A2, B1, B2))   # ça fonctionne j'ai dessiné sur papier pour comparer
+    print(barycentre(A1, A2, B1, B2))
+    t1 = time.time()
+    det(A1, A2, B1)   # ça fonctionne j'ai dessiné sur papier pour comparer
     t2 = time.time()
     print("temps d'execution", t2-t1, 'secondes')

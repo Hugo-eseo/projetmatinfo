@@ -2,6 +2,7 @@ import tkinter as tk
 from maths import barycentre, det, distance_two_points, find_direction
 
 def point_in_polygon(point, segments_list):
+    # side est un point sur le bord du canvas au meme x (ou y) que le gardien
     side_x = (0, point[1])
     side_y = (point[0], 0)
     cpt_x, cpt_y = 0, 0
@@ -11,25 +12,32 @@ def point_in_polygon(point, segments_list):
         intersection_x = barycentre(side_x, point, segment[0], segment[1])
         intersection_y = barycentre(side_y, point, segment[0], segment[1])
         if intersection_x is not None:
+            # verification que les segments se coupent
             if (intersection_x[0] >= segment[0][0] and intersection_x[0] <= segment[1][0]) or (intersection_x[0] <= segment[0][0] and intersection_x[0] >= segment[1][0]):
                 intersections_x_list.append(intersection_x)
         if intersection_y is not None:
             if (intersection_y[1] >= segment[0][1] and intersection_y[1] <= segment[1][1]) or (intersection_y[1] <= segment[0][1] and intersection_y[1] >= segment[1][1]):
                 intersections_y_list.append(intersection_y)
     if len(intersections_x_list):
+        # tri par les x croissants de tous les points d'intersection sur la droite horizontale
         intersections_x_list.sort(key=lambda tupple: tupple[0])
         for intersection in intersections_x_list:
             if point[0] > intersection[0]:
+                # comptage du nombre d'intersections avant d'arriver au point
                 cpt_x += 1 
     if len(intersections_y_list):
+        # tri par les y croissants de tous les points d'intersection sur la droite verticale 
         intersections_y_list.sort(key=lambda tupple: tupple[1])
         for intersection in intersections_y_list:
+            # comptage du nombre d'intersections avant d'arriver au point
             if point[1] > intersection[1]:
                 cpt_y += 1
     if cpt_x % 2 != 0 and cpt_y % 2 != 0:
+        # si le nombre d'intersections est impair alors on est dans le polygone 
         return True
     else: 
-        return False    
+        # sinon on est en dehors
+        return False
 
 def polygon_by_clic(event, cnv):
     global coords_list
@@ -39,7 +47,8 @@ def polygon_by_clic(event, cnv):
 
 def draw(cnv):
     global coords_list, segments_list, corner_list
-    if len(coords_list):
+    if len(coords_list) >= 3:
+        # 3 points minimum pour un polygone
         cnv.create_polygon(coords_list, fill='grey', outline='black')
         segments_list.clear()
         corner_list.clear()
