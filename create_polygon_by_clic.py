@@ -1,5 +1,6 @@
 import tkinter as tk
-from maths import barycentre, det, distance_two_points, find_direction
+from maths import barycentre, det, distance_two_points, find_direction, point_in_segment
+from math import isclose
 
 def point_in_polygon(point, segments_list):
     # side est un point sur le bord du canvas au meme x (ou y) que le gardien
@@ -13,10 +14,10 @@ def point_in_polygon(point, segments_list):
         intersection_y = barycentre(side_y, point, segment[0], segment[1])
         if intersection_x is not None:
             # verification que les segments se coupent
-            if (intersection_x[0] >= segment[0][0] and intersection_x[0] <= segment[1][0]) or (intersection_x[0] <= segment[0][0] and intersection_x[0] >= segment[1][0]):
+            if point_in_segment(segment[0], segment[1], intersection_x):
                 intersections_x_list.append(intersection_x)
         if intersection_y is not None:
-            if (intersection_y[1] >= segment[0][1] and intersection_y[1] <= segment[1][1]) or (intersection_y[1] <= segment[0][1] and intersection_y[1] >= segment[1][1]):
+            if point_in_segment(segment[0], segment[1], intersection_y):
                 intersections_y_list.append(intersection_y)
     if len(intersections_x_list):
         # tri par les x croissants de tous les points d'intersection sur la droite horizontale
@@ -32,7 +33,7 @@ def point_in_polygon(point, segments_list):
             # comptage du nombre d'intersections avant d'arriver au point
             if point[1] > intersection[1]:
                 cpt_y += 1
-    if cpt_x % 2 != 0 and cpt_y % 2 != 0:
+    if cpt_x % 2 != 0:
         # si le nombre d'intersections est impair alors on est dans le polygone 
         return True
     else: 
@@ -53,110 +54,82 @@ def draw(cnv):
         segments_list.clear()
         corner_list.clear()
         for i in range(len(coords_list)-1):
+            # creation de la liste des segments
             segments_list.append((coords_list[i], coords_list[i+1]))
         segments_list.append((coords_list[-1], coords_list[0]))
+        # liste des sommets du polygone
         corner_list = coords_list.copy()
         coords_list.clear()
         cnv.delete('point')
 
 def guardian_by_clic(event, cnv, segments_list):
-    cnv.delete('guardian')
-    cnv.delete('light')
-    x0, y0 = event.x, event.y
-    is_in_polygon = point_in_polygon((x0, y0), segments_list)
     def light(x0, y0, side, segments_list):
+        # initialisation
         light_list = []
-        # side is a point (tuple) of 2
+        distance_list = []
+        A1 = (x0, y0)
+        A2 = side   # side is a point (tuple) of 2
         for segment in segments_list:
-            A1 = (x0, y0)
-            A2 = side
             B1 = segment[0]
             B2 = segment[1]
             intersection = barycentre(A1, A2, B1, B2)
-            direction1 = []
-            direction2 = []
-            distances1 = []
-            distances2 = []
             if intersection is not None:
-                if (intersection[0] > B1[0] and intersection[0] < B2[0]) or (intersection[0] < B1[0] and intersection[0] > B2[0]):
-                    light_list.append(intersection)
-                elif (intersection[1] > B1[1] and intersection[1] < B2[1]) or (intersection[1] < B1[1] and intersection[1] > B2[1]):
+                # verification de si les segments se coupent, et non les droites
+                if point_in_segment(B1, B2, intersection) and point_in_segment(A1, side, intersection):
                     light_list.append(intersection)
         if len(light_list):
-            direction = find_direction(A1, light_list[0])
-        for inter in light_list:
-            if find_direction(A1, inter) == direction:
-                direction1.append(inter)
-            else:
-                direction2.append(inter)
-        for inter in direction1:
-            distances1.append((distance_two_points(A1, inter), inter))
-        for inter in direction2:
-            distances2.append((distance_two_points(A1, inter), inter))
-        distances1.sort(key=lambda tupple: tupple[0])
-        distances2.sort(key=lambda tupple: tupple[1])
-        if len(distances1):
-            cnv.create_line(A1[0], A1[1], distances1[0][1][0], distances1[0][1][1], tags='light', fill="yellow", width=1)
-        if len(distances2):
-            cnv.create_line(A1[0], A1[1], distances2[0][1][0], distances2[0][1][1], tags='light', fill="yellow", width=1)
-    if is_in_polygon:
-        for width in range(0, 601, 100):
-            for height in range(0, 401, 100):
+            for inter in light_list:
+                # calcul des distances pour toutes les intersections
+                distance_list.append((distance_two_points(A1, inter), inter))
+            # tri par rapport à la distance 
+            distance_list.sort()
+            cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tags='light', fill="yellow")
+
+    x0, y0 = event.x, event.y
+    # verification de si le gardien est dans la polygone
+    if point_in_polygon((x0, y0), segments_list):
+        cnv.delete('guardian')
+        cnv.delete('light')
+        # boucle qui prend tous les points du bord du canvas pour avoir toutes les directions possibles
+        for width in range(0, 601, 50):
+            for height in range(0, 401, 50):
                 light(x0, y0, (width, height), segments_list)
+        # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
 def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
-    cnv.delete('guardian')
-    cnv.delete('light')
-    point_list.clear()
-    x0, y0 = event.x, event.y
-    is_in_polygon = point_in_polygon((x0, y0), segments_list)
-    def light(x0, y0, side, segments_list, corner_list):
-        global point_list
+    """ WIP ++, des problemes de traversée des murs dans les polygones type galerie d'art ont été detectés """
+    def light(x0, y0, corner, segments_list, corner_list):
+        # initialisation
         light_list = []
-        # side is a point (tuple) of 2
+        distance_list = []
+        A1 = (x0, y0)
+        A2 = corner   # side is a point (tuple) of 2
         for segment in segments_list:
-            A1 = (x0, y0)
-            A2 = side
             B1 = segment[0]
             B2 = segment[1]
             intersection = barycentre(A1, A2, B1, B2)
-            direction1 = []
-            direction2 = []
-            distances1 = []
-            distances2 = []
             if intersection is not None:
-                if (intersection[0] >= B1[0] and intersection[0] <= B2[0]) or (intersection[0] <= B1[0] and intersection[0] >= B2[0]):
-                    light_list.append(intersection)
-                elif (intersection[1] >= B1[1] and intersection[1] <= B2[1]) or (intersection[1] <= B1[1] and intersection[1] >= B2[1]):
+                # verification de si les segments se coupent, et non les droites
+                if point_in_segment(B1, B2, intersection) and point_in_segment(A1, corner, intersection):
                     light_list.append(intersection)
         if len(light_list):
-            direction = find_direction(A1, light_list[0])
-        for inter in light_list:
-            if find_direction(A1, inter) == direction:
-                direction1.append(inter)
-            else:
-                direction2.append(inter)
-        for inter in direction1:
-            distances1.append((distance_two_points(A1, inter), inter))
-        for inter in direction2:
-            distances2.append((distance_two_points(A1, inter), inter))
-        distances1.sort(key=lambda tupple: tupple[0])
-        distances2.sort(key=lambda tupple: tupple[1])
-        if len(distances1):
-            if distances1[0][1] in corner_list:
-                point_list.append(distances1[0][1])
-                point_list.append(distances1[1][1])
-        if len(distances2):
-            if distances2[0][1] in corner_list:
-                point_list.append(distances2[0][1])
-                point_list.append(distances2[1][1])
-    if is_in_polygon:
+            for inter in light_list:
+                # calcul des distances pour toutes les intersections
+                distance_list.append((distance_two_points(A1, inter), inter))
+            # tri par rapport à la distance 
+            distance_list.sort()
+            cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tags='light', fill="yellow")
+
+    x0, y0 = event.x, event.y
+    # verification de si le gardien est dans la polygone
+    if point_in_polygon((x0, y0), segments_list):
+        cnv.delete('guardian')
+        cnv.delete('light')
+        # boucle qui prend tous les points du bord du canvas pour avoir toutes les directions possibles
         for corner in corner_list:
                 light(x0, y0, corner, segments_list, corner_list)
-        for point in point_list:
-            cnv.create_line(x0, y0, point[0], point[1], fill="yellow", tag="light")
-        # cnv.create_polygon(point_list, fill='yellow', tag="light")
+        # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
 def delete_points(cnv):

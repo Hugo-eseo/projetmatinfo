@@ -1,5 +1,6 @@
-from math import sqrt
+from math import sqrt, isclose
 import time
+import tkinter as tk
 
 def det(m, n, p):
     # m, n, p tuples of 2
@@ -17,6 +18,12 @@ def barycentre(A1, A2, B1, B2):
     I = (numerateur[0] / denominateur, numerateur[1] / denominateur)
     return I
 
+def point_in_segment(a, b, c):
+    AB = distance_two_points(a, b)
+    AC = distance_two_points(a, c)
+    BC = distance_two_points(b, c)
+    return isclose(AC + BC, AB, rel_tol=0.01)
+
 def distance_two_points(a, b):
     # a, b tuples of 2
     part1 = b[0] - a[0]
@@ -24,39 +31,26 @@ def distance_two_points(a, b):
     dist = sqrt(part1**2 + part2**2)
     return dist
 
-def find_direction(a, b):
-    # a, b tuples of 2
-    if a[0] > b[0]:
-        if a[1] > b[1]:
-            return "NO"
-        elif a[1] < b[1]:
-            return "SO"
-        else:
-            return "O"
-    elif a[0] < b[0]:
-        if a[1] > b[1]:
-            return "NE"
-        elif a[1] < b[1]:
-            return "SE"
-        else:
-            return "E"
-    else:
-        if a[1] > b[1]:
-            return "N"
-        elif a[1] < b[1]:
-            return "S"
-        else:
-            return None
+def droite(event):
+    global points, droite_list
+    points.append((event.x, event.y))
+    if len(points) == 2:
+        cnv.create_line(points, tag="droite")
+        droite_list.append(points.copy())
+        points.clear()
 
+def intersection(segment1, segment2, cnv):
+    I = barycentre(segment1[0], segment1[1], segment2[0], segment2[1])
+    if point_in_segment(segment1[0], segment1[1], I) and point_in_segment(segment2[0], segment2[1], I):
+        cnv.create_oval(I[0]-5, I[1]-5, I[0]+5, I[1]+5, fill='blue', tag='point')
 
 if __name__ == '__main__':
-    A1 = (-1, -1)
-    A2 = (3, 1)
-    B1 = (6, 0)
-    B2 = (2, -2)
-    print(distance_two_points(A1, B1))
-    print(barycentre(A1, A2, B1, B2))
-    t1 = time.time()
-    det(A1, A2, B1)   # ça fonctionne j'ai dessiné sur papier pour comparer
-    t2 = time.time()
-    print("temps d'execution", t2-t1, 'secondes')
+    points = []
+    droite_list = []
+    wnd = tk.Tk()
+    cnv = tk.Canvas(wnd, width=600, height=400)
+    cnv.pack()
+    boutton = tk.Button(wnd, text="intersect", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv))
+    boutton.pack(side=tk.BOTTOM)
+    cnv.bind('<1>', droite)
+    wnd.mainloop()
