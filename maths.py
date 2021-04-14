@@ -31,6 +31,11 @@ def distance_two_points(a, b):
     dist = sqrt(part1**2 + part2**2)
     return dist
 
+def middle(a, b):
+    # a, b tuples of 2 
+    middle = (((a[0] + b[0]) / 2), ((a[1] + b[1]) / 2))
+    return middle
+
 def droite(event):
     global points, droite_list
     points.append((event.x, event.y))
@@ -50,7 +55,6 @@ if __name__ == '__main__':
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
-    boutton = tk.Button(wnd, text="intersect", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv))
-    boutton.pack(side=tk.BOTTOM)
+    boutton = tk.Button(wnd, text="intersect", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv)).pack(side=tk.BOTTOM)
     cnv.bind('<1>', droite)
     wnd.mainloop()

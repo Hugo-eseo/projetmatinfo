@@ -1,5 +1,5 @@
 import tkinter as tk
-from maths import barycentre, det, distance_two_points, point_in_segment
+from maths import barycentre, det, distance_two_points, point_in_segment, middle
 from math import isclose
 
 def point_in_polygon(point, segments_list):
@@ -50,7 +50,7 @@ def polygon_by_txt(cnv):
     global segments_list, corner_list
     segments_list.clear()
     corner_list.clear()
-    cnv.delete('point')
+    cnv.delete('all')
     # mettre dans un ficher txt par la suite, ici on evite les problemes de chemin qui ne seront pas les memes entre nos differents ordinateurs 
     point_list = [(243, 308), (243, 286), (242, 244), (206, 242), (171, 242), (145, 241), (125, 241), (99, 242), (76, 242), (42, 240), (42, 221), (41, 199), (40, 165), (39, 148), (39, 120), (38, 96), (36, 67), (36, 37), (62, 37), (81, 36), (103, 35), (105, 60), (104, 87), (82, 84), (65, 84), (65, 101), (65, 129), (65, 155), (65, 185), (65, 199), (86, 196), (113, 195), (136, 195), (166, 195), (198, 195), (196, 169), (196, 149), (152, 148), (110, 147), (106, 114), (131, 113), (131, 83), (131, 52), (154, 49), (174, 47), (175, 71), (175, 104), (196, 105), (215, 105), (220, 80), (220, 62), (226, 32), (249, 16), (276, 16), (310, 16), (342, 16), (345, 36), (323, 38), (288, 38), (267, 44), (267, 66), (264, 101), (287, 101), (320, 101), (358, 101), (376, 95), (375, 78), (375, 56), (375, 26), (407, 21), (427, 21), (438, 21), (437, 58), (437, 94), (436, 116), (434, 139), (432, 161), (434, 195), (434, 230), (434, 278), (433, 329), (383, 336), (319, 338), (246, 340)]
     cnv.create_polygon(point_list, fill='grey', outline='black')
@@ -64,8 +64,8 @@ def draw(cnv):
     global coords_list, segments_list, corner_list
     if len(coords_list) >= 3:
         # 3 points minimum pour un polygone
+        cnv.delete('all')
         cnv.create_polygon(coords_list, fill='grey', outline='black')
-        print(coords_list)
         segments_list.clear()
         corner_list.clear()
         for i in range(len(coords_list)-1):
@@ -75,8 +75,7 @@ def draw(cnv):
         # liste des sommets du polygone
         corner_list = coords_list.copy()
         coords_list.clear()
-        cnv.delete('all')
-
+  
 def guardian_by_clic(event, cnv, segments_list):
     def light(x0, y0, side, segments_list):
         # initialisation
@@ -121,9 +120,9 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         A1 = (x0, y0)
         A2 = corner  # corner is a point (tuple) of 2
         NO, NE, SO, SE = (0, 0), (600, 0), (0, 400), (600, 400)
-        # modification de corner en side
         #####################
-        # cette portion devra etre réécrite plus proprement
+        # modification de corner en side
+        ## cette portion devra etre réécrite plus proprement
         top = barycentre(A1, A2, NO, NE)
         bottom = barycentre(A1, A2, SO, SE)
         left = barycentre(A1, A2, NO, SO)
@@ -151,8 +150,16 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                 distance_list.append((distance_two_points(A1, inter), inter))
             # tri par rapport à la distance 
             distance_list.sort()
-            cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tags='light', fill="yellow")
-
+            cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
+            # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
+            if len(distance_list) >= 2:
+                for corner in corner_list:
+                    if isclose(distance_list[0][1][0], corner[0]) and isclose(distance_list[0][1][1], corner[1]):
+                        # milieu des deux intersections
+                        middle_point = middle(distance_list[0][1], distance_list[1][1])
+                        if point_in_polygon(middle_point, segments_list):
+                            # si le milieu est dans le polygone, alors on dessine la lumiere jusqu'a la 2eme intersection 
+                            cnv.create_line(A1[0], A1[1], distance_list[1][1][0], distance_list[1][1][1], tag='light', fill="blue")   
     x0, y0 = event.x, event.y
     # verification de si le gardien est dans la polygone
     if point_in_polygon((x0, y0), segments_list):
@@ -185,17 +192,13 @@ if __name__ == '__main__':
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
     # boutton pour creer un polygone une fois les points placés
-    draw_button = tk.Button(wnd, command=lambda: draw(cnv), text='Draw polygon !')
-    draw_button.pack(side=tk.BOTTOM)
+    draw_button = tk.Button(wnd, command=lambda: draw(cnv), text='Draw polygon !').pack(side=tk.BOTTOM)
     # boutton creeant automatiquement une figure de type musée d'art
-    draw_museum_button = tk.Button(wnd, command=lambda : polygon_by_txt(cnv), text='Museum')
-    draw_museum_button.pack(side=tk.RIGHT)
+    draw_museum_button = tk.Button(wnd, command=lambda : polygon_by_txt(cnv), text='Museum').pack(side=tk.RIGHT)
     # boutton supprimant les points
-    delete_point_button = tk.Button(wnd, command=lambda: delete_points(cnv), text='Delete all points')
-    delete_point_button.pack(side=tk.BOTTOM)
+    delete_point_button = tk.Button(wnd, command=lambda: delete_points(cnv), text='Delete all points').pack(side=tk.BOTTOM)
     # boutton supprimant tous els elemets du canvas
-    delete_all_button = tk.Button(wnd, command=lambda: delete_all(cnv), text='Delete all')
-    delete_all_button.pack(side=tk.BOTTOM)
+    delete_all_button = tk.Button(wnd, command=lambda: delete_all(cnv), text='Delete all').pack(side=tk.BOTTOM)
     # reglages des clics de la souris, <2> correspond au clic mollette pour windows, si le clic droit est souhaité il faut changer par <3> 
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
