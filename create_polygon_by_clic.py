@@ -150,13 +150,16 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                 distance_list.append((distance_two_points(A1, inter), inter))
             # tri par rapport à la distance 
             distance_list.sort()
+            if isclose(distance_list[-1][0], distance_list[-2][0], rel_tol=0.01):
+                distance_list.pop()
             cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
             # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
             if len(distance_list) >= 2:
                 for corner in corner_list:
-                    if isclose(distance_list[0][1][0], corner[0]) and isclose(distance_list[0][1][1], corner[1]):
+                    if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
                         # milieu des deux intersections
                         middle_point = middle(distance_list[0][1], distance_list[1][1])
+                        print(distance_two_points(distance_list[0][1], distance_list[1][1]))
                         if point_in_polygon(middle_point, segments_list):
                             # si le milieu est dans le polygone, alors on dessine la lumiere jusqu'a la 2eme intersection 
                             cnv.create_line(A1[0], A1[1], distance_list[1][1][0], distance_list[1][1][1], tag='light', fill="blue")   
@@ -201,6 +204,6 @@ if __name__ == '__main__':
     delete_all_button = tk.Button(wnd, command=lambda: delete_all(cnv), text='Delete all').pack(side=tk.BOTTOM)
     # reglages des clics de la souris, <2> correspond au clic mollette pour windows, si le clic droit est souhaité il faut changer par <3> 
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
-    cnv.bind('<2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
+    cnv.bind('<Button-2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
     cnv.bind('<Double-Button-2>', lambda event, cnv=cnv: guardian_by_clic_on_corner(event, cnv, segments_list, corner_list))
     wnd.mainloop()
