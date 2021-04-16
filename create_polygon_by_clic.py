@@ -1,5 +1,5 @@
 import tkinter as tk
-from maths import barycentre, det, distance_two_points, point_in_segment, middle
+from maths import barycentre, det, distance_two_points, point_in_segment, middle, find_direction
 from math import isclose
 
 def point_in_polygon(point, segments_list):
@@ -25,7 +25,7 @@ def point_in_polygon(point, segments_list):
         for intersection in intersections_x_list:
             if point[0] > intersection[0]:
                 # comptage du nombre d'intersections avant d'arriver au point
-                cpt_x += 1 
+                cpt_x += 1
     if len(intersections_y_list):
         # tri par les y croissants de tous les points d'intersection sur la droite verticale 
         intersections_y_list.sort(key=lambda tupple: tupple[1])
@@ -36,7 +36,7 @@ def point_in_polygon(point, segments_list):
     if cpt_x % 2 != 0:
         # si le nombre d'intersections est impair alors on est dans le polygone 
         return True
-    else: 
+    else:
         # sinon on est en dehors
         return False
 
@@ -112,29 +112,63 @@ def guardian_by_clic(event, cnv, segments_list):
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
 def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
+    global polygon_list
     """ WIP, le bug indiqué dans la notice du projet est encore present """
     def light(x0, y0, corner, segments_list, corner_list):
+        global polygon_list
         # initialisation
         light_list = []
         distance_list = []
-        A1 = (x0, y0)
-        A2 = corner  # corner is a point (tuple) of 2
+        A1 = (x0, y0) 
         NO, NE, SO, SE = (0, 0), (600, 0), (0, 400), (600, 400)
-        #####################
+        ########################
         # modification de corner en side
-        ## cette portion devra etre réécrite plus proprement
-        top = barycentre(A1, A2, NO, NE)
-        bottom = barycentre(A1, A2, SO, SE)
-        left = barycentre(A1, A2, NO, SO)
-        right = barycentre(A1, A2, NE, SE)
-        if top is not None and point_in_segment(NO, NE, top):
-            A2 = top
-        elif bottom is not None and point_in_segment(SO, SE, bottom):
-            A2 = bottom
-        elif left is not None and point_in_segment(NE, SE, left):
-            A2 = left
-        elif right is not None and point_in_segment(NE, SE, right):
-            A2 = right
+        ## reecrire plus proprement 
+        direction = find_direction(A1, corner)
+        if direction == 'NO':
+            top = barycentre(A1, corner, NE, NO)
+            left = barycentre(A1, corner, NO, SO)
+            if top is not None and point_in_segment(NO, NE, top):
+                A2 = top
+            else:
+                A2 = left
+        elif direction == 'N':
+            top = barycentre(A1, corner, NE, NO)
+            if top is not None and point_in_segment(NO, NE, top):
+                A2 = top
+        elif direction == 'NE':
+            top = barycentre(A1, corner, NE, NO)
+            right = barycentre(A1, corner, SE, NE)
+            if top is not None and point_in_segment(NO, NE, top):
+                A2 = top
+            else:
+                A2 = right
+        elif direction == 'E':
+            right = barycentre(A1, corner, SE, NE)
+            if right is not None and point_in_segment(NE, SE, right):
+                A2 = right
+        elif direction == 'SE':
+            bottom = barycentre(A1, corner, SO, SE)
+            right = barycentre(A1, corner, SE, NE)
+            if bottom is not None and point_in_segment(SE, SO, bottom):
+                A2 = bottom
+            else:
+                A2 = right
+        elif direction == 'S':
+            bottom = barycentre(A1, corner, SO, SE)
+            if bottom is not None and point_in_segment(SE, SO, bottom):
+                A2 = bottom
+        elif direction == 'SO':
+            bottom = barycentre(A1, corner, SO, SE)
+            left = barycentre(A1, corner, NO, SO)
+            if bottom is not None and point_in_segment(SE, SO, bottom):
+                A2 = bottom
+            else:
+                A2 = left
+        elif direction == 'O':
+            left = barycentre(A1, corner, NO, SO)
+            if left is not None and point_in_segment(SO, NO, left):
+                A2 = left
         #########################
         for segment in segments_list:
             B1 = segment[0]
@@ -142,35 +176,41 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
             intersection = barycentre(A1, A2, B1, B2)
             if intersection is not None:
                 # verification de si les segments se coupent, et non les droites
-                if point_in_segment(B1, B2, intersection) and point_in_segment(A1, corner, intersection):
+                if point_in_segment(B1, B2, intersection) and point_in_segment(A1, A2, intersection):
                     light_list.append(intersection)
-        if len(light_list):
-            for inter in light_list:
-                # calcul des distances pour toutes les intersections
-                distance_list.append((distance_two_points(A1, inter), inter))
-            # tri par rapport à la distance 
-            distance_list.sort()
-            if isclose(distance_list[-1][0], distance_list[-2][0], rel_tol=0.01):
-                distance_list.pop()
-            cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
-            # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
-            if len(distance_list) >= 2:
-                for corner in corner_list:
-                    if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
-                        # milieu des deux intersections
-                        middle_point = middle(distance_list[0][1], distance_list[1][1])
-                        print(distance_two_points(distance_list[0][1], distance_list[1][1]))
-                        if point_in_polygon(middle_point, segments_list):
-                            # si le milieu est dans le polygone, alors on dessine la lumiere jusqu'a la 2eme intersection 
-                            cnv.create_line(A1[0], A1[1], distance_list[1][1][0], distance_list[1][1][1], tag='light', fill="blue")   
+        for inter in light_list:
+            # calcul des distances pour toutes les intersections
+            distance_list.append((distance_two_points(A1, inter), inter))
+        # tri par rapport à la distance 
+        distance_list.sort()
+        if len(distance_list) >= 2 and isclose(distance_list[0][0], distance_list[1][0], rel_tol=0.01):
+            distance_list.pop(0)
+        cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
+        for corner in corner_list:
+                if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
+                    polygon_list.append((distance_list[0][1][0], distance_list[0][1][1], "angle"))
+        else: 
+            polygon_list.append((distance_list[0][1][0], distance_list[0][1][1], "mur simple"))
+        # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
+        if len(distance_list) >= 2:
+            for corner in corner_list:
+                if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
+                    # milieu des deux intersections
+                    middle_point = middle(distance_list[0][1], distance_list[1][1])
+                    if point_in_polygon(middle_point, segments_list):
+                        # si le milieu est dans le polygone, alors on dessine la lumiere jusqu'a la 2eme intersection 
+                        cnv.create_line(distance_list[0][1][0], distance_list[0][1][1], distance_list[1][1][0], distance_list[1][1][1], tag='light', fill="blue")   
+                        polygon_list.append((distance_list[1][1][0], distance_list[1][1][1], "projeté d'un angle"))
     x0, y0 = event.x, event.y
     # verification de si le gardien est dans la polygone
     if point_in_polygon((x0, y0), segments_list):
         cnv.delete('guardian')
         cnv.delete('light')
+        cnv.delete('polyLight')
+        polygon_list.clear()
         # boucle qui prend tous les points du bord du canvas pour avoir toutes les directions possibles
         for corner in corner_list:
-                light(x0, y0, corner, segments_list, corner_list)
+            light(x0, y0, corner, segments_list, corner_list)
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
@@ -189,6 +229,7 @@ if __name__ == '__main__':
     coords_list = []
     segments_list = []
     corner_list = []
+    polygon_list = []
 
     wnd = tk.Tk()
     wnd.title("Detection")
@@ -206,4 +247,8 @@ if __name__ == '__main__':
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<Button-2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
     cnv.bind('<Double-Button-2>', lambda event, cnv=cnv: guardian_by_clic_on_corner(event, cnv, segments_list, corner_list))
+
     wnd.mainloop()
+
+
+[(57.688820407423826, (242.0, 244.0)), (57.688820407423826, (242.0, 244.0)), (139.67592114949642, (196.5217391304347, 175.78260869565204)), (172.34535096717866, (178.40000000000003, 148.60000000000002)), (257.79691619567524, (130.99999999999997, 77.49999999999999)), (308.1926897050015, (103.04545454545452, 35.56818181818178))]

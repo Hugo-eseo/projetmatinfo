@@ -18,7 +18,32 @@ def barycentre(A1, A2, B1, B2):
     I = (numerateur[0] / denominateur, numerateur[1] / denominateur)
     return I
 
+def find_direction(a, b):
+    # a, b tuples of 2
+    if a[0] > b[0]:
+        if a[1] > b[1]:
+            return "NO"
+        elif a[1] < b[1]:
+            return "SO"
+        else:
+            return "O"
+    elif a[0] < b[0]:
+        if a[1] > b[1]:
+            return "NE"
+        elif a[1] < b[1]:
+            return "SE"
+        else:
+            return "E"
+    else:
+        if a[1] > b[1]:
+            return "N"
+        elif a[1] < b[1]:
+            return "S"
+        else:
+            return None
+
 def point_in_segment(a, b, c):
+    # les points doivent etre alignés 
     AB = distance_two_points(a, b)
     AC = distance_two_points(a, c)
     BC = distance_two_points(b, c)
