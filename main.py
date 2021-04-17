@@ -66,17 +66,49 @@ class Application():
             width : largeur de la fenêtre
             height : hauteur de la fenêtre
         """
-
         self.width, self.height = width, height
+        self.d_to_check = [[(0, 0), (self.width, 0)],
+                           [(0, 0), (0, self.height)],
+                           [(self.width, 0), (self.width, self.height)],
+                           [(0, self.height), (self.width, self.height)]]
         self.wnd = tk.Tk()
         self.wnd.title("Visualisation intersection 2 droites")
-        string = str(self.width) + 'x' + str(self.height)
-        self.wnd.geometry(string)
+        #string = str(self.width) + 'x' + str(self.height)
+        #self.wnd.geometry(string)
         self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
         self.cnv.pack()
-        self.draw_obstacle()
-        self.cnv.bind('<Button-1>', self.clic)
+        self.frm = tk.Frame(self.wnd, width=self.width, height=100)
+        self.frm.pack(side=tk.BOTTOM)
+        tk.Button(self.frm, text='Quiter', command=self.wnd.destroy).pack()
+        tk.Button(self.frm, text='[DEMO] Intersection deux droites',
+                  command=self.demo1).pack()
+        tk.Button(self.frm, text='[DEMO] Rayon et obstacles',
+                  command=self.demo2).pack()
+        self.reset_button = tk.Button(self.frm, text='Reset', command=self.reset)
+        self.reset_button.pack()
         self.wnd.mainloop()
+        
+    def reset(self):
+        """Reset du canvas"""
+        self.cnv.delete(tk.ALL)
+        
+    def demo1(self):
+        """Lancement de la demo 1"""
+        self.reset_button.config(command=self.reset)
+        self.cnv.delete(tk.ALL)
+        self.cnv.bind('<Button-1>', self.intersection_deux_droites_demo)
+        
+    def demo2(self):
+        """Lancement de la demo 2"""
+        self.cnv.delete(tk.ALL)
+        self.d_to_check = [[(0, 0), (self.width, 0)],
+                           [(0, 0), (0, self.height)],
+                           [(self.width, 0), (self.width, self.height)],
+                           [(0, self.height), (self.width, self.height)]]
+        self.cnv.bind('<Button-1>', self.rayon_obsatcles_demo)
+        self.reset_button.config(command=self.demo2)
+        self.draw_obstacle()
+        self.draw_obstacle()
 
     def draw_obstacle(self):
         """Dessine un obsacle quelconque sur le canas"""
@@ -88,7 +120,10 @@ class Application():
         A, B, C, D = (x, y), (x1, y), (x1, y1), (x, y1)
         B, C, D = self.rotation(A, B, angle), self.rotation(A, C, angle),\
             self.rotation(A, D, angle)
-        self.A, self.B, self.C, self.D = A, B, C, D
+        self.d_to_check.append([A, B])
+        self.d_to_check.append([B, C])
+        self.d_to_check.append([C, D])
+        self.d_to_check.append([D, A])
         self.cnv.create_polygon(A, B, C, D, fill='green')
 
     def rotation(self, O, M, angle):
@@ -101,24 +136,17 @@ class Application():
         y = - xM*math.sin(angle) + yM*math.cos(angle) + O[1]
         return (x, y)
 
-    def clic(self, event):
+    def rayon_obsatcles_demo(self, event):
+        """Demo : intersection rayon lumineux contre des obstacles"""
         size = 4
         angle = 360/self.nbrayons
-        d_to_check = [[(0, 0), (self.width, 0)],
-                      [(0, 0), (0, self.height)],
-                      [(self.width, 0), (self.width, self.height)],
-                      [(0, self.height), (self.width, self.height)],
-                      [self.A, self.B],
-                      [self.B, self.C],
-                      [self.C, self.D],
-                      [self.D, self.A]]
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
                              event.y+size, fill='yellow')
         A = (event.x, event.y)
         B = (A[0]+50, A[1])
         for i in range(self.nbrayons):
             inter = []
-            for d in d_to_check:
+            for d in self.d_to_check:
                 I = inter2d(d[0], d[1], A, B)
                 if I is not None:
                     if dist(I, A) > dist(I, B):
@@ -154,8 +182,9 @@ class Application():
         if self.nbd == 2:
             I = inter2d(self.d[0][0], self.d[0][1], self.d[1][0], self.d[1][1])
             self.d = []
-            self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                 I[1]+size, fill='red')
+            if I is not None:
+                self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                     I[1]+size, fill='red')
             self.nbd = 0
 
 
