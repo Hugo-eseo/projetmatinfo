@@ -58,7 +58,7 @@ class Application():
     """Crée la fenêtre de l'application"""
     state = 1
     nbd = 0
-    nbrayons = 36
+    nbrayons = 60
     d = list()
 
     def __init__(self, width, height):
@@ -104,33 +104,35 @@ class Application():
     def clic(self, event):
         size = 4
         angle = 360/self.nbrayons
-        d_to_check = [[(0, 0), (0, self.width)],
-                      [(0, 0), (self.height, 0)],
+        d_to_check = [[(0, 0), (self.width, 0)],
+                      [(0, 0), (0, self.height)],
                       [(self.width, 0), (self.width, self.height)],
                       [(0, self.height), (self.width, self.height)],
                       [self.A, self.B],
                       [self.B, self.C],
                       [self.C, self.D],
-                      [self.D, self.A],]
-        inter = list()
+                      [self.D, self.A]]
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
                              event.y+size, fill='yellow')
         A = (event.x, event.y)
         B = (A[0]+50, A[1])
-        self.cnv.create_line(A, B, fill='yellow')
         for i in range(self.nbrayons):
-            B = self.rotation(A, B, angle)
-            inter.append([])
+            inter = []
             for d in d_to_check:
                 I = inter2d(d[0], d[1], A, B)
                 if I is not None:
-                    if (I[0] >= 0) and (I[0] <= self.width) and (I[1] >= 0) and (I[1] < self.height):
-                        inter[i].append(I)
-                        self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                             I[1]+size, fill='red')
-                        self.cnv.create_line(A, I, fill='yellow')
-                    else:
-                        self.cnv.create_line(A, B, fill='red')
+                    if dist(I, A) > dist(I, B):
+                        inter.append([dist(I, A), I])
+            if not inter:
+                # Utilisé pour debug
+                self.cnv.create_line(A, B, fill='red')
+            else:
+                I_p = min(inter)
+                I = I_p[1]
+                self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                     I[1]+size, fill='red')
+                self.cnv.create_line(A, I, fill='yellow')
+            B = self.rotation(A, B, angle)
 
     def intersection_deux_droites_demo(self, event):
         """Demo : Machine à état pour le dessin des droites"""
