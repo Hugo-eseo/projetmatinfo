@@ -56,6 +56,7 @@ def inter2d(A1, A2, B1, B2):
 
 class Application():
     """Crée la fenêtre de l'application"""
+    # Paramètres pour les différents modes de demo
     state = 1
     nbd = 0
     nbrayons = 60
@@ -67,14 +68,8 @@ class Application():
             height : hauteur de la fenêtre
         """
         self.width, self.height = width, height
-        self.d_to_check = [[(0, 0), (self.width, 0)],
-                           [(0, 0), (0, self.height)],
-                           [(self.width, 0), (self.width, self.height)],
-                           [(0, self.height), (self.width, self.height)]]
         self.wnd = tk.Tk()
         self.wnd.title("Visualisation intersection 2 droites")
-        #string = str(self.width) + 'x' + str(self.height)
-        #self.wnd.geometry(string)
         self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
         self.cnv.pack()
         self.frm = tk.Frame(self.wnd, width=self.width, height=100)
@@ -84,20 +79,23 @@ class Application():
                   command=self.demo1).pack()
         tk.Button(self.frm, text='[DEMO] Rayon et obstacles',
                   command=self.demo2).pack()
-        self.reset_button = tk.Button(self.frm, text='Reset', command=self.reset)
+        tk.Button(self.frm, text='[DEMO] Dessiner un polygone',
+                  command=self.demo3).pack()
+        self.reset_button = tk.Button(self.frm, text='Reset',
+                                      command=self.reset)
         self.reset_button.pack()
         self.wnd.mainloop()
-        
+
     def reset(self):
         """Reset du canvas"""
         self.cnv.delete(tk.ALL)
-        
+
     def demo1(self):
         """Lancement de la demo 1"""
         self.reset_button.config(command=self.reset)
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.intersection_deux_droites_demo)
-        
+
     def demo2(self):
         """Lancement de la demo 2"""
         self.cnv.delete(tk.ALL)
@@ -109,6 +107,26 @@ class Application():
         self.reset_button.config(command=self.demo2)
         self.draw_obstacle()
         self.draw_obstacle()
+
+    def demo3(self):
+        """Lancement de la demo3 3"""
+        self.reset_button.config(command=self.demo3)
+        self.p_polygon = []
+        self.cnv.delete(tk.ALL)
+        self.cnv.bind('<Button-1>', self.dessin_polygone_demo)
+        self.cnv.bind('<Button-3>', self.fin_dessin_polygone)
+
+    def dessin_polygone_demo(self, event):
+        size = 4
+        self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
+                             event.y+size, fill='black')
+        self.p_polygon.append(event.x)
+        self.p_polygon.append(event.y)
+        
+    def fin_dessin_polygone(self, event):
+        if not self.p_polygon:
+            return
+        self.cnv.create_polygon(self.p_polygon, fill='grey')
 
     def draw_obstacle(self):
         """Dessine un obsacle quelconque sur le canas"""
