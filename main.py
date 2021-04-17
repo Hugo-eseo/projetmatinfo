@@ -119,7 +119,7 @@ class Application():
     def dessin_polygone_demo(self, event):
         size = 4
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                             event.y+size, fill='black')
+                             event.y+size, fill='black', tag='pts')
         self.p_polygon.append(event.x)
         self.p_polygon.append(event.y)
         
@@ -127,6 +127,8 @@ class Application():
         if not self.p_polygon:
             return
         self.cnv.create_polygon(self.p_polygon, fill='grey')
+        self.p_polygon = []
+        self.cnv.delete('pts')
 
     def draw_obstacle(self):
         """Dessine un obsacle quelconque sur le canas"""
