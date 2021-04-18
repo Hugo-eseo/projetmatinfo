@@ -1,4 +1,4 @@
-from math import sqrt, isclose
+from math import sqrt, isclose, atan2
 import time
 import tkinter as tk
 
@@ -17,6 +17,11 @@ def barycentre(A1, A2, B1, B2):
     if denominateur == 0: return None
     I = (numerateur[0] / denominateur, numerateur[1] / denominateur)
     return I
+
+def angle_two_points(point, center):
+    # a, b tuples of 2 
+    angle = atan2(point[1] - center[1], point[0] - center[0])
+    return angle
 
 def find_direction(a, b):
     # a, b tuples of 2

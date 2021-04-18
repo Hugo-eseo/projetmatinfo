@@ -1,5 +1,5 @@
 import tkinter as tk
-from maths import barycentre, det, distance_two_points, point_in_segment, middle, find_direction
+from maths import barycentre, det, distance_two_points, point_in_segment, middle, find_direction, angle_two_points
 from math import isclose
 
 def point_in_polygon(point, segments_list):
@@ -33,7 +33,7 @@ def point_in_polygon(point, segments_list):
             # comptage du nombre d'intersections avant d'arriver au point
             if point[1] > intersection[1]:
                 cpt_y += 1
-    if cpt_x % 2 != 0:
+    if cpt_x % 2 != 0 and cpt_y % 2 != 0:
         # si le nombre d'intersections est impair alors on est dans le polygone 
         return True
     else:
@@ -52,7 +52,7 @@ def polygon_by_txt(cnv):
     corner_list.clear()
     cnv.delete('all')
     # mettre dans un ficher txt par la suite, ici on evite les problemes de chemin qui ne seront pas les memes entre nos differents ordinateurs 
-    point_list = [(243, 308), (243, 286), (242, 244), (206, 242), (171, 242), (145, 241), (125, 241), (99, 242), (76, 242), (42, 240), (42, 221), (41, 199), (40, 165), (39, 148), (39, 120), (38, 96), (36, 67), (36, 37), (62, 37), (81, 36), (103, 35), (105, 60), (104, 87), (82, 84), (65, 84), (65, 101), (65, 129), (65, 155), (65, 185), (65, 199), (86, 196), (113, 195), (136, 195), (166, 195), (198, 195), (196, 169), (196, 149), (152, 148), (110, 147), (106, 114), (131, 113), (131, 83), (131, 52), (154, 49), (174, 47), (175, 71), (175, 104), (196, 105), (215, 105), (220, 80), (220, 62), (226, 32), (249, 16), (276, 16), (310, 16), (342, 16), (345, 36), (323, 38), (288, 38), (267, 44), (267, 66), (264, 101), (287, 101), (320, 101), (358, 101), (376, 95), (375, 78), (375, 56), (375, 26), (407, 21), (427, 21), (438, 21), (437, 58), (437, 94), (436, 116), (434, 139), (432, 161), (434, 195), (434, 230), (434, 278), (433, 329), (383, 336), (319, 338), (246, 340)]
+    point_list = [(243, 308), (244, 286), (242, 244), (206, 242), (171, 243), (145, 241), (125, 242), (99, 241), (76, 242), (43, 240), (42, 221), (41, 199), (40, 165), (39, 148), (38, 120), (37, 96), (36, 67), (35, 37), (62, 38), (81, 36), (103, 35), (105, 60), (104, 87), (82, 84), (62, 83), (63, 101), (64, 129), (65, 155), (66, 185), (67, 199), (86, 196), (113, 195), (136, 194), (166, 193), (198, 195), (196, 169), (195, 149), (152, 148), (110, 147), (106, 114), (131, 113), (132, 83), (131, 52), (154, 49), (174, 47), (175, 71), (174, 104), (196, 105), (215, 105), (220, 80), (221, 62), (226, 32), (249, 16), (276, 17), (310, 16), (342, 17), (345, 36), (323, 38), (288, 37), (267, 44), (267, 66), (264, 101), (287, 100), (320, 101), (358, 100), (376, 95), (375, 78), (373, 56), (375, 26), (407, 21), (427, 22), (438, 21), (437, 58), (438, 94), (436, 116), (434, 139), (432, 161), (434, 195), (432, 230), (434, 278), (433, 329), (383, 336), (319, 338), (246, 340)]
     cnv.create_polygon(point_list, fill='grey', outline='black')
     corner_list = point_list.copy()
     for i in range(len(point_list)-1):
@@ -191,7 +191,6 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                     polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "angle"))
         else: 
             polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "mur simple"))
-        # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
         if len(distance_list) >= 2:
             for corner in corner_list:
                 if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
@@ -203,6 +202,8 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                         polygon_list.append(((distance_list[1][1][0], distance_list[1][1][1]), "projeté d'un angle"))
     x0, y0 = event.x, event.y
     polygon_list_corner = []
+    final_polygon = []
+    light_poly_coords = []
     # verification de si le gardien est dans la polygone
     if point_in_polygon((x0, y0), segments_list):
         cnv.delete('guardian')
@@ -215,10 +216,24 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         # creation du polygone de lumiere
         for elem in polygon_list:
             if elem[1] != 'mur simple':
-                polygon_list_corner.append(elem[0])
+                polygon_list_corner.append(elem)
         ############
-        # besoin de trier, peut etre avec arctan2 pour avoir les points dans le sens des aiguilles d'une montre 
-        cnv.create_polygon(polygon_list_corner, fill="yellow", tag="light")
+        # besoin de trier, peut etre avec atan2 pour avoir les points dans le sens des aiguilles d'une montre
+        for elem in polygon_list_corner:
+            final_polygon.append((angle_two_points(elem[0], (x0, y0)), elem[1], elem[0]))
+        final_polygon.sort()
+        for i in range(len(final_polygon)-1):
+            try:
+                if isclose(final_polygon[i][0], final_polygon[i+1][0],rel_tol=0.01):
+                    if final_polygon[i][1] == "angle":
+                        final_polygon.pop(i)
+                    else:
+                        final_polygon.pop(i+1)
+            except IndexError:
+                pass
+        for elem in final_polygon:
+            light_poly_coords.append(elem[2])
+        cnv.create_polygon(light_poly_coords, fill="yellàw", tag="light")
         ############
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
