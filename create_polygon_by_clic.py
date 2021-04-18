@@ -188,9 +188,9 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
         for corner in corner_list:
                 if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
-                    polygon_list.append((distance_list[0][1][0], distance_list[0][1][1], "angle"))
+                    polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "angle"))
         else: 
-            polygon_list.append((distance_list[0][1][0], distance_list[0][1][1], "mur simple"))
+            polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "mur simple"))
         # la logique a l'air bonne, cependant cela ne fonctionne pas (correction du bug de la notice) 
         if len(distance_list) >= 2:
             for corner in corner_list:
@@ -200,8 +200,9 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                     if point_in_polygon(middle_point, segments_list):
                         # si le milieu est dans le polygone, alors on dessine la lumiere jusqu'a la 2eme intersection 
                         cnv.create_line(distance_list[0][1][0], distance_list[0][1][1], distance_list[1][1][0], distance_list[1][1][1], tag='light', fill="blue")   
-                        polygon_list.append((distance_list[1][1][0], distance_list[1][1][1], "projeté d'un angle"))
+                        polygon_list.append(((distance_list[1][1][0], distance_list[1][1][1]), "projeté d'un angle"))
     x0, y0 = event.x, event.y
+    polygon_list_corner = []
     # verification de si le gardien est dans la polygone
     if point_in_polygon((x0, y0), segments_list):
         cnv.delete('guardian')
@@ -211,6 +212,14 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         # boucle qui prend tous les points du bord du canvas pour avoir toutes les directions possibles
         for corner in corner_list:
             light(x0, y0, corner, segments_list, corner_list)
+        # creation du polygone de lumiere
+        for elem in polygon_list:
+            if elem[1] != 'mur simple':
+                polygon_list_corner.append(elem[0])
+        ############
+        # besoin de trier, peut etre avec arctan2 pour avoir les points dans le sens des aiguilles d'une montre 
+        cnv.create_polygon(polygon_list_corner, fill="yellow", tag="light")
+        ############
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
@@ -249,6 +258,3 @@ if __name__ == '__main__':
     cnv.bind('<Double-Button-2>', lambda event, cnv=cnv: guardian_by_clic_on_corner(event, cnv, segments_list, corner_list))
 
     wnd.mainloop()
-
-
-[(57.688820407423826, (242.0, 244.0)), (57.688820407423826, (242.0, 244.0)), (139.67592114949642, (196.5217391304347, 175.78260869565204)), (172.34535096717866, (178.40000000000003, 148.60000000000002)), (257.79691619567524, (130.99999999999997, 77.49999999999999)), (308.1926897050015, (103.04545454545452, 35.56818181818178))]
