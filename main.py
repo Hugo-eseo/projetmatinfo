@@ -87,6 +87,8 @@ class Application():
                   command=self.demo2).pack()
         tk.Button(self.frm, text='[DEMO] Dessiner un polygone',
                   command=self.demo3).pack()
+        tk.Button(self.frm, text='[PRESET] Museum',
+                  command=self.preset1).pack()
         self.reset_button = tk.Button(self.frm, text='Reset',
                                       command=self.reset)
         self.reset_button.pack()
@@ -125,6 +127,40 @@ class Application():
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.dessin_polygone_demo)
         self.cnv.bind('<Button-3>', self.fin_dessin_polygone)
+        
+    def preset1(self):
+        self.d_to_check = []
+        self.sommets_polygon = [(243, 308), (244, 286), (242, 244), (206, 242),
+                                (171, 243), (145, 241), (125, 242), (99, 241),
+                                (76, 242), (43, 240), (42, 221), (41, 199),
+                                (40, 165), (39, 148), (38, 120), (37, 96),
+                                (36, 67), (35, 37), (62, 38), (81, 36),
+                                (103, 35), (105, 60), (104, 87), (82, 84),
+                                (62, 83), (63, 101), (64, 129), (65, 155),
+                                (66, 185), (67, 199), (86, 196), (113, 195),
+                                (136, 194), (166, 193), (198, 195), (196, 169),
+                                (195, 149), (152, 148), (110, 147), (106, 114),
+                                (131, 113), (132, 83), (131, 52), (154, 49),
+                                (174, 47), (175, 71), (174, 104), (196, 105),
+                                (215, 105), (220, 80), (221, 62), (226, 32),
+                                (249, 16), (276, 17), (310, 16), (342, 17),
+                                (345, 36), (323, 38), (288, 37), (267, 44),
+                                (267, 66), (264, 101), (287, 100), (320, 101),
+                                (358, 100), (376, 95), (375, 78), (373, 56),
+                                (375, 26), (407, 21), (427, 22), (438, 21),
+                                (437, 58), (438, 94), (436, 116), (434, 139),
+                                (432, 161), (434, 195), (432, 230), (434, 278),
+                                (433, 329), (383, 336), (319, 338), (246, 340)]
+        self.cnv.create_polygon(self.sommets_polygon, fill='grey')
+        for i in range(len(self.sommets_polygon)):
+            if i > 1:
+                A = self.sommets_polygon[i]
+                B = self.sommets_polygon[i-1]
+                self.d_to_check.append([B, A])
+        A = self.sommets_polygon[0]
+        B = self.sommets_polygon[-1]
+        self.d_to_check.append([B, A])
+        self.cnv.bind('<Button-1>', self.point_in_polygon_demo)
 
     def dessin_polygone_demo(self, event):
         size = 4
@@ -157,21 +193,24 @@ class Application():
     def point_in_polygon_demo(self, event):
         size = 4
         wn = 0
-        demo = False
+        demo = True
+        nbI = 0
+        self.cnv.delete('light')
         if demo:
             self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                                 event.y+size, fill='green')
+                                 event.y+size, fill='green', tag='light')
         A = (event.x, event.y)
         O = (0, A[1])
         M = (self.width, A[1])
         if demo:
-            self.cnv.create_line(O, M, fill='red')
+            self.cnv.create_line(O, M, fill='red', tag='light')
         for d in self.d_to_check:
             I = inter2d(d[0], d[1], O, M)
             if I is not None:
+                nbI += 1
                 if demo:
                     self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                         I[1]+size, fill='red')
+                                         I[1]+size, fill='red', tag='light')
                 u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
                 if u[1]<0:
                     # Croisement vers le haut
@@ -183,7 +222,9 @@ class Application():
                     if I[0] > A[0]:
                         # A est à droite
                         wn -= 1
+        print(nbI)
         if wn != 0:
+            print(wn)
             self.rayon_obsatcles_demo(event)
 
     def draw_obstacle(self):
@@ -218,9 +259,9 @@ class Application():
         angle = 360/self.nbrayons
         demo = False
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                             event.y+size, fill='yellow')
+                             event.y+size, fill='yellow', tag='light')
         A = (event.x, event.y)
-        B = (A[0]+50, A[1])
+        B = (A[0]+1, A[1])
         for i in range(self.nbrayons):
             inter = []
             for d in self.d_to_check:
@@ -230,14 +271,14 @@ class Application():
                         inter.append([dist(I, A), I])
             if not inter:
                 # Utilisé pour debug
-                self.cnv.create_line(A, B, fill='red')
+                self.cnv.create_line(A, B, fill='red', tag='light')
             else:
                 I_p = min(inter)
                 I = I_p[1]
                 if demo:
                     self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
                                          I[1]+size, fill='red')
-                self.cnv.create_line(A, I, fill='yellow')
+                self.cnv.create_line(A, I, fill='yellow', tag='light')
             B = self.rotation(A, B, angle)
 
     def intersection_deux_droites_demo(self, event):
