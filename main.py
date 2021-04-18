@@ -36,6 +36,7 @@ def det3pts(M, N, P):
     mat = [[M[0], N[0], P[0]], [M[1], N[1], P[1]], [1, 1, 1]]
     return det3(mat)
 
+
 def dist(A, B):
     """Renvoie la distance entre deux points"""
     return(math.sqrt((B[0] - A[0])**2+(B[1] - A[1])**2))
@@ -45,12 +46,14 @@ def inter2d(A1, A2, B1, B2):
     """Calcul les coordonnées du point d'intersection de 2 droites définies
     par 4 points"""
     a, b = det3pts(B1, B2, A2), det3pts(B2, B1, A1)
-    if signe(a) != signe(b):
-        return None
     if a+b == 0:
         return None
     x = (a*A1[0] + b*A2[0])/(a+b)
     y = (a*A1[1] + b*A2[1])/(a+b)
+    if signe(a) != signe(b):
+        if (x, y) == A1 or (x, y) == A2 or (x, y) == B1 or (x, y) == B2:
+            return [x, y]
+        return None
     return [x, y]
 
 
@@ -61,6 +64,9 @@ class Application():
     nbd = 0
     nbrayons = 60
     d = list()
+    alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
+                'Y', 'Z']
 
     def __init__(self, width, height):
         """Prend en argument :
@@ -95,6 +101,7 @@ class Application():
         self.reset_button.config(command=self.reset)
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.intersection_deux_droites_demo)
+        self.cnv.unbind('<Button-3>')
 
     def demo2(self):
         """Lancement de la demo 2"""
@@ -104,6 +111,7 @@ class Application():
                            [(self.width, 0), (self.width, self.height)],
                            [(0, self.height), (self.width, self.height)]]
         self.cnv.bind('<Button-1>', self.rayon_obsatcles_demo)
+        self.cnv.unbind('<Button-3>')
         self.reset_button.config(command=self.demo2)
         self.draw_obstacle()
         self.draw_obstacle()
@@ -112,6 +120,8 @@ class Application():
         """Lancement de la demo3 3"""
         self.reset_button.config(command=self.demo3)
         self.p_polygon = []
+        self.sommets_polygon = []
+        self.d_to_check = []
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.dessin_polygone_demo)
         self.cnv.bind('<Button-3>', self.fin_dessin_polygone)
@@ -122,13 +132,59 @@ class Application():
                              event.y+size, fill='black', tag='pts')
         self.p_polygon.append(event.x)
         self.p_polygon.append(event.y)
-        
+        self.sommets_polygon.append((event.x, event.y))
+        if len(self.sommets_polygon) > 1:
+            A = self.sommets_polygon[-1]
+            B = self.sommets_polygon[-2]
+            self.d_to_check.append([B, A])
+        self.cnv.create_text(event.x, event.y-10,
+                             text=self.alphabet[len(self.sommets_polygon)-1],
+                             tag = 'lettre')
+
     def fin_dessin_polygone(self, event):
         if not self.p_polygon:
             return
         self.cnv.create_polygon(self.p_polygon, fill='grey')
+        self.cnv.tag_raise('lettre')
+        A = self.sommets_polygon[0]
+        B = self.sommets_polygon[-1]
+        self.d_to_check.append([B, A])
         self.p_polygon = []
         self.cnv.delete('pts')
+        self.cnv.unbind('<Button-3>')
+        self.cnv.bind('<Button-1>', self.point_in_polygon_demo)
+
+    def point_in_polygon_demo(self, event):
+        size = 4
+        wn = 0
+        demo = False
+        if demo:
+            self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
+                                 event.y+size, fill='green')
+        A = (event.x, event.y)
+        O = (0, A[1])
+        M = (self.width, A[1])
+        if demo:
+            self.cnv.create_line(O, M, fill='red')
+        for d in self.d_to_check:
+            I = inter2d(d[0], d[1], O, M)
+            if I is not None:
+                if demo:
+                    self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                         I[1]+size, fill='red')
+                u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
+                if u[1]<0:
+                    # Croisement vers le haut
+                    if I[0] > A[0]:
+                        # A est à gauche
+                        wn += 1
+                else:
+                    # Croisement vers le bas
+                    if I[0] > A[0]:
+                        # A est à droite
+                        wn -= 1
+        if wn != 0:
+            self.rayon_obsatcles_demo(event)
 
     def draw_obstacle(self):
         """Dessine un obsacle quelconque sur le canas"""
@@ -160,6 +216,7 @@ class Application():
         """Demo : intersection rayon lumineux contre des obstacles"""
         size = 4
         angle = 360/self.nbrayons
+        demo = False
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
                              event.y+size, fill='yellow')
         A = (event.x, event.y)
@@ -177,8 +234,9 @@ class Application():
             else:
                 I_p = min(inter)
                 I = I_p[1]
-                self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                     I[1]+size, fill='red')
+                if demo:
+                    self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                         I[1]+size, fill='red')
                 self.cnv.create_line(A, I, fill='yellow')
             B = self.rotation(A, B, angle)
 
