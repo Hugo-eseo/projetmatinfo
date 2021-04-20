@@ -42,6 +42,21 @@ def dist(A, B):
     return(math.sqrt((B[0] - A[0])**2+(B[1] - A[1])**2))
 
 
+def sc(u, v):
+    """Renvoie le produit scalaire entre deux vecteurs u et v"""
+    return(u[0]*v[0] + u[1]*v[1])
+
+
+def norme(u):
+    """Renvoie la norme d'un vecteur"""
+    return(math.sqrt(u[0]**2 + u[1]**2))
+
+
+def vect(u, v):
+    """Renvoie le produit vectoriel de deux vecteurs en dimension 2"""
+    return(u[0]*v[1]-u[1]*v[0])
+
+
 def inter2d(A1, A2, B1, B2):
     """Calcul les coordonnées du point d'intersection de 2 droites définies
     par 4 points"""
@@ -52,9 +67,9 @@ def inter2d(A1, A2, B1, B2):
     y = (a*A1[1] + b*A2[1])/(a+b)
     if signe(a) != signe(b):
         if (x, y) == A1 or (x, y) == A2 or (x, y) == B1 or (x, y) == B2:
-            return [x, y]
+            return (x, y)
         return None
-    return [x, y]
+    return (x, y)
 
 
 class Application():
@@ -87,8 +102,10 @@ class Application():
                   command=self.demo2).pack()
         tk.Button(self.frm, text='[DEMO] Dessiner un polygone',
                   command=self.demo3).pack()
-        tk.Button(self.frm, text='[PRESET] Museum',
+        tk.Button(self.frm, text='[PRESET1] Museum',
                   command=self.preset1).pack()
+        tk.Button(self.frm, text='[PRESET2] Autre',
+                  command=self.preset2).pack()
         self.reset_button = tk.Button(self.frm, text='Reset',
                                       command=self.reset)
         self.reset_button.pack()
@@ -127,9 +144,9 @@ class Application():
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.dessin_polygone_demo)
         self.cnv.bind('<Button-3>', self.fin_dessin_polygone)
-        
+
     def preset1(self):
-        self.d_to_check = []
+        size = 4
         self.sommets_polygon = [(243, 308), (244, 286), (242, 244), (206, 242),
                                 (171, 243), (145, 241), (125, 242), (99, 241),
                                 (76, 242), (43, 240), (42, 221), (41, 199),
@@ -151,9 +168,25 @@ class Application():
                                 (437, 58), (438, 94), (436, 116), (434, 139),
                                 (432, 161), (434, 195), (432, 230), (434, 278),
                                 (433, 329), (383, 336), (319, 338), (246, 340)]
+        self.cnv.create_oval(264-size, 101-size, 264+size,
+                             101+size, fill='red')
+        self.cnv.create_oval(287-size, 100-size, 287+size,
+                             100+size, fill='red')
+        self.lancement_preset()
+
+    def preset2(self):
+        self.sommets_polygon = [(164, 302), (107, 388), (187, 371), (336, 472),
+                                (427, 371), (508, 446), (737, 472), (820, 371),
+                                (757, 105), (729, 328), (638, 261), (615, 116),
+                                (468, 49), (334, 54), (374, 201), (269, 254),
+                                (118, 115)]
+        self.lancement_preset()
+
+    def lancement_preset(self):
+        self.d_to_check = []
         self.cnv.create_polygon(self.sommets_polygon, fill='grey')
         for i in range(len(self.sommets_polygon)):
-            if i > 1:
+            if i > 0:
                 A = self.sommets_polygon[i]
                 B = self.sommets_polygon[i-1]
                 self.d_to_check.append([B, A])
@@ -175,13 +208,14 @@ class Application():
             self.d_to_check.append([B, A])
         self.cnv.create_text(event.x, event.y-10,
                              text=self.alphabet[len(self.sommets_polygon)-1],
-                             tag = 'lettre')
+                             tag='lettre')
 
     def fin_dessin_polygone(self, event):
         if not self.p_polygon:
             return
         self.cnv.create_polygon(self.p_polygon, fill='grey')
         self.cnv.tag_raise('lettre')
+        print(self.p_polygon)
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
@@ -204,27 +238,83 @@ class Application():
         M = (self.width, A[1])
         if demo:
             self.cnv.create_line(O, M, fill='red', tag='light')
+        interliste = []
+        angleliste = []
+        e = None
+        result = 0
+        nbangle = 0
         for d in self.d_to_check:
+            cd = [0, 0]
             I = inter2d(d[0], d[1], O, M)
             if I is not None:
+                interliste.append(I)
+                u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
+                if I[0] == 1000:
+                    print(d)
+                    print(I)
+                if interliste.count(I) > 1:
+                    nbangle += 1
+                    '''v = (e[1][0] - e[0][0], e[1][1] - e[0][1])
+                    cosinus = sc(u, v)/(norme(u)*norme(v))
+                    sinus = vect(u, v)/(norme(u)*norme(v))
+                    angle = math.atan2(sinus, cosinus)*180/math.pi
+                    print("Angle entre les deux segments : ", angle)
+                    if angle > 0:  # Si l'angle est aigu'''
+                    self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                         I[1]+size, fill='blue', tag='light')
+                    '''if len(nbI) % 2 == 0:
+                        wn -= result
+                        print("Un angle ignoré")
+                    print("Result : ", result)
+                    angleliste.append(result)'''
+                    print(d[0], I)
+                    if d[0] == I:
+                        D = d[1]
+                    else:
+                        D = d[0]
+                    if e[0] == I:
+                        E = e[1]
+                    else:
+                        E = e[0]
+                    print(D)
+                    print(E)
+                    if signe(D[1]-I[1]) == signe(E[1]-I[1]):
+                        wn -= result
+                        print("Skiped")
+                    continue
                 nbI += 1
                 if demo:
                     self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
                                          I[1]+size, fill='red', tag='light')
-                u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
-                if u[1]<0:
+                if u[1] < 0:
                     # Croisement vers le haut
                     if I[0] > A[0]:
                         # A est à gauche
                         wn += 1
+                        result = 1
+                    else:
+                        result = 0
                 else:
                     # Croisement vers le bas
                     if I[0] > A[0]:
                         # A est à droite
                         wn -= 1
-        print(nbI)
+                        result = -1
+                    else:
+                        result = 0
+                e = d
+                print("Wining number : ", wn)
+                if demo:  # Pour debug
+                    self.cnv.create_text(I[0], I[1]+10, text=result,
+                                         tag='light')
+        '''if nbI % 2 != 0 or nbangle == nbI:
+            for i in range(nbangle):
+                wn -= angleliste[i]'''
+        print("Nombre d'angle détécté : ", nbangle)
+        print("Nombre d'intersections : ", nbI)
+        print("Wining number : ", wn)
         if wn != 0:
-            print(wn)
+            print("Liste des intersections : ", interliste)
             self.rayon_obsatcles_demo(event)
 
     def draw_obstacle(self):
