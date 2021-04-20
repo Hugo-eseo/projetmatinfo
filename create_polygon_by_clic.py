@@ -75,7 +75,7 @@ def draw(cnv):
         # liste des sommets du polygone
         corner_list = coords_list.copy()
         coords_list.clear()
-  
+
 def guardian_by_clic(event, cnv, segments_list):
     def light(x0, y0, side, segments_list):
         # initialisation
@@ -187,8 +187,8 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
             distance_list.pop(0)
         cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
         for corner in corner_list:
-                if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
-                    polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "angle"))
+            if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
+                polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "angle"))
         else: 
             polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "mur simple"))
         if len(distance_list) >= 2:
@@ -223,17 +223,16 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
             final_polygon.append((angle_two_points(elem[0], (x0, y0)), elem[1], elem[0]))
         final_polygon.sort()
         for i in range(len(final_polygon)-1):
-            try:
-                if isclose(final_polygon[i][0], final_polygon[i+1][0],rel_tol=0.01):
+            if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=0.01):
+                if find_direction((x0, y0), final_polygon[i][2]) == "NE" or find_direction((x0, y0), final_polygon[i][2]) == "E" or find_direction((x0, y0), final_polygon[i][2]) == "SE" or find_direction((x0, y0), final_polygon[i][2]) == "N":
                     if final_polygon[i][1] == "angle":
-                        final_polygon.pop(i)
-                    else:
-                        final_polygon.pop(i+1)
-            except IndexError:
-                pass
+                        final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+                elif find_direction((x0, y0), final_polygon[i][2]) == "NO" or find_direction((x0, y0), final_polygon[i][2]) == "O" or find_direction((x0, y0), final_polygon[i][2]) == "SO" or find_direction((x0, y0), final_polygon[i][2]) == "S":
+                    if final_polygon[i][1] == "projeté d'un angle":
+                        final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
         for elem in final_polygon:
             light_poly_coords.append(elem[2])
-        cnv.create_polygon(light_poly_coords, fill="yellàw", tag="light")
+        cnv.create_polygon(light_poly_coords, fill="yellow", tag="light")
         ############
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
