@@ -57,7 +57,14 @@ def vect(u, v):
     return(u[0]*v[1]-u[1]*v[0])
 
 
-def inter2d(A1, A2, B1, B2):
+def pointapts(A, A1, A2):
+    """Renvoie True si le point A appartient au segment [A1;A2]"""
+    if math.isclose(dist(A, A1) + dist(A, A2), dist(A1, A2), rel_tol=0.01):
+        return True
+    return False
+
+
+def inter2d(A1, A2, B1, B2, requireInt=False):
     """Calcul les coordonnées du point d'intersection de 2 droites définies
     par 4 points"""
     a, b = det3pts(B1, B2, A2), det3pts(B2, B1, A1)
@@ -65,10 +72,13 @@ def inter2d(A1, A2, B1, B2):
         return None
     x = (a*A1[0] + b*A2[0])/(a+b)
     y = (a*A1[1] + b*A2[1])/(a+b)
+    I = (x, y)
     if signe(a) != signe(b):
-        if (x, y) == A1 or (x, y) == A2 or (x, y) == B1 or (x, y) == B2:
-            return (x, y)
-        return None
+        if (x, y) != A1 and (x, y) != A2 and (x, y) != B1 and (x, y) != B2:
+            return None
+    if requireInt:
+        if not(pointapts(I, A1, A2) and pointapts(I, B1, B2)):
+            return None
     return (x, y)
 
 
@@ -245,13 +255,15 @@ class Application():
         nbangle = 0
         for d in self.d_to_check:
             cd = [0, 0]
-            I = inter2d(d[0], d[1], O, M)
+            I = inter2d(d[0], d[1], O, M, True)
             if I is not None:
+                if I[0] == 1000:
+                    print("d :", d)
+                    print("O :" ,O)
+                    print("M :", M)
+                    print("I :", I)
                 interliste.append(I)
                 u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
-                if I[0] == 1000:
-                    print(d)
-                    print(I)
                 if interliste.count(I) > 1:
                     nbangle += 1
                     '''v = (e[1][0] - e[0][0], e[1][1] - e[0][1])
@@ -367,7 +379,7 @@ class Application():
                 I = I_p[1]
                 if demo:
                     self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                         I[1]+size, fill='red')
+                                         I[1]+size, fill='red', tag='light')
                 self.cnv.create_line(A, I, fill='yellow', tag='light')
             B = self.rotation(A, B, angle)
 
