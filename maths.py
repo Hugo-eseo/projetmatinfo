@@ -1,4 +1,4 @@
-from math import sqrt, isclose, atan2
+from math import sqrt, isclose, atan2, pi, acos
 import time
 import tkinter as tk
 
@@ -20,8 +20,15 @@ def barycentre(A1, A2, B1, B2):
 
 def angle_two_points(point, center):
     # a, b tuples of 2 
-    angle = atan2(point[1] - center[1], point[0] - center[0])
-    return angle
+    rad = atan2(point[1] - center[1], point[0] - center[0])
+    deg = rad * 180/pi
+    return deg
+
+def longueur(u):
+    return sqrt(v[0]**2+u[1]**2)
+
+def scalaire(u, v):
+    return u[0] * v[0] + u[1] * v[1]
 
 def find_direction(a, b):
     # a, b tuples of 2
@@ -74,17 +81,34 @@ def droite(event):
         droite_list.append(points.copy())
         points.clear()
 
-def intersection(segment1, segment2, cnv):
+def intersection(segment1, segment2):
     I = barycentre(segment1[0], segment1[1], segment2[0], segment2[1])
     if point_in_segment(segment1[0], segment1[1], I) and point_in_segment(segment2[0], segment2[1], I):
-        cnv.create_oval(I[0]-5, I[1]-5, I[0]+5, I[1]+5, fill='blue', tag='point')
+        return (I)
+    else: 
+        return (None)
+
+def inter2d(A1, A2, B1, B2):
+    """Calcul les coordonnées du point d'intersection de 2 droites définies
+    par 4 points"""
+    a, b = det3pts(B1, B2, A2), det3pts(B2, B1, A1)
+    if a+b == 0:
+        return None
+    x = (a*A1[0] + b*A2[0])/(a+b)
+    y = (a*A1[1] + b*A2[1])/(a+b)
+    if signe(a) != signe(b):
+        if (x, y) == A1 or (x, y) == A2 or (x, y) == B1 or (x, y) == B2:
+            cnv.create_oval(x-5, y-5, x+5, y+5, fill='blue', tag='point')
+        return None
+    return cnv.create_oval(x-5, y-5, x+5, y+5, fill='blue', tag='point')
 
 if __name__ == '__main__':
     points = []
     droite_list = []
+    intersection([(264, 101), (287,100)], [(0, 69), (1000,69)])
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
-    boutton = tk.Button(wnd, text="intersect", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv)).pack(side=tk.BOTTOM)
+    boutton = tk.Button(wnd, text="angle", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv)).pack(side=tk.BOTTOM)
     cnv.bind('<1>', droite)
     wnd.mainloop()

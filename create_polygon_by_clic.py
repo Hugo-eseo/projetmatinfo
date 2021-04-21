@@ -1,6 +1,7 @@
 import tkinter as tk
 from maths import barycentre, det, distance_two_points, point_in_segment, middle, find_direction, angle_two_points
 from math import isclose
+import random
 
 def point_in_polygon(point, segments_list):
     # side est un point sur le bord du canvas au meme x (ou y) que le gardien
@@ -111,10 +112,10 @@ def guardian_by_clic(event, cnv, segments_list):
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
 
-def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
+def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list, tolerance):
     global polygon_list
     """ WIP, le bug indiqué dans la notice du projet est encore present """
-    def light(x0, y0, corner, segments_list, corner_list):
+    def light(x0, y0, corner, segments_list, corner_list, tolerance):
         global polygon_list
         # initialisation
         light_list = []
@@ -187,13 +188,13 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
             distance_list.pop(0)
         cnv.create_line(A1[0], A1[1], distance_list[0][1][0], distance_list[0][1][1], tag='light', fill="yellow")
         for corner in corner_list:
-            if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
+            if isclose(distance_list[0][1][0], corner[0], rel_tol=tolerance) and isclose(distance_list[0][1][1], corner[1], rel_tol=tolerance):
                 polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "angle"))
-        else: 
-            polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "mur simple"))
+            else: 
+                polygon_list.append(((distance_list[0][1][0], distance_list[0][1][1]), "mur simple"))
         if len(distance_list) >= 2:
             for corner in corner_list:
-                if isclose(distance_list[0][1][0], corner[0], rel_tol=0.01) and isclose(distance_list[0][1][1], corner[1], rel_tol=0.01):
+                if isclose(distance_list[0][1][0], corner[0], rel_tol=tolerance) and isclose(distance_list[0][1][1], corner[1], rel_tol=tolerance):
                     # milieu des deux intersections
                     middle_point = middle(distance_list[0][1], distance_list[1][1])
                     if point_in_polygon(middle_point, segments_list):
@@ -204,6 +205,7 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
     polygon_list_corner = []
     final_polygon = []
     light_poly_coords = []
+    guardian = [x0, y0]
     # verification de si le gardien est dans la polygone
     if point_in_polygon((x0, y0), segments_list):
         cnv.delete('guardian')
@@ -212,7 +214,7 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         polygon_list.clear()
         # boucle qui prend tous les points du bord du canvas pour avoir toutes les directions possibles
         for corner in corner_list:
-            light(x0, y0, corner, segments_list, corner_list)
+            light(x0, y0, corner, segments_list, corner_list, tolerance)
         # creation du polygone de lumiere
         for elem in polygon_list:
             if elem[1] != 'mur simple':
@@ -223,16 +225,58 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
             final_polygon.append((angle_two_points(elem[0], (x0, y0)), elem[1], elem[0]))
         final_polygon.sort()
         for i in range(len(final_polygon)-1):
-            if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=0.01):
-                if find_direction((x0, y0), final_polygon[i][2]) == "NE" or find_direction((x0, y0), final_polygon[i][2]) == "E" or find_direction((x0, y0), final_polygon[i][2]) == "SE" or find_direction((x0, y0), final_polygon[i][2]) == "N":
-                    if final_polygon[i][1] == "angle":
-                        final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
-                elif find_direction((x0, y0), final_polygon[i][2]) == "NO" or find_direction((x0, y0), final_polygon[i][2]) == "O" or find_direction((x0, y0), final_polygon[i][2]) == "SO" or find_direction((x0, y0), final_polygon[i][2]) == "S":
-                    if final_polygon[i][1] == "projeté d'un angle":
-                        final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+            if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=tolerance):
+                if final_polygon[i][1] == "projeté d'un angle":
+                    final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+        for i in range(len(final_polygon)-1):
+            if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=tolerance):
+                if final_polygon[i][1] == "angle":
+                    for corner in corner_list:
+                        if isclose(final_polygon[i][2][0], corner[0],rel_tol=tolerance) and isclose(final_polygon[i][2][1], corner[1],rel_tol=tolerance):
+                            angle0 = corner_list.index(corner)
+                            if angle0 == 0:
+                                angle1 = corner_list[-1]
+                            else:
+                                angle1 = corner_list[angle0 - 1]
+                            if angle0 == len(corner_list)-1:
+                                angle2 = corner_list[0]
+                            else: 
+                                angle2 = corner_list[angle0 + 1]
+                    a1 = angle_two_points(angle1, final_polygon[i][2])
+                    a2 = angle_two_points(angle2, final_polygon[i][2]) 
+
+                    if abs(a1) > abs(a2):
+                        if a1 > 0 and a2 < 0:
+                            a1 -= 360
+                        angle_final = a1 - a2
+                    else:
+                        if a1 > 0 and a2 < 0:
+                            a1 -= 360
+                        angle_final = a2 - a1
+                """
+                ####
+                # ça a l'air pas trop mal
+                if angle_final > 180:
+                    angle_final -= 360
+                elif angle_final < -180:
+                    angle_final += 360
+                ####
+                """
+                if angle_final > 0 and x0 > final_polygon[i][2][0]: # positif droite
+                    pass
+                elif angle_final < 0 and x0 >= final_polygon[i][2][0]: # negatif et droite
+                    final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+                elif angle_final > 0 and x0 <= final_polygon[i][2][0]: # positif gauche
+                    final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+                elif angle_final < 0 and x0 < final_polygon[i][2][0]: # negatif gauche
+                    pass
+
         for elem in final_polygon:
             light_poly_coords.append(elem[2])
         cnv.create_polygon(light_poly_coords, fill="yellow", tag="light")
+        for i in range(len(light_poly_coords)):
+            cnv.create_oval(light_poly_coords[i][0]-5, light_poly_coords[i][1]-5, light_poly_coords[i][0]+5, light_poly_coords[i][1]+5, fill='green', tag='light')
+            cnv.create_text(light_poly_coords[i][0], light_poly_coords[i][1]+10, text=f'{i}', tag='light', font=("Helvetica", 9))
         ############
         # creation du gardien
         cnv.create_oval(x0-5, y0-5, x0+5, y0+5, fill='black', tag='guardian')
@@ -247,16 +291,30 @@ def delete_all(cnv):
     cnv.delete('all')
     coords_list.clear()
 
+def monte_carlo(segment_list, width, height):
+    cpt = 0
+    iterations = 100000
+    for i in range(iterations):
+        x, y = random.randint(0, width), random.randint(0, height)
+        if point_in_polygon((x, y), segments_list):
+            cpt +=1
+    ratio = cpt/iterations
+    surface_cnv = width * height
+    surface_poly = surface_cnv * ratio 
+    print(surface_poly)
+
 if __name__ == '__main__':
     # initialisation
     coords_list = []
     segments_list = []
     corner_list = []
     polygon_list = []
+    tolerance_angle = 0.0001
+    width, height = 600, 400
 
     wnd = tk.Tk()
     wnd.title("Detection")
-    cnv = tk.Canvas(wnd, width=600, height=400)
+    cnv = tk.Canvas(wnd, width=width, height=height)
     cnv.pack()
     # boutton pour creer un polygone une fois les points placés
     draw_button = tk.Button(wnd, command=lambda: draw(cnv), text='Draw polygon !').pack(side=tk.BOTTOM)
@@ -266,9 +324,10 @@ if __name__ == '__main__':
     delete_point_button = tk.Button(wnd, command=lambda: delete_points(cnv), text='Delete all points').pack(side=tk.BOTTOM)
     # boutton supprimant tous els elemets du canvas
     delete_all_button = tk.Button(wnd, command=lambda: delete_all(cnv), text='Delete all').pack(side=tk.BOTTOM)
+    # boutton surface polygone par monte carlo
+    monte_carlo_button = tk.Button(wnd, command=lambda: monte_carlo(segments_list, width, height), text='Monte-Carlo').pack(side=tk.RIGHT)
     # reglages des clics de la souris, <2> correspond au clic mollette pour windows, si le clic droit est souhaité il faut changer par <3> 
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<Button-2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
-    cnv.bind('<Double-Button-2>', lambda event, cnv=cnv: guardian_by_clic_on_corner(event, cnv, segments_list, corner_list))
-
+    cnv.bind('<Double-Button-2>', lambda event, cnv=cnv: guardian_by_clic_on_corner(event, cnv, segments_list, corner_list, tolerance_angle))
     wnd.mainloop()
