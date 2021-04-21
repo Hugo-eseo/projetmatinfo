@@ -183,8 +183,111 @@ class Application():
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
-        self.cnv.bind('<Button-1>', self.point_in_polygon_demo)
+        self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
         self.reset_button.config(command=self.demo3)
+
+    # Mode de démonstration 5
+
+    def polygone_eclairage(self, inter_in_order):
+        self.cnv.delete('lightpolygon')
+        for intersection in inter_in_order:
+            if intersection[1] == "AHEAD":
+                inter_in_order.remove(intersection)
+        for i in range(len(inter_in_order)-1):
+            self.cnv.create_polygon(self.A, inter_in_order[i][0],
+                                    inter_in_order[i+1][0], fill='yellow',
+                                    tag='lightpolygon')
+            i += 1
+        self.cnv.create_polygon(self.A, inter_in_order[-1][0],
+                                inter_in_order[0][0], fill='yellow',
+                                tag='lightpolygon')
+        self.cnv.tag_raise('light')
+
+    # Mode de démonstration 4
+
+    def intersection_sommets_demo(self, event):
+        """Docstring"""
+        # Taille des points d'intersection
+        size = 4
+        # Suppression de la précédente source lumineuse
+        self.cnv.delete('light')
+        # Affichage de la source lumineuse en jaune
+        self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
+                             event.y+size, fill='white', tag='light')
+        self.liste_inter_def = []
+        for sommet in self.sommets_polygon:
+            self.A = (event.x, event.y)
+            self.B = sommet
+            # On cherche toutes les intersections avec les segments renseignés
+            inter = []
+            count = 0
+            for d in self.d_to_check:
+                I = inter2d(d[0], d[1], self.A, self.B)
+                # Si il y a un point d'intersection
+                if I is not None:
+                    # On élimine les doublons
+                    if inter.count([dist(I, self.A), I]) == 1:
+                        continue
+                    # On vérifie que ce dernier se trouve dans la direction du
+                    # segment [AB]
+                    u = (sommet[0] - self.A[0], sommet[1] - self.A[1])
+                    v = (I[0] - self.A[0], I[1] - self.A[1])
+                    if signe(u[0]) == signe(v[0]) and signe(u[1]) == signe(v[1]):
+                        inter.append([dist(I, self.A), I])
+            # On cherche le point d'intersection le plus proche du point A
+            I_p = min(inter)
+            I = I_p[1]
+            C = (I[0]+((self.B[0]-self.A[0])/dist(self.A, self.B)),
+                 I[1]+((self.B[1]-self.A[1])/dist(self.A, self.B)))
+            status, color, I_p = self.find_status(I_p, inter, C)
+            I = I_p[1]
+            self.liste_inter_def.append([I, status])
+            self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size, I[1]+size,
+                                 fill=color, tag='light')
+            self.cnv.create_line(self.A, I, fill='white', tag='light')
+
+        inter_in_order = []
+        for d in self.d_to_check:
+            pts_sur_segment = []
+            for intersection in self.liste_inter_def:
+                I = intersection[0]
+                if pointapts(I, d[0], d[1]):
+                    pts_sur_segment.append([dist(d[0], I), intersection])
+            if not pts_sur_segment:
+                continue
+            pts_sur_segment.sort()
+            for intersection in pts_sur_segment:
+                count += 1
+                I = intersection[1][0]
+                inter_in_order.append(intersection[1])
+                self.liste_inter_def.remove(intersection[1])
+                self.cnv.create_text(I[0], I[1]-10, text=count, tag='light')
+        self.polygone_eclairage(inter_in_order)
+
+    def find_status(self, I_p, inter, C, selfcall=False):
+        size = 4
+        for sommet in self.sommets_polygon:
+            if math.isclose(sommet[0], I_p[1][0], rel_tol=0.01) and\
+                math.isclose(sommet[1], I_p[1][1], rel_tol=0.01) and\
+                    not self.point_in_polygon_demo(C):
+                if not selfcall:
+                    return "EQUALS", "green", I_p
+                return "BEYOND", "blue", I_p
+        if not self.point_in_polygon_demo(C):
+            if not selfcall:
+                return "AHEAD", "red", I_p
+            return "BEYOND", "blue", I_p
+        else:
+            I = I_p[1]
+            self.liste_inter_def.append([I, "EQUALS"])
+            self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size, I[1]+size,
+                                 fill="green", tag='light')
+            inter.remove(I_p)
+            I_p = min(inter)
+            I = I_p[1]
+            C = (I[0]+((self.B[0]-self.A[0])/dist(self.A, self.B)),
+                 I[1]+((self.B[1]-self.A[1])/dist(self.A, self.B)))
+            return self.find_status(I_p, inter, C, True)
 
     # Mode de démonstration 3
 
@@ -243,9 +346,15 @@ class Application():
         self.d_to_check.append([B, A])
         self.cnv.delete('pts')
         self.cnv.unbind('<Button-3>')
-        self.cnv.bind('<Button-1>', self.point_in_polygon_demo)
+        self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
 
-    def point_in_polygon_demo(self, event, demo=False):
+    def clic_source_lumière_demo(self, event):
+        A = (event.x, event.y)
+        if self.point_in_polygon_demo(A):
+            self.intersection_sommets_demo(event)
+            # self.rayon_obsatcles_demo(event)
+
+    def point_in_polygon_demo(self, A, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
         polygon dessiné. Prend un paramètre supplémentaire demo pour
         l'affichage ou non des données de construction"""
@@ -260,11 +369,10 @@ class Application():
         # Si mode de demo: affichage du point sur le clic de l'utilisateur
         if demo:
             self.cnv.delete("demo")
-            self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                                 event.y+size, fill='green', tag='demo')
+            self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
+                                 A[1]+size, fill='green', tag='demo')
             # Compte le nombre d'intersections
             nbI = 0
-        A = (event.x, event.y)
         O = (0, A[1])
         M = (self.width, A[1])
         if demo:
@@ -376,7 +484,8 @@ class Application():
         # Si le winding number est différent de 0, alors le point se trouve
         # dans le polygon
         if wn != 0:
-            self.rayon_obsatcles_demo(event)
+            return True
+        return False
 
     # Mode de démonstration 2
 
@@ -485,10 +594,13 @@ class Application():
                     if inter.count(I_p) > 1:
                         color = 'green'
                         print(inter.count(I_p))
+                        self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                                             I[1]+size, fill=color,
+                                             tag='light')
                     else:
                         color = 'red'
-                    self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                         I[1]+size, fill=color, tag='light')
+                    # self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
+                    #                     I[1]+size, fill=color, tag='light')
                 # Dans tous les cas on dessine le rayon lumineux jusqu'au
                 # point d'intersection
                 self.cnv.create_line(A, I, fill='yellow', tag='light')
