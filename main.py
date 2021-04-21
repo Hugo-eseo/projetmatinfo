@@ -404,10 +404,11 @@ class Application():
     def draw_obstacle(self):
         """Dessine un obsacle rectangulaire quelconque sur le canas"""
         # Choix aléatoire de la hauteur et largeur de l'obstacle
-        width, height = random.randint(0, 50), random.randint(100, 200)
+        width, height = random.randint(10, 60), random.randint(100, 200)
         # Choix aléatoire de ses coordonnées
-        x, y = random.randint(width, self.width-width),\
-            random.randint(height, self.height-height)
+        maxi = max(width, height)
+        x, y = random.randint(maxi, self.width-maxi),\
+            random.randint(maxi, self.height-maxi)
         # Choix aléatoire de son angle d'inclinaison
         angle = random.randint(0, 360)
         # Définition des 4 points de l'obstacle
@@ -443,7 +444,7 @@ class Application():
         size = 4
         # Angle pour la rotation
         angle = 360/self.nbrayons
-        # demo = False # Pour controler le paramètre manuellement
+        demo = True  # Pour controler le paramètre manuellement
         # Suppression de la précédente source lumineuse
         self.cnv.delete('light')
         # Affichage de la source lumineuse en jaune
@@ -481,8 +482,13 @@ class Application():
                 # Si le mode de demo est activé on dessine ce point
                 # d'intersection
                 if demo:
+                    if inter.count(I_p) > 1:
+                        color = 'green'
+                        print(inter.count(I_p))
+                    else:
+                        color = 'red'
                     self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                         I[1]+size, fill='red', tag='light')
+                                         I[1]+size, fill=color, tag='light')
                 # Dans tous les cas on dessine le rayon lumineux jusqu'au
                 # point d'intersection
                 self.cnv.create_line(A, I, fill='yellow', tag='light')
