@@ -70,11 +70,14 @@ def pointapts(A, A1, A2):
 
 def inter2d(A1, A2, B1, B2, requireInt=False):
     """Renvoie les coordonnées du point d'intersection de 2 droites définies
-    par 2 points chacunes passés en arguments. Le paramètre requireInt
+    par 2 points chacunes passés en arguments. Renvoie False si tous les points
+    sont alignés et si requireInt. Le paramètre requireInt
     (True ou False) indique à la fonction si le point d'intersection doit se
     trouver à l'intérieur des deux segments. Désactivé si non renseigné"""
     a, b = det3pts(B1, B2, A2), det3pts(B2, B1, A1)
     if a + b == 0:
+        if a == 0 and b == 0 and requireInt:
+            return(False)
         return None
     x = (a*A1[0]+b*A2[0])/(a+b)
     y = (a*A1[1]+b*A2[1])/(a+b)
@@ -185,17 +188,22 @@ class Application():
                                 (219, 124)]
         self.lancement_preset()
 
-    def lancement_preset(self):
+    def lancement_preset(self, demo=False):
         """Dessin du polygon défini par les preset"""
+        size = 4
+        demo = True  # Pour controler le paramètre manuellement
         self.d_to_check = []
         self.cnv.delete(tk.ALL)
         self.cnv.create_polygon(self.sommets_polygon, fill='grey')
         # Mémorisation des segments
         for i in range(len(self.sommets_polygon)):
+            A = self.sommets_polygon[i]
             if i > 0:
-                A = self.sommets_polygon[i]
                 B = self.sommets_polygon[i-1]
                 self.d_to_check.append([B, A])
+            if demo:
+                self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
+                                     A[1]+size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
@@ -415,76 +423,126 @@ class Application():
             # On souhaite cette fois-ci que le point d'intersection
             # appartienne aux deux segments, d'où l'argument True (cf fonction)
             I = inter2d(d[0], d[1], O, M, True)
+            # Variables utilisés dans le cas où deux intersections sont
+            # détectés sur un même segment (segment horizontal)
+            I1 = None
+            nbintertocheck = 1
             if demo:
                 print("#############################################")
                 print("Recherche d'intersections avec le segment", d)
             if I is not None:
+                # Si la fonction inter2d a détécté que les 4 points passés
+                # en argument sont alignés, alors il s'agit d'un segment
+                # horizontal
+                if I is False:
+                    # Deux sommets sont donc à prendre en compte
+                    interliste.append(d[0])
+                    interliste.append(d[1])
+                    I = d[0]
+                    I1 = d[1]
+                    nbintertocheck = 2
+                    if demo:
+                        print("Une intersection trouvée en : ", I1)
+                # Dans le cas classique
+                else:
+                    # On mémorise chaque intersection
+                    interliste.append(I)
                 if demo:
                     print("Une intersection trouvée en : ", I)
-                # On mémorise chaque intersection
-                interliste.append(I)
-                # Vecteur directeur de la droite définie par le segment du
-                # polygon considéré
-                u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
-                # Si l'intersection a déjà été enregistrée, c'est qu'il
-                # s'agit d'un sommet du polygon
-                if interliste.count(I) > 1:
+                # Si deux sommets ont été detectés (cas du segment horrizontal)
+                # il faut faire un tour de boucle supplémentaire
+                # pour tous deux les prendre en compte
+                for i in range(nbintertocheck):
                     if demo:
-                        # On le compte
-                        nbsommets += 1
-                        # On change la couleur du point d'intersection
-                        self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                             I[1]+size, fill='blue',
-                                             tag='demo')
-                        print("Sommet détecté en", I)
-                    # On cherche les points D et E, les deux autres points
-                    # définissants les deux segments formant le sommet
-                    if d[0] == I:
-                        D = d[1]
-                    else:
-                        D = d[0]
-                    if e[0] == I:
-                        E = e[1]
-                    else:
-                        E = e[0]
-                    # Si ces deux points sont tous les deux au dessus ou
-                    # en dessous de I, le sommet doit être ignoré dans le
-                    # calcul du winding number
-                    if signe(D[1]-I[1]) == signe(E[1]-I[1]):
-                        # On retire donc le résultat de la précédente
-                        # intersection (correspondant au sommet), chaque sommet
-                        # étant détecté deux fois
-                        wn -= result
+                        print("Nombre d'intersections à vérifier : ",
+                              nbintertocheck - i)
+                    # Boolean utilisé pour savoir si l'intersection est un
+                    # détectée une deuxième fois et donc ne pas être recalculée
+                    go_to_next_segment = False
+                    # Vecteur directeur de la droite définie par le segment du
+                    # polygon considéré
+                    u = (d[1][0] - d[0][0], d[1][1] - d[0][1])
+                    # Si l'intersection a déjà été enregistrée, c'est qu'il
+                    # s'agit d'un sommet du polygon
+                    if interliste.count(I) > 1:
                         if demo:
-                            print("Sommet ignoré")
-                    # Dans tous les cas (où il s'agit d'un sommet), on passe
-                    # au segment suivant
-                    continue
-                if demo:
-                    nbI += 1
-                if demo:
-                    # On affiche l'intersection
-                    self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
-                                         I[1]+size, fill='red', tag='demo')
-                # Pour chaque intersection, on met à jour le winding number
-                if u[1] < 0:
-                    # Croisement vers le haut
-                    if I[0] > A[0]:
-                        # A est à gauche
-                        wn += 1
-                        result = 1
-                    else:
-                        result = 0
-                else:
-                    # Croisement vers le bas
-                    if I[0] > A[0]:
-                        # A est à droite
-                        wn -= 1
-                        result = -1
-                    else:
-                        result = 0
-                # On mémorise le segment précédent
-                e = d
+                            # On le compte
+                            nbsommets += 1
+                            # On change la couleur du point d'intersection
+                            self.cnv.create_oval(I[0]-size, I[1]-size,
+                                                 I[0]+size, I[1]+size,
+                                                 fill='blue', tag='demo')
+                            print("Sommet détecté en", I)
+                        # On cherche les points D et E, les deux autres points
+                        # définissants les deux segments formant le sommet
+                        if d[0] == I:
+                            D = d[1]
+                        else:
+                            D = d[0]
+                        if e[0] == I:
+                            E = e[1]
+                        else:
+                            E = e[0]
+                        ignore = False
+                        # Deux premiers if: cas particuliés du segment
+                        # horizontale: dans ce cas seul compte l'orientation
+                        # du deuxième segment
+                        if signe(D[1]-I[1]) == 0:
+                            if signe(E[1]-I[1]) == 1:
+                                ignore = True
+                        elif signe(E[1]-I[1]) == 0:
+                            if signe(D[1]-I[1]) == 1:
+                                ignore = True
+                        # Si ces deux points sont tous les deux au dessus ou
+                        # en dessous de I, le sommet doit être ignoré dans le
+                        # calcul du winding number
+                        elif signe(D[1]-I[1]) == signe(E[1]-I[1]):
+                            # On retire donc le résultat de la précédente
+                            # intersection (correspondant au sommet),
+                            # chaque sommet étant détecté deux fois
+                            ignore = True
+                        if ignore:
+                            wn -= result
+                            if demo:
+                                print("Sommet ignoré")
+                        # Dans tous les cas (où il s'agit d'un sommet),
+                        # on passe au segment suivant
+                        go_to_next_segment = True
+                    if not go_to_next_segment:
+                        if demo:
+                            nbI += 1
+                        if demo:
+                            # On affiche l'intersection
+                            self.cnv.create_oval(I[0]-size, I[1]-size,
+                                                 I[0]+size, I[1]+size,
+                                                 fill='red', tag='demo')
+                            print("Vecteur directeur u :", u)
+                        # Pour chaque intersection, on met à jour le winding
+                        # number
+                        if u[1] < 0:
+                            # Croisement vers le haut
+                            if I[0] > A[0]:
+                                # A est à gauche
+                                wn += 1
+                                result = 1
+                            else:
+                                result = 0
+                        else:
+                            # Croisement vers le bas
+                            if I[0] > A[0]:
+                                # A est à droite
+                                wn -= 1
+                                result = -1
+                            else:
+                                result = 0
+                        # On mémorise le segment précédent
+                        e = d
+                    # Pour le deuxième tour de boucle si 2 intersections
+                    # sont à traiter
+                    if I1 is not None:
+                        I = I1
+                        I1 = None
+
                 if demo:
                     print("Résultat : ", result)
                     print("Wining number : ", wn)
@@ -495,7 +553,7 @@ class Application():
             print("#############################################")
             print("Nombre total de sommets détécté : ", nbsommets)
             print("Nombre d'intersections : ", nbI)
-            print("Wining number final : ", wn)
+            print("Winding number final : ", wn)
             print("Liste des intersections : ", interliste)
         # Si le winding number est différent de 0, alors le point se trouve
         # dans le polygon
