@@ -107,6 +107,7 @@ class Application():
         # Création de la fenêtre, du canvas et de la frame de commande
         self.width, self.height = width, height
         self.three_dim = three_dim
+        self.loc_gardien = None
         self.wnd = tk.Tk()
         self.wnd.title("Galerie d'art - Demonstrateur")
         if self.three_dim:
@@ -582,10 +583,14 @@ class Application():
         y = - xM*math.sin(angle) + yM*math.cos(angle) + O[1]
         return (x, y)
 
-    def rayon_obsatcles_demo(self, event, demo=False):
+    def rayon_obsatcles_demo(self, event, key=False, demo=False):
         """Demo : intersection rayon lumineux contre des obstacles
         Prend un paramètre supplémentaire demo pour l'affichage ou non
         des points d'intersection"""
+        self.wnd.bind('<z>', self.move_up)
+        self.wnd.bind('<s>', self.move_down)
+        self.wnd.bind('<d>', self.move_right)
+        self.wnd.bind('<q>', self.move_left)
         # Taille des points d'intersection
         size = 4
         # Angle pour la rotation
@@ -596,33 +601,31 @@ class Application():
         self.cnv.delete('light')
         if self.three_dim:
             self.cnv3d.delete('light')
-        # Affichage de la source lumineuse en jaune
-        self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                             event.y+size, fill='yellow', tag='light')
         # La fonction va chercher une intersection avec les segments
         # renseignés dans self.d_to_check et le segment [AB]. Celui-ci
         # de longeur 1 est le départ des rayons de la source
-        A = (event.x, event.y)
-        B = (A[0]+2, A[1]+1)
+        if self.loc_gardien is None or key is False:
+            self.loc_gardien = [event.x, event.y]
+        B = (self.loc_gardien[0]+1, self.loc_gardien[1]-2)    # besoin de faire un changement pour avoir la mesure en degres entre A et le placement de B. 
         # Pour le nombre de rayon demandés
         for i in range(self.nbrayons):
             # On cherche toutes les intersections avec les segments renseignés
             inter = []
             for d in self.d_to_check:
-                I = inter2d(d[0], d[1], A, B)
+                I = inter2d(d[0], d[1], self.loc_gardien, B)
                 # Si il y a un point d'intersection
                 if I is not None:
                     # On vérifie que ce dernier se trouve dans la direction du
                     # segment [AB]
-                    if dist(I, A) > dist(I, B):
+                    if dist(I, self.loc_gardien) > dist(I, B):
                         # Si oui on l'ajoute à la liste
-                        inter.append([dist(I, A), I, d])
+                        inter.append([dist(I, self.loc_gardien), I, d])
             # Si aucun point d'intersection n'est trouvé
             if not inter:
                 # On trace un segment rouge pour contrôle visuel
                 # Utilisé pour debug
-                C = (B[0]+(B[0]-A[0])*50, B[1]+(B[1]-A[1])*50)
-                self.cnv.create_line(A, C, fill='red', tag='light')
+                C = (B[0]+(B[0]-self.loc_gardien[0])*50, B[1]+(B[1]-self.loc_gardien[1])*50)
+                self.cnv.create_line(self.loc_gardien, C, fill='red', tag='light')
             # Sinon
             else:
                 # On cherche le point d'intersection le plus proche du point A
@@ -642,14 +645,17 @@ class Application():
                         color = 'red'
                     # self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
                     #                     I[1]+size, fill=color, tag='light')
+                # Affichage de la source lumineuse en jaune
+                self.cnv.create_oval(self.loc_gardien[0]-size, self.loc_gardien[1]-size, self.loc_gardien[0]+size,
+                                     self.loc_gardien[1]+size, fill='yellow', tag='light')
                 # Dans tous les cas on dessine le rayon lumineux jusqu'au
                 # point d'intersection
-                self.cnv.create_line(A, I, fill='yellow', tag='light')
+                self.cnv.create_line(self.loc_gardien, I, fill='yellow', tag='light')
                 if self.three_dim:
-                    distanceM = dist(A, I)
+                    distanceM = dist(self.loc_gardien, I)
                     self.draw3d(distanceM, angleT, wall)
             # On passe au rayon suivant en effectuant une rotation du point B
-            B = self.rotation(A, B, angle)
+            B = self.rotation(self.loc_gardien, B, angle)
             angleT += angle
         
     def draw3d(self, distanceM, angle, wall):
@@ -739,6 +745,33 @@ class Application():
                                      I[1]+size, fill='red')
             self.nbd = 0
 
+    def move_up(self, event):
+        self.loc_gardien[1] -= 10
+        if self.point_in_polygon_demo(self.loc_gardien):
+            self.rayon_obsatcles_demo(event, key=True)
+        else:
+            self.loc_gardien[1] += 10
+    
+    def move_down(self, event):
+        self.loc_gardien[1] += 10
+        if self.point_in_polygon_demo(self.loc_gardien):
+            self.rayon_obsatcles_demo(event, key=True)
+        else:
+            self.loc_gardien[1] -= 10
+    
+    def move_right(self, event):
+        self.loc_gardien[0] += 10
+        if self.point_in_polygon_demo(self.loc_gardien):
+            self.rayon_obsatcles_demo(event, key=True)
+        else:
+            self.loc_gardien[0] -= 10
+    
+    def move_left(self, event):
+        self.loc_gardien[0] -= 10
+        if self.point_in_polygon_demo(self.loc_gardien):
+            self.rayon_obsatcles_demo(event, key=True)
+        else:
+            self.loc_gardien[0] += 10
 
 Application(600, 400, three_dim=True)
 
