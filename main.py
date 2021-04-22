@@ -121,7 +121,7 @@ class Application():
         tk.Button(self.frm, text='[PRESET1] Museum',
                   command=self.preset1).pack()
         tk.Button(self.frm, text='[PRESET2] Autre',
-                  command=self.preset2).pack()
+                  command=self.preset3).pack()
         self.reset_button = tk.Button(self.frm, text='Reset',
                                       command=self.reset)
         self.reset_button.pack()
@@ -167,6 +167,22 @@ class Application():
                                 (757, 105), (729, 328), (638, 261), (615, 116),
                                 (468, 49), (334, 54), (374, 201), (269, 254),
                                 (118, 115)]
+        self.lancement_preset()
+
+    def preset3(self):
+        """Preset 3"""
+        self.sommets_polygon = [(221, 183), (221, 221), (90, 223), (91, 109),
+                                (140, 106), (143, 168), (173, 168), (176, 70),
+                                (46, 65), (50, 276), (223, 274), (225, 321),
+                                (81, 330), (82, 403), (116, 400), (112, 359),
+                                (224, 357), (275, 356), (272, 317), (415, 315),
+                                (415, 277), (481, 272), (482, 316), (530, 315),
+                                (528, 225), (413, 227), (406, 162), (463, 158),
+                                (460, 116), (495, 111), (496, 65), (542, 64),
+                                (541, 21), (456, 21), (457, 81), (416, 81),
+                                (416, 120), (369, 122), (319, 123), (315, 63),
+                                (373, 57), (372, 23), (266, 22), (272, 122),
+                                (219, 124)]
         self.lancement_preset()
 
     def lancement_preset(self):
@@ -351,8 +367,8 @@ class Application():
     def clic_source_lumière_demo(self, event):
         A = (event.x, event.y)
         if self.point_in_polygon_demo(A):
-            self.intersection_sommets_demo(event)
-            # self.rayon_obsatcles_demo(event)
+            # self.intersection_sommets_demo(event)
+            self.rayon_obsatcles_demo(event)
 
     def point_in_polygon_demo(self, A, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
@@ -365,7 +381,7 @@ class Application():
         # Winding number
         # Utilisé pour déterminer si un point est dans le polygon ou non
         wn = 0
-        # demo = True  # Pour controler le paramètre manuellement
+        demo = True  # Pour controler le paramètre manuellement
         # Si mode de demo: affichage du point sur le clic de l'utilisateur
         if demo:
             self.cnv.delete("demo")
