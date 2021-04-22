@@ -392,7 +392,7 @@ class Application():
             # self.intersection_sommets_demo(event)
             self.rayon_obsatcles_demo(event)
 
-    def point_in_polygon_demo(self, A, demo=False):
+    def point_in_polygon_demo(self, A, demo=True):
         """ Fonction permettant de vérifier si un point est dans le
         polygon dessiné. Prend un paramètre supplémentaire demo pour
         l'affichage ou non des données de construction"""
