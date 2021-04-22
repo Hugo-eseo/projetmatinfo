@@ -392,7 +392,7 @@ class Application():
             # self.intersection_sommets_demo(event)
             self.rayon_obsatcles_demo(event)
 
-    def point_in_polygon_demo(self, A, demo=True):
+    def point_in_polygon_demo(self, A, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
         polygon dessiné. Prend un paramètre supplémentaire demo pour
         l'affichage ou non des données de construction"""
@@ -403,7 +403,7 @@ class Application():
         # Winding number
         # Utilisé pour déterminer si un point est dans le polygon ou non
         wn = 0
-        # demo = True  # Pour controler le paramètre manuellement
+        demo = True  # Pour controler le paramètre manuellement
         # Si mode de demo: affichage du point sur le clic de l'utilisateur
         if demo:
             self.cnv.delete("demo")
@@ -587,10 +587,12 @@ class Application():
         """Demo : intersection rayon lumineux contre des obstacles
         Prend un paramètre supplémentaire demo pour l'affichage ou non
         des points d'intersection"""
+        """
         self.wnd.bind('<z>', self.move_up)
         self.wnd.bind('<s>', self.move_down)
         self.wnd.bind('<d>', self.move_right)
         self.wnd.bind('<q>', self.move_left)
+        """
         # Taille des points d'intersection
         size = 4
         # Angle pour la rotation
@@ -747,28 +749,32 @@ class Application():
 
     def move_up(self, event):
         self.loc_gardien[1] -= 10
-        if self.point_in_polygon_demo(self.loc_gardien):
+        loc = self.loc_gardien
+        if self.point_in_polygon_demo(loc):
             self.rayon_obsatcles_demo(event, key=True)
         else:
             self.loc_gardien[1] += 10
     
     def move_down(self, event):
         self.loc_gardien[1] += 10
-        if self.point_in_polygon_demo(self.loc_gardien):
+        loc = self.loc_gardien
+        if self.point_in_polygon_demo(loc):
             self.rayon_obsatcles_demo(event, key=True)
         else:
             self.loc_gardien[1] -= 10
     
     def move_right(self, event):
         self.loc_gardien[0] += 10
-        if self.point_in_polygon_demo(self.loc_gardien):
+        loc = self.loc_gardien
+        if self.point_in_polygon_demo(loc):
             self.rayon_obsatcles_demo(event, key=True)
         else:
             self.loc_gardien[0] -= 10
     
     def move_left(self, event):
         self.loc_gardien[0] -= 10
-        if self.point_in_polygon_demo(self.loc_gardien):
+        loc = self.loc_gardien
+        if self.point_in_polygon_demo(loc):
             self.rayon_obsatcles_demo(event, key=True)
         else:
             self.loc_gardien[0] += 10
