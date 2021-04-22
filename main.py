@@ -93,27 +93,36 @@ def angle_two_points(point, center):
 
 class Application():
     """Crée la fenêtre de l'application"""
-    nbrayons = 60  # Nombre de rayon partants de la source lumineuse
+    nbrayons = 300  # Nombre de rayon partants de la source lumineuse
     d = list()
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
                 'Y', 'Z']
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, three_dim=False):
         """Prend en argument :
             width : largeur de la fenêtre
             height : hauteur de la fenêtre
         """
         # Création de la fenêtre, du canvas et de la frame de commande
         self.width, self.height = width, height
+        self.three_dim = three_dim
         self.wnd = tk.Tk()
         self.wnd.title("Galerie d'art - Demonstrateur")
-        self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
-        self.cnv.pack(side=tk.LEFT)
-        self.cnv3d = tk.Canvas(self.wnd, width=self.width, height=self.height, bg='grey')
-        self.cnv3d.pack(side=tk.RIGHT)
-        self.frm = tk.Frame(self.wnd, width=2*self.width, height=100)
-        self.frm.pack(side=tk.BOTTOM)
+        if self.three_dim:
+            self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
+            self.cnv.pack(side=tk.LEFT)
+            self.cnv3d = tk.Canvas(self.wnd, width=self.width, height=self.height, bg='green')
+            self.cnv3d.pack(side=tk.RIGHT)
+            # Création du ciel
+            self.cnv3d.create_rectangle(0, 0, self.width+3, self.height//2, fill='lightblue', width=0)
+            self.frm = tk.Frame(self.wnd, width=2*self.width, height=100)
+            self.frm.pack(side=tk.BOTTOM)
+        else:
+            self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
+            self.cnv.pack()
+            self.frm = tk.Frame(self.wnd, width=2*self.width, height=100)
+            self.frm.pack(side=tk.BOTTOM)
 
         # Différents modes de demonstration
         tk.Button(self.frm, text='Quiter', command=self.wnd.destroy).pack()
@@ -147,27 +156,18 @@ class Application():
 
     def preset1(self):
         """Preset 1"""
-        self.sommets_polygon = [(243, 308), (244, 286), (242, 244), (206, 242),
-                                (171, 243), (145, 241), (125, 242), (99, 241),
-                                (76, 242), (43, 240), (42, 221), (41, 199),
-                                (40, 165), (39, 148), (38, 120), (37, 96),
-                                (36, 67), (35, 37), (62, 38), (81, 36),
-                                (103, 35), (105, 60), (104, 87), (82, 84),
-                                (62, 83), (63, 101), (64, 129), (65, 155),
-                                (66, 185), (67, 199), (86, 196), (113, 195),
-                                (136, 194), (166, 193), (198, 195), (196, 169),
-                                (195, 149), (152, 148), (110, 147), (106, 114),
-                                (131, 113), (132, 83), (131, 52), (154, 49),
-                                (174, 47), (175, 71), (174, 104), (196, 105),
-                                (215, 105), (220, 80), (221, 62), (226, 32),
-                                (249, 16), (276, 17), (310, 16), (342, 17),
-                                (345, 36), (323, 38), (288, 37), (267, 44),
-                                (267, 66), (264, 101), (287, 100), (320, 101),
-                                (358, 100), (376, 95), (375, 78), (373, 56),
-                                (375, 26), (407, 21), (427, 22), (438, 21),
-                                (437, 58), (438, 94), (436, 116), (434, 139),
-                                (432, 161), (434, 195), (432, 230), (434, 278),
-                                (433, 329), (383, 336), (319, 338), (246, 340)]
+        self.sommets_polygon = [(221, 183), (221, 221), (90, 223), (91, 109),
+                                (140, 106), (143, 168), (173, 168), (176, 70),
+                                (46, 65), (50, 276), (223, 274), (225, 321),
+                                (81, 330), (82, 403), (116, 400), (112, 359),
+                                (224, 357), (275, 356), (272, 317), (415, 315),
+                                (415, 277), (481, 272), (482, 316), (530, 315),
+                                (528, 225), (413, 227), (406, 162), (463, 158),
+                                (460, 116), (495, 111), (496, 65), (542, 64),
+                                (541, 21), (456, 21), (457, 81), (416, 81),
+                                (416, 120), (369, 122), (319, 123), (315, 63),
+                                (373, 57), (372, 23), (266, 22), (272, 122),
+                                (219, 124)]
         self.lancement_preset()
 
     def preset2(self):
@@ -388,8 +388,8 @@ class Application():
     def clic_source_lumière_demo(self, event):
         A = (event.x, event.y)
         if self.point_in_polygon_demo(A):
-            self.intersection_sommets_demo(event)
-            # self.rayon_obsatcles_demo(event)
+            # self.intersection_sommets_demo(event)
+            self.rayon_obsatcles_demo(event)
 
     def point_in_polygon_demo(self, A, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
@@ -594,7 +594,8 @@ class Application():
         demo = True  # Pour controler le paramètre manuellement
         # Suppression de la précédente source lumineuse
         self.cnv.delete('light')
-        self.cnv3d.delete('light')
+        if self.three_dim:
+            self.cnv3d.delete('light')
         # Affichage de la source lumineuse en jaune
         self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
                              event.y+size, fill='yellow', tag='light')
@@ -602,7 +603,7 @@ class Application():
         # renseignés dans self.d_to_check et le segment [AB]. Celui-ci
         # de longeur 1 est le départ des rayons de la source
         A = (event.x, event.y)
-        B = (A[0]+1, A[1])
+        B = (A[0]+2, A[1]+1)
         # Pour le nombre de rayon demandés
         for i in range(self.nbrayons):
             # On cherche toutes les intersections avec les segments renseignés
@@ -615,7 +616,7 @@ class Application():
                     # segment [AB]
                     if dist(I, A) > dist(I, B):
                         # Si oui on l'ajoute à la liste
-                        inter.append([dist(I, A), I])
+                        inter.append([dist(I, A), I, d])
             # Si aucun point d'intersection n'est trouvé
             if not inter:
                 # On trace un segment rouge pour contrôle visuel
@@ -627,6 +628,7 @@ class Application():
                 # On cherche le point d'intersection le plus proche du point A
                 I_p = min(inter)
                 I = I_p[1]
+                wall = I_p[2]
                 # Si le mode de demo est activé on dessine ce point
                 # d'intersection
                 if demo:
@@ -643,21 +645,35 @@ class Application():
                 # Dans tous les cas on dessine le rayon lumineux jusqu'au
                 # point d'intersection
                 self.cnv.create_line(A, I, fill='yellow', tag='light')
-                distanceM = dist(A, I)
-                self.draw3d(distanceM, angleT)
+                if self.three_dim:
+                    distanceM = dist(A, I)
+                    self.draw3d(distanceM, angleT, wall)
             # On passe au rayon suivant en effectuant une rotation du point B
             B = self.rotation(A, B, angle)
             angleT += angle
         
-    def draw3d(self, distanceM, angle):
-        # 320x160 --> 600x400
-        distanceM *= math.cos((angle-30) * math.pi/180) # deg to rad
+    def draw3d(self, distanceM, angle, wall):
+        # Correction de l'effet fisheye
+        distanceM *= math.cos((angle-30) * math.pi/180)
         lineH = 10*self.width / distanceM
         if lineH > self.width:
             lineH = self.width
         lineOff = self.height // 2 - lineH // 2
-        self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                lineOff+lineH, width=10, fill='black', tag='light')
+        # Rangement des points du mur
+        if wall[0][0] > wall[1][0]:
+            wall[0], wall[1] = wall[1], wall[0]
+        # Éclairage
+        if (wall[1][0] - wall[0][0]) != 0:
+            wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
+            if wall_pente < 1 and wall_pente > -1:
+                self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                lineOff+lineH, width=2, fill='grey20', tag='light')
+            else:
+                self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                lineOff+lineH, width=2, fill='grey30', tag='light')
+        else:
+            self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                lineOff+lineH, width=2, fill='grey30', tag='light')
 
     def aire_polygon(self):
         sommeX_Y1 = 0
@@ -724,7 +740,7 @@ class Application():
             self.nbd = 0
 
 
-Application(600, 400)
+Application(600, 400, three_dim=True)
 
 '''v = (e[1][0] - e[0][0], e[1][1] - e[0][1])
 cosinus = sc(u, v)/(norme(u)*norme(v))
