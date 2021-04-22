@@ -111,4 +111,5 @@ if __name__ == '__main__':
     cnv.pack()
     boutton = tk.Button(wnd, text="angle", command= lambda droite_list=droite_list, cnv=cnv : intersection(droite_list[0], droite_list[1], cnv)).pack(side=tk.BOTTOM)
     cnv.bind('<1>', droite)
+    wnd.bind
     wnd.mainloop()

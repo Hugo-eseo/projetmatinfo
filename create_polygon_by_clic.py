@@ -64,6 +64,7 @@ def polygon_by_txt(cnv):
 def draw(cnv):
     global coords_list, segments_list, corner_list
     if len(coords_list) >= 3:
+        print(coords_list)
         # 3 points minimum pour un polygone
         cnv.delete('all')
         cnv.create_polygon(coords_list, fill='grey', outline='black')
@@ -292,8 +293,9 @@ def delete_all(cnv):
     coords_list.clear()
 
 def monte_carlo(segment_list, width, height):
+    # faible valeur de confiance mais drole
     cpt = 0
-    iterations = 100000
+    iterations = 10000
     for i in range(iterations):
         x, y = random.randint(0, width), random.randint(0, height)
         if point_in_polygon((x, y), segments_list):
@@ -302,6 +304,19 @@ def monte_carlo(segment_list, width, height):
     surface_cnv = width * height
     surface_poly = surface_cnv * ratio 
     print(surface_poly)
+
+def aire_polygon(corner_list):
+    # très precis
+    sommeX_Y1 = 0
+    sommeY_X1 = 0
+    for i in range(len(corner_list)):
+        if i+1 == len(corner_list):
+            sommeX_Y1 += corner_list[i][0] * corner_list[0][1]
+            sommeY_X1 += corner_list[i][1] * corner_list[0][0]
+        else:
+            sommeX_Y1 += corner_list[i][0] * corner_list[i+1][1]
+            sommeY_X1 += corner_list[i][1] * corner_list[i+1][0]
+    print(abs(0.5*(sommeX_Y1-sommeY_X1)))
 
 if __name__ == '__main__':
     # initialisation
@@ -326,6 +341,7 @@ if __name__ == '__main__':
     delete_all_button = tk.Button(wnd, command=lambda: delete_all(cnv), text='Delete all').pack(side=tk.BOTTOM)
     # boutton surface polygone par monte carlo
     monte_carlo_button = tk.Button(wnd, command=lambda: monte_carlo(segments_list, width, height), text='Monte-Carlo').pack(side=tk.RIGHT)
+    aire_button = tk.Button(wnd, command=lambda: aire_polygon(corner_list), text='Aire').pack(side=tk.RIGHT)
     # reglages des clics de la souris, <2> correspond au clic mollette pour windows, si le clic droit est souhaité il faut changer par <3> 
     cnv.bind('<1>', lambda event, cnv=cnv: polygon_by_clic(event, cnv))
     cnv.bind('<Button-2>', lambda event, cnv=cnv: guardian_by_clic(event, cnv, segments_list))
