@@ -8,6 +8,8 @@ import tkinter as tk
 import random
 import math
 
+import point_in_polygon as pip
+
 # Partie 1 : fonctions mathématiques
 
 
@@ -183,7 +185,7 @@ class Application():
                                 (415, 277), (481, 272), (482, 316), (530, 315),
                                 (528, 225), (413, 227), (406, 162), (463, 158),
                                 (460, 116), (495, 111), (496, 65), (542, 64),
-                                (541, 21), (456, 21), (457, 81), (430, 81), (416, 81),
+                                (541, 21), (456, 21), (457, 81), (416, 81),
                                 (416, 120), (369, 122), (319, 123), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
@@ -375,11 +377,13 @@ class Application():
 
     def clic_source_lumière_demo(self, event):
         A = (event.x, event.y)
-        if self.point_in_polygon_demo(A):
+        '''if self.point_in_polygon_demo(A, True):
             # self.intersection_sommets_demo(event)
+            self.rayon_obsatcles_demo(event)'''
+        if pip.point_in_polygon(A, self.sommets_polygon, self.cnv, True):
             self.rayon_obsatcles_demo(event)
 
-    def point_in_polygon_demo(self, A, demo=False):
+    def point_in_polygon_demo(self, A, exclude_seg=False, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
         polygon dessiné. Prend un paramètre supplémentaire demo pour
         l'affichage ou non des données de construction"""
@@ -424,6 +428,21 @@ class Application():
             nbsommets = 0
         # On parcours la liste des segments du polygon
         for d in self.d_to_check:
+            if exclude_seg:
+                # Si le point se trouve sur le segment, on le considère comme
+                # a l'extérieur du polygon
+                if pointapts(A, d[0], d[1]):
+                    if demo:
+                        self.cnv.delete("demo")
+                        for i in range(1, self.nbI+1):
+                            tag = "Text" + str(i)
+                            self.cnv.delete(tag)
+                        self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
+                                             A[1]+size, fill='green', tag='demo')
+                        print("#############################################")
+                        print("Point appartient au segment :", d)
+                        print("Fin de l'algorithme")
+                    return False
             # On cherche si il y a une intersection avec la droite horizontale
             # On souhaite cette fois-ci que le point d'intersection
             # appartienne aux deux segments, d'où l'argument True (cf fonction)
@@ -635,7 +654,7 @@ class Application():
         size = 4
         # Angle pour la rotation
         angle = 360/self.nbrayons
-        demo = True  # Pour controler le paramètre manuellement
+        # demo = True  # Pour controler le paramètre manuellement
         # Suppression de la précédente source lumineuse
         self.cnv.delete('light')
         # Affichage de la source lumineuse en jaune
@@ -675,7 +694,6 @@ class Application():
                 if demo:
                     if inter.count(I_p) > 1:
                         color = 'green'
-                        print(inter.count(I_p))
                         self.cnv.create_oval(I[0]-size, I[1]-size, I[0]+size,
                                              I[1]+size, fill=color,
                                              tag='light')
