@@ -98,6 +98,7 @@ class Application():
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
                 'Y', 'Z']
+    nbI = 0
 
     def __init__(self, width, height):
         """Prend en argument :
@@ -182,7 +183,7 @@ class Application():
                                 (415, 277), (481, 272), (482, 316), (530, 315),
                                 (528, 225), (413, 227), (406, 162), (463, 158),
                                 (460, 116), (495, 111), (496, 65), (542, 64),
-                                (541, 21), (456, 21), (457, 81), (416, 81),
+                                (541, 21), (456, 21), (457, 81), (430, 81), (416, 81),
                                 (416, 120), (369, 122), (319, 123), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
@@ -393,6 +394,9 @@ class Application():
         # Si mode de demo: affichage du point sur le clic de l'utilisateur
         if demo:
             self.cnv.delete("demo")
+            for i in range(1, self.nbI+1):
+                tag = "Text" + str(i)
+                self.cnv.delete(tag)
             self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
                                  A[1]+size, fill='green', tag='demo')
             # Compte le nombre d'intersections
@@ -413,6 +417,7 @@ class Application():
         # diminue, ou n'influence pas le winding number. Le résultat
         # de la précédente intersection est conservé dans cette varibale
         result = 0
+        tag = 'Text'
         if demo:
             # Compte le nombre de sommets étant point d'intersection
             # pour affichage ultérieur dans la console
@@ -488,10 +493,10 @@ class Application():
                         # horizontale: dans ce cas seul compte l'orientation
                         # du deuxième segment
                         if signe(D[1]-I[1]) == 0:
-                            if signe(E[1]-I[1]) == 1:
+                            if signe(E[1]-I[1]) == 1 or signe(E[1]-I[1]) == 0:
                                 ignore = True
                         elif signe(E[1]-I[1]) == 0:
-                            if signe(D[1]-I[1]) == 1:
+                            if signe(D[1]-I[1]) == 1 or signe(D[1]-I[1]) == 0:
                                 ignore = True
                         # Si ces deux points sont tous les deux au dessus ou
                         # en dessous de I, le sommet doit être ignoré dans le
@@ -504,6 +509,7 @@ class Application():
                         if ignore:
                             wn -= result
                             if demo:
+                                self.cnv.itemconfig(tag, text='0')
                                 print("Sommet ignoré")
                         # Dans tous les cas (où il s'agit d'un sommet),
                         # on passe au segment suivant
@@ -537,24 +543,26 @@ class Application():
                                 result = 0
                         # On mémorise le segment précédent
                         e = d
+                        if demo:
+                            print("Résultat : ", result)
+                            print("Wining number : ", wn)
+                            tag = "Text" + str(nbI)
+                            # Affichage du résultat de chaque intersection
+                            self.cnv.create_text(I[0], I[1]+10, text=result,
+                                                 tag=tag)
                     # Pour le deuxième tour de boucle si 2 intersections
                     # sont à traiter
                     if I1 is not None:
                         I = I1
                         I1 = None
 
-                if demo:
-                    print("Résultat : ", result)
-                    print("Wining number : ", wn)
-                    # Affichage du résultat de chaque intersection
-                    self.cnv.create_text(I[0], I[1]+10, text=result,
-                                         tag='demo')
         if demo:
             print("#############################################")
             print("Nombre total de sommets détécté : ", nbsommets)
             print("Nombre d'intersections : ", nbI)
             print("Winding number final : ", wn)
             print("Liste des intersections : ", interliste)
+            self.nbI = nbI
         # Si le winding number est différent de 0, alors le point se trouve
         # dans le polygon
         if wn != 0:
