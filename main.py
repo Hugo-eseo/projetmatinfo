@@ -63,8 +63,10 @@ def vect(u, v):
 
 def pointapts(A, A1, A2):
     """Renvoie True si le point A appartient au segment [A1;A2]"""
-    return math.isclose(dist(A, A1) + dist(A, A2), dist(A1, A2), rel_tol=0.01)
-
+    if det3pts(A, A1, A2) == 0:
+        return math.isclose(dist(A, A1) + dist(A, A2), dist(A1, A2), rel_tol=0.01)
+    else:
+        return False
 
 def inter2d(A1, A2, B1, B2, requireInt=False):
     """Renvoie les coordonnées du point d'intersection de 2 droites définies
@@ -107,7 +109,7 @@ class Application():
         # Création de la fenêtre, du canvas et de la frame de commande
         self.width, self.height = width, height
         self.three_dim = three_dim
-        self.loc_gardien = None
+        self.loc_gardien, self.angle_facing = [], 0
         self.wnd = tk.Tk()
         self.wnd.title("Galerie d'art - Demonstrateur")
         if self.three_dim:
@@ -169,7 +171,7 @@ class Application():
                                 (416, 120), (369, 122), (319, 123), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
-        self.lancement_preset()
+        self.lancement_preset(mechant=True)
 
     def preset2(self):
         """Preset 2"""
@@ -180,9 +182,13 @@ class Application():
                                 (118, 115)]
         self.lancement_preset()
     
-    def polygon_random(self):
+    def polygon_random(self, full_random=True):
+        """ Crée un polygone aléatoire avec un nombre de points defini"""
         liste_points, random_polygon, self.sommets_polygon = [], [], []
-        nb_points = 30
+        if full_random:
+            nb_points = random.randint(3, 50)
+        else:
+            nb_points = 30
         for i in range(nb_points):
             liste_points.append((random.randint(1, self.width-1), random.randint(1, self.height-1)))
         C = (self.width//2, self.height//2)
@@ -195,20 +201,32 @@ class Application():
         if not self.point_in_polygon_demo(C):
             self.polygon_random()
         
-    def lancement_preset(self):
+    def lancement_preset(self, mechant=False):
         """Dessin du polygon défini par les preset"""
         self.d_to_check = []
         self.cnv.delete(tk.ALL)
+        couleur = ('')
         self.cnv.create_polygon(self.sommets_polygon, fill='grey')
         # Mémorisation des segments
         for i in range(len(self.sommets_polygon)):
             if i > 0:
                 A = self.sommets_polygon[i]
                 B = self.sommets_polygon[i-1]
-                self.d_to_check.append([B, A])
+                if i > 5 and i < 9:
+                    self.d_to_check.append([B, A, 'coloré'])
+                else:
+                    self.d_to_check.append([B, A])
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
+        if mechant:
+            mechant = (300, 300)
+            taille_mechant = 5
+            self.cnv.create_rectangle(mechant[0]-taille_mechant, mechant[1]-taille_mechant, mechant[0]+taille_mechant, mechant[1]+taille_mechant, fill='red')
+            self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]+taille_mechant), 'mechant'])
+            self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]+taille_mechant), 'mechant'])
+            self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]-taille_mechant), 'mechant'])
+            self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]-taille_mechant), 'mechant'])
         self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
         self.reset_button.config(command=self.demo3)
 
@@ -403,7 +421,7 @@ class Application():
         # Winding number
         # Utilisé pour déterminer si un point est dans le polygon ou non
         wn = 0
-        demo = True  # Pour controler le paramètre manuellement
+        demo = False  # Pour controler le paramètre manuellement
         # Si mode de demo: affichage du point sur le clic de l'utilisateur
         if demo:
             self.cnv.delete("demo")
@@ -587,18 +605,18 @@ class Application():
         """Demo : intersection rayon lumineux contre des obstacles
         Prend un paramètre supplémentaire demo pour l'affichage ou non
         des points d'intersection"""
-        """
-        self.wnd.bind('<z>', self.move_up)
-        self.wnd.bind('<s>', self.move_down)
-        self.wnd.bind('<d>', self.move_right)
-        self.wnd.bind('<q>', self.move_left)
-        """
+
+        self.wnd.bind('<Up>', self.move_up)
+        self.wnd.bind('<Down>', self.move_down)
+        self.wnd.bind('<Left>', self.turn_left)
+        self.wnd.bind('<Right>', self.turn_right)
+        
         # Taille des points d'intersection
         size = 4
         # Angle pour la rotation
         angle = 60/self.nbrayons
         angleT = 0
-        demo = True  # Pour controler le paramètre manuellement
+        demo = False  # Pour controler le paramètre manuellement
         # Suppression de la précédente source lumineuse
         self.cnv.delete('light')
         if self.three_dim:
@@ -608,11 +626,14 @@ class Application():
         # de longeur 1 est le départ des rayons de la source
         if self.loc_gardien is None or key is False:
             self.loc_gardien = [event.x, event.y]
-        B = (self.loc_gardien[0]+1, self.loc_gardien[1]-2)    # besoin de faire un changement pour avoir la mesure en degres entre A et le placement de B. 
+        # besoin de faire un changement pour avoir la mesure en degres entre A et le placement de B.
+        B = (self.loc_gardien[0]+1, self.loc_gardien[1])
+        B = self.rotation(self.loc_gardien, B, self.angle_facing-30)   
         # Pour le nombre de rayon demandés
         for i in range(self.nbrayons):
             # On cherche toutes les intersections avec les segments renseignés
             inter = []
+            wall_list = []
             for d in self.d_to_check:
                 I = inter2d(d[0], d[1], self.loc_gardien, B)
                 # Si il y a un point d'intersection
@@ -621,7 +642,8 @@ class Application():
                     # segment [AB]
                     if dist(I, self.loc_gardien) > dist(I, B):
                         # Si oui on l'ajoute à la liste
-                        inter.append([dist(I, self.loc_gardien), I, d])
+                        inter.append([dist(I, self.loc_gardien), I])
+                        wall_list.append([dist(I, self.loc_gardien), d])
             # Si aucun point d'intersection n'est trouvé
             if not inter:
                 # On trace un segment rouge pour contrôle visuel
@@ -633,7 +655,9 @@ class Application():
                 # On cherche le point d'intersection le plus proche du point A
                 I_p = min(inter)
                 I = I_p[1]
-                wall = I_p[2]
+                wall_list.sort()
+                wall = wall_list[0][1]
+
                 # Si le mode de demo est activé on dessine ce point
                 # d'intersection
                 if demo:
@@ -661,9 +685,12 @@ class Application():
             angleT += angle
         
     def draw3d(self, distanceM, angle, wall):
+        liste_couleurs = ['RoyalBlue1', 'RoyalBlue2', 'RoyalBlue3', 'RoyalBlue4']
+        couleur1 = random.choice(liste_couleurs[0:2])
+        couleur2 = random.choice(liste_couleurs[2:4])
         # Correction de l'effet fisheye
         distanceM *= math.cos((angle-30) * math.pi/180)
-        lineH = 10*self.width / distanceM
+        lineH = 30*self.width / distanceM
         if lineH > self.width:
             lineH = self.width
         lineOff = self.height // 2 - lineH // 2
@@ -671,17 +698,43 @@ class Application():
         if wall[0][0] > wall[1][0]:
             wall[0], wall[1] = wall[1], wall[0]
         # Éclairage
-        if (wall[1][0] - wall[0][0]) != 0:
-            wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
-            if wall_pente < 1 and wall_pente > -1:
-                self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                lineOff+lineH, width=2, fill='grey20', tag='light')
+        if len(wall) == 3:
+            if wall[2] == 'mechant':
+                if (wall[1][0] - wall[0][0]) != 0:
+                    wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
+                    if wall_pente < 1 and wall_pente > -1:
+                        self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill=couleur2, tag='light')
+                    else:
+                        self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill=couleur1, tag='light')
+                else:
+                    self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill=couleur1, tag='light')
+            elif wall[2] == 'coloré':
+                if (wall[1][0] - wall[0][0]) != 0:
+                    wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
+                    if wall_pente < 1 and wall_pente > -1:
+                        self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill='red2', tag='light')
+                    else:
+                        self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill='red', tag='light')
+                else:
+                    self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                        lineOff+lineH, width=2, fill='red', tag='light')
+        else:
+            if (wall[1][0] - wall[0][0]) != 0:
+                wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
+                if wall_pente < 1 and wall_pente > -1:
+                    self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                    lineOff+lineH, width=2, fill='grey20', tag='light')
+                else:
+                    self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
+                                    lineOff+lineH, width=2, fill='grey30', tag='light')
             else:
                 self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                lineOff+lineH, width=2, fill='grey30', tag='light')
-        else:
-            self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                lineOff+lineH, width=2, fill='grey30', tag='light')
+                                    lineOff+lineH, width=2, fill='grey30', tag='light')
 
     def aire_polygon(self):
         sommeX_Y1 = 0
@@ -748,36 +801,34 @@ class Application():
             self.nbd = 0
 
     def move_up(self, event):
-        self.loc_gardien[1] -= 10
-        loc = self.loc_gardien
-        if self.point_in_polygon_demo(loc):
+        self.loc_gardien[1] -= math.sin(self.angle_facing * math.pi/180) * 5
+        self.loc_gardien[0] += math.cos(self.angle_facing * math.pi/180) * 5
+        if self.point_in_polygon_demo(self.loc_gardien):
             self.rayon_obsatcles_demo(event, key=True)
         else:
-            self.loc_gardien[1] += 10
+            self.loc_gardien[1] += math.sin(self.angle_facing * math.pi/180) * 5
+            self.loc_gardien[0] -= math.cos(self.angle_facing * math.pi/180) * 5
     
     def move_down(self, event):
-        self.loc_gardien[1] += 10
-        loc = self.loc_gardien
-        if self.point_in_polygon_demo(loc):
+        self.loc_gardien[1] += math.sin(self.angle_facing * math.pi/180) * 5
+        self.loc_gardien[0] -= math.cos(self.angle_facing * math.pi/180) * 5
+        if self.point_in_polygon_demo(self.loc_gardien):
             self.rayon_obsatcles_demo(event, key=True)
         else:
-            self.loc_gardien[1] -= 10
+            self.loc_gardien[1] -= math.sin(self.angle_facing * math.pi/180) * 5 
+            self.loc_gardien[0] += math.cos(self.angle_facing * math.pi/180) * 5
+            
+    def turn_left(self, event):
+        self.angle_facing += 10
+        if self.angle_facing == 360:
+            self.angle_facing = 0
+        self.rayon_obsatcles_demo(event, key=True)
     
-    def move_right(self, event):
-        self.loc_gardien[0] += 10
-        loc = self.loc_gardien
-        if self.point_in_polygon_demo(loc):
-            self.rayon_obsatcles_demo(event, key=True)
-        else:
-            self.loc_gardien[0] -= 10
-    
-    def move_left(self, event):
-        self.loc_gardien[0] -= 10
-        loc = self.loc_gardien
-        if self.point_in_polygon_demo(loc):
-            self.rayon_obsatcles_demo(event, key=True)
-        else:
-            self.loc_gardien[0] += 10
+    def turn_right(self, event):
+        self.angle_facing -= 10
+        if self.angle_facing == -360:
+            self.angle_facing = 0
+        self.rayon_obsatcles_demo(event, key=True)
 
 Application(600, 400, three_dim=True)
 
