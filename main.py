@@ -63,10 +63,10 @@ def vect(u, v):
 
 def pointapts(A, A1, A2):
     """Renvoie True si le point A appartient au segment [A1;A2]"""
-    if det3pts(A, A1, A2) == 0:
-        return math.isclose(dist(A, A1) + dist(A, A2), dist(A1, A2), rel_tol=0.01)
-    else:
-        return False
+    #if det3pts(A, A1, A2) == 0:
+    return math.isclose(dist(A, A1) + dist(A, A2), dist(A1, A2), rel_tol=0.01)
+    #else:
+    #return False
 
 def inter2d(A1, A2, B1, B2, requireInt=False):
     """Renvoie les coordonnées du point d'intersection de 2 droites définies
@@ -115,10 +115,10 @@ class Application():
         if self.three_dim:
             self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
             self.cnv.pack(side=tk.LEFT)
-            self.cnv3d = tk.Canvas(self.wnd, width=self.width, height=self.height, bg='green')
+            self.cnv3d = tk.Canvas(self.wnd, width=self.width, height=self.height, bg='burlywood4')
             self.cnv3d.pack(side=tk.RIGHT)
             # Création du ciel
-            self.cnv3d.create_rectangle(0, 0, self.width+3, self.height//2, fill='lightblue', width=0)
+            self.cnv3d.create_rectangle(0, 0, self.width+3, self.height//2, fill='grey40', width=0)
             self.frm = tk.Frame(self.wnd, width=2*self.width, height=100)
             self.frm.pack(side=tk.BOTTOM)
         else:
@@ -220,14 +220,16 @@ class Application():
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
         if mechant:
-            mechant = (300, 300)
+            mechant_list = [(300, 300), (300, 200), (150, 350)]
             taille_mechant = 5
-            self.cnv.create_rectangle(mechant[0]-taille_mechant, mechant[1]-taille_mechant, mechant[0]+taille_mechant, mechant[1]+taille_mechant, fill='red')
-            self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]+taille_mechant), 'mechant'])
-            self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]+taille_mechant), 'mechant'])
-            self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]-taille_mechant), 'mechant'])
-            self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]-taille_mechant), 'mechant'])
-        self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
+            for i in range(len(mechant_list)):
+                mechant = mechant_list[i]
+                self.cnv.create_rectangle(mechant[0]-taille_mechant, mechant[1]-taille_mechant, mechant[0]+taille_mechant, mechant[1]+taille_mechant, fill='black')
+                self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]+taille_mechant), 'mechant'])
+                self.d_to_check.append([(mechant[0]-taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]+taille_mechant), 'mechant'])
+                self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]+taille_mechant), (mechant[0]+taille_mechant, mechant[1]-taille_mechant), 'mechant'])
+                self.d_to_check.append([(mechant[0]+taille_mechant, mechant[1]-taille_mechant), (mechant[0]-taille_mechant, mechant[1]-taille_mechant), 'mechant'])
+            self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
         self.reset_button.config(command=self.demo3)
 
     # Mode de démonstration 5
@@ -258,7 +260,7 @@ class Application():
 
     # Mode de démonstration 4
 
-    def intersection_sommets_demo(self, event, demo=True):
+    def intersection_sommets_demo(self, event, demo=False):
         """Docstring"""
         # Taille des points d'intersection
         size = 4
@@ -319,7 +321,7 @@ class Application():
                     self.cnv.create_text(I[0], I[1]+10, text=count, tag='light')
         self.polygone_eclairage(inter_in_order)
 
-    def find_status(self, I_p, inter, C, selfcall=False, demo=True):
+    def find_status(self, I_p, inter, C, selfcall=False, demo=False):
         size = 4
         for sommet in self.sommets_polygon:
             if math.isclose(sommet[0], I_p[1][0], rel_tol=0.01) and\
@@ -405,8 +407,8 @@ class Application():
         self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
 
     def clic_source_lumière_demo(self, event):
-        A = (event.x, event.y)
-        if self.point_in_polygon_demo(A):
+        self.loc_gardien = (event.x, event.y)
+        if self.point_in_polygon_demo(self.loc_gardien):
             # self.intersection_sommets_demo(event)
             self.rayon_obsatcles_demo(event)
 
@@ -690,7 +692,7 @@ class Application():
         couleur2 = random.choice(liste_couleurs[2:4])
         # Correction de l'effet fisheye
         distanceM *= math.cos((angle-30) * math.pi/180)
-        lineH = 30*self.width / distanceM
+        lineH = 30 * self.width / distanceM
         if lineH > self.width:
             lineH = self.width
         lineOff = self.height // 2 - lineH // 2
@@ -704,13 +706,13 @@ class Application():
                     wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
                     if wall_pente < 1 and wall_pente > -1:
                         self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                        lineOff+lineH, width=2, fill=couleur2, tag='light')
+                                        lineOff+lineH, width=2, fill='grey4', tag='light')
                     else:
                         self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                        lineOff+lineH, width=2, fill=couleur1, tag='light')
+                                        lineOff+lineH, width=2, fill='grey9', tag='light')
                 else:
                     self.cnv3d.create_line((self.width-1)-angle*10, lineOff, (self.width-1)-angle*10,
-                                        lineOff+lineH, width=2, fill=couleur1, tag='light')
+                                        lineOff+lineH, width=2, fill='grey9', tag='light')
             elif wall[2] == 'coloré':
                 if (wall[1][0] - wall[0][0]) != 0:
                     wall_pente = (wall[1][1] - wall[0][1]) / (wall[1][0] - wall[0][0])
