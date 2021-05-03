@@ -69,7 +69,7 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
 
     # On parcours la liste des segments du polygon
     for segment in liste_segments_polygon:
-        # Si le point appartien à un segment du polygon, il n'est donc pas
+        # Si le point appartient à un segment du polygon, il n'est donc pas
         # considéré comme appartenant au polygon
         if point_appartient_segment(O, segment):
             return False
