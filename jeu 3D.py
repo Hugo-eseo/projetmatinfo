@@ -167,7 +167,6 @@ def dessiner_rayon_2D(cnv, carte):
         else:
             distance_max = distance_horizontale
             # cnv.create_line(joueur_x, joueur_y, x_horizontal, y_horizontal, fill="yellow", width=3, tag='joueur')
-        
 
         angle_projection = angle_joueur - angle_rayon
         if angle_projection > 2*math.pi:
@@ -175,6 +174,7 @@ def dessiner_rayon_2D(cnv, carte):
         if angle_projection < 0:
             angle_projection += 2*math.pi
         
+        # dessin des murs
         distance_max *= math.cos(angle_projection)
         ratio = 50 * 512 / distance_max 
         if ratio > 530:
@@ -351,5 +351,3 @@ wnd.bind("<Right>", turn_right)
 wnd.bind("<Left>", turn_left)
 
 wnd.mainloop()
-
-    

@@ -7,6 +7,8 @@ Created on Mon Apr  5 17:23:28 2021
 import tkinter as tk
 import random
 import math
+from PIL import Image, ImageDraw
+import numpy as np
 
 # Partie 1 : fonctions mathématiques
 
@@ -171,7 +173,7 @@ class Application():
                                 (416, 120), (369, 122), (319, 123), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
-        self.lancement_preset(mechant=True)
+        self.lancement_preset(mechant=False)
 
     def preset2(self):
         """Preset 2"""
@@ -188,7 +190,7 @@ class Application():
         if full_random:
             nb_points = random.randint(3, 50)
         else:
-            nb_points = 30
+            nb_points = 4
         for i in range(nb_points):
             liste_points.append((random.randint(1, self.width-1), random.randint(1, self.height-1)))
         C = (self.width//2, self.height//2)
@@ -204,6 +206,7 @@ class Application():
     def lancement_preset(self, mechant=False):
         """Dessin du polygon défini par les preset"""
         self.d_to_check = []
+        matrice = [[0 for i in range(600)] for j in range(400)]
         self.cnv.delete(tk.ALL)
         couleur = ('')
         self.cnv.create_polygon(self.sommets_polygon, fill='grey')
@@ -219,6 +222,18 @@ class Application():
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
+
+        # recuperer la matrice de la carte
+        image = Image.new("RGB", (600, 400), color=(255,255,255))
+        polygone = ImageDraw.Draw(image)
+        polygone.polygon(self.sommets_polygon, fill="black")
+        matrice = np.asarray(image.convert('L'))
+        np.savetxt("P2/projetmatinfo/fichier.txt", matrice, fmt='%3d')
+
+        f = open('P2/projetmatinfo/fichier2.txt','w')
+        f.write(str(self.sommets_polygon))
+        f.close()
+
         if mechant:
             mechant_list = [(300, 300), (300, 200), (150, 350)]
             taille_mechant = 5
@@ -359,7 +374,7 @@ class Application():
         self.d_to_check = []
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.dessin_polygone_demo)
-        self.cnv.bind('<Button-3>', self.fin_dessin_polygone)
+        self.cnv.bind('<Button-2>', self.fin_dessin_polygone)
 
     def dessin_polygone_demo(self, event):
         """Pour chaque clic, on dessine le point correspondant"""
@@ -403,9 +418,9 @@ class Application():
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
         self.cnv.delete('pts')
-        self.cnv.unbind('<Button-3>')
+        self.cnv.unbind('<Button-2>')
         self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
-
+    
     def clic_source_lumière_demo(self, event):
         self.loc_gardien = (event.x, event.y)
         if self.point_in_polygon_demo(self.loc_gardien):
@@ -561,7 +576,7 @@ class Application():
                            [(0, self.height), (self.width, self.height)]]
 
         self.cnv.bind('<Button-1>', self.rayon_obsatcles_demo)
-        self.cnv.unbind('<Button-3>')
+        self.cnv.unbind('<Button-2>')
         self.reset_button.config(command=self.demo2)
 
         # On dessine le nombre obstable demandé
@@ -762,7 +777,7 @@ class Application():
         self.reset_button.config(command=self.reset)
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.intersection_deux_droites_demo)
-        self.cnv.unbind('<Button-3>')
+        self.cnv.unbind('<Button-2>')
 
     def intersection_deux_droites_demo(self, event):
         """Demo : Machine à état pour le dessin des droites"""
