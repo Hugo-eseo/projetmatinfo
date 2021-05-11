@@ -44,27 +44,28 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
     liste_segments_polygon.append(segment_classe(A, B))
 
     # Création d'une liste contenant les sommets du polygon
-    liste_sommets_polygon = polygon
+    liste_sommets_polygon = list()
+    for point in polygon:
+        liste_sommets_polygon.append(point_classe(point[0], point[1]))
 
     # Le point O est le point où l'on souhaite connaître le polygon d'éclairage
     O = point_classe(start_point[0], start_point[1])
 
-    # Suppression de la précédente source lumineuse
-    canvas.delete('light')
-    # Affichage de la source lumineuse en jaune
-    canvas.create_oval(O.x-size, O.y-size, O.x+size, O.y+size, fill='white',
-                       tag='light')
-
-    # Liste des points d'intersections avec les sommets du polygon
-    liste_intersections = list()
+    if mode_demo:
+        # Affichage de la source lumineuse en jaune
+        canvas.create_oval(O.x-size, O.y-size, O.x+size, O.y+size,
+                           fill='white', tag='demo')
 
     # Liste des intersections définitives avec leur status
     liste_intersections_def = list()
 
-    for sommet in liste_sommets_polygon():
+    for sommet in liste_sommets_polygon:
+        # Liste des points d'intersections avec les sommets du polygon
+        liste_intersections = list()
+
         # On cherche toutes les intersections avec les segments du polygon
         segment_sommet = segment_classe(O, sommet)
-        for segment in liste_segments_polygon():
+        for segment in liste_segments_polygon:
             I = intersection_segments(segment_sommet, segment)
             # Si il y a un point d'intersection
             if I is not None:
@@ -87,7 +88,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # On parcours une seconde fois la liste des sommets du polygon
             # En vérité, cela n'est utile que dans le cas où l'on fait
             # plusieurs tours de boucle
-            for sommet in liste_sommets_polygon():
+            for sommet in liste_sommets_polygon:
                 # Si l'intersection est un sommet
                 if point_egaux(I, sommet) and not point_suivant_in_polygon:
                     # Si il ne s'agit pas d'une projection
@@ -118,20 +119,41 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
                 I = min_intersection[1]
                 status = "BEYOND"
 
+    if mode_demo:
+        for intersection in liste_intersections_def:
+            I = intersection[0]
+            canvas.create_line(O.x, O.y, I.x, I.y,
+                               fill='white', tag='demo')
+            if intersection[1] == 'AHEAD':
+                continue
+            elif intersection[1] == 'EQUALS':
+                color = 'green'
+            else:
+                color = 'blue'
+            canvas.create_oval(I.x-size, I.y-size, I.x+size, I.y+size,
+                               fill=color, tag='demo')
+
     # Liste des intersections dans l'ordre
     liste_intersections_ordones = list()
     count = 0
     # Une fois toutes les intersections trouvés
-    for segment in liste_segments_polygon():
+    for segment in liste_segments_polygon:
         intersections_sur_segment = list()
         for intersection in liste_intersections_def:
             I = intersection[0]
             if point_appartient_segment(I, segment):
-                intersections_sur_segment.append([dist(segment.A, I), intersection])
+                if not intersection[1] == "AHEAD":
+                    intersections_sur_segment.append([dist(segment.A, I), intersection])
+                else:
+                    liste_intersections_def.remove(intersection)
         if not intersections_sur_segment:
             continue
         intersections_sur_segment.sort()
-        for intersection in intersections_sur_segment():
-            count+=1
-            liste_intersections_ordones.append(intersection)
-            
+        for intersection in intersections_sur_segment:
+            count += 1
+            I = (intersection[1][0].x, intersection[1][0].y)
+            liste_intersections_ordones.append(I)
+            liste_intersections_def.remove(intersection[1])
+            if mode_demo:
+                canvas.create_text(I[0], I[1]-10, text=count, tag='demo')
+    return liste_intersections_ordones
