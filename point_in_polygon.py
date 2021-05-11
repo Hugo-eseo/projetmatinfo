@@ -22,30 +22,51 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
     'polygon'. False sinon (segments et sommets du polygon sont considérés
     comme à l'extérieur')
     Retourne None en cas d'erreur"""
-
+        
     # Vérifications élémentaires
     if not (type(point_to_check) == tuple or type(point_to_check) == list):
         return None
     if not (len(point_to_check) == 2):
         return None
-
+    
     canvas.delete("demo")
     # Récupération des informations de la fenêtre
     width = canvas.winfo_width()
 
     # Création d'une liste contenant les segments du polygon
     liste_segments_polygon = list()
-    A = point_classe(polygon[0][0], polygon[0][1])
-    for i in range(1, len(polygon)):
-        B = point_classe(polygon[i][0], polygon[i][1])
+
+    # separation entre objet et tuple/list
+    if type(polygon[0]) is tuple or type(polygon[0]) is list:
+        A = point_classe(polygon[0][0], polygon[0][1])
+    else:
+        A = polygon[0]
+
+    # verification de base
+    if type(polygon[0]) is point_classe:
+        for i in range(1, len(polygon)):
+            if type(polygon[i]) is tuple or type(polygon[i]) is list:
+                B = point_classe(polygon[i][0], polygon[i][1])
+            else:
+                B = polygon[i]
+            if type(B) is point_classe:
+                liste_segments_polygon.append(segment_classe(A, B))
+                A = B
+            else:
+                break
+    if type(polygon[0]) is tuple or type(polygon[0]) is list:
+        B = point_classe(polygon[0][0], polygon[0][1])
+    else:
+        B = polygon[0]
+    if type(B) is point_classe:
         liste_segments_polygon.append(segment_classe(A, B))
-        A = B
-    B = point_classe(polygon[0][0], polygon[0][1])
-    liste_segments_polygon.append(segment_classe(A, B))
 
     # Le point 0 dans tout l'algorithme correspond au point
     # dont nous souhaitons savoir si il est dans le poylgon
-    O = point_classe(point_to_check[0], point_to_check[1])
+    if type(polygon[0]) is tuple or type(polygon[0]) is list:
+        O = point_classe(point_to_check[0], point_to_check[1])
+    else:
+        O = point_to_check
 
     # Cette fonction se base sur l'algorithme présenté dans cet article
     # https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119
