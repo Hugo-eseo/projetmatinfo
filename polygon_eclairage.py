@@ -84,13 +84,16 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # On cherche le point juste après le sommet sur la même demi-droite
             point_suivant = point_classe(I.x + (sommet.x - O.x)/dist(sommet, O),
                                          I.y + (sommet.y - O.y)/dist(sommet, O))
+            canvas.create_oval(point_suivant.x-size, point_suivant.y-size, point_suivant.x+size, point_suivant.y+size,
+                               fill='purple', tag='demo')
             point_suivant_in_polygon = point_in_polygon(point_suivant, polygon, canvas)
             # On parcours une seconde fois la liste des sommets du polygon
             # En vérité, cela n'est utile que dans le cas où l'on fait
             # plusieurs tours de boucle
             for sommet in liste_sommets_polygon:
                 # Si l'intersection est un sommet
-                if point_egaux(I, sommet) and not point_suivant_in_polygon:
+                print(point_suivant_in_polygon)
+                if point_egaux(I, sommet) and not point_suivant_in_polygon: # Problème vient d'ici !! Fonction point in polygon
                     # Si il ne s'agit pas d'une projection
                     if status is None:
                         # Le statut est donc "EQUALS"
@@ -118,6 +121,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
                 min_intersection = min(liste_intersections)
                 I = min_intersection[1]
                 status = "BEYOND"
+                print("Hello world")
 
     if mode_demo:
         for intersection in liste_intersections_def:
