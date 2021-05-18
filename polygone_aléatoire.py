@@ -10,7 +10,9 @@ def polygone_aleatoire(nombre_de_points, canvas):
     """
     Arguments : 
         - nombre_de_points : si None, le polygone à un nombre de points aleatoire compris entre 3 et 50
-                             sinon, le polygone à un nombre defini de points 
+                             sinon, le polygone à un nombre defini de points
+        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
+                   dessiné 
     Affiche :
         - un polygone connexe avec le nombre de points pris en argument
     Retourne :

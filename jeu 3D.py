@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# @author : ArthurM 
+
 import tkinter as tk
 import math
 

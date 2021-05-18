@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+# @author : ArthurM 
+
 from shared import point_classe
 import time
 
