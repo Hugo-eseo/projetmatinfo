@@ -144,5 +144,43 @@ def angle_deux_points(A, O):
     angle = math.atan2(A.y - O.y, A.x - O.x)
     return angle
 
+def intersection_demi_droite_segment(demi_droite, segment):
+    """Arguments :
+        - demi_droite, segment : objet de classe 'segment'
+    Retourne le point d'intersection entre la demi_droite (définie par le
+    premier point) et le segment. None si ils n'en ont pas."Infinite" si
+    ils en ont une infinité"""
+    a = determinant_3_points(demi_droite.A, demi_droite.B, segment.B)
+    b = determinant_3_points(demi_droite.B, demi_droite.A, segment.A)
+    # Si tous les points sont alignés
+    if a == 0 and b == 0:
+        # Il y a une infinité de points d'intersection
+        return 'Infinite'
+    # Si la demi-droite ou le segment est nul ou si ils sont parallèles
+    if a+b == 0:
+        return None
+    x = (a*segment.A.x + b*segment.B.x)/(a + b)
+    y = (a*segment.A.y + b*segment.B.y)/(a + b)
+    I = point_classe(x, y)
+    points_to_check = [demi_droite.A, demi_droite.B, segment.A, segment.B]
+    # Vérifie que le point d'intersection trouvé est sur la droite
+    if signe(a) != signe(b):
+        equal = False
+        # Cas où le point trouvé est un des points renseigné
+        for point in points_to_check:
+            if point_egaux(I, point):
+                equal = True
+        if not equal:
+            return None
+    # Vérifie que le point d'intersection se trouve sur la demi droite et non
+    # la droite seulement
+    if signe(I.y-demi_droite.A.y) != signe(demi_droite.B.y-demi_droite.A.y):
+        if signe(I.y-demi_droite.A.y) != signe(demi_droite.B.y-demi_droite.A.y):
+            return None
+    # Vérifie si le point appartient au segment
+    if point_appartient_segment(I, segment):
+        return I
+    return None
+
 if __name__ == "__main__":
     print(type(point_classe(0, 0)))

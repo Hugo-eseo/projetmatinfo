@@ -1,4 +1,5 @@
 import numpy as np
+from polygon_eclairage import polygon_eclairage
 
 # fonction de calcul de l'aire
 def aire_polygon(points_coords):
@@ -34,6 +35,7 @@ mutation_proba = 0.05
 pop_taille = 10
 ############################
 
+canvas = 0
 
 # creation d'une population de 10 individus ayant pour genome (x, y)
 pop = [] 
@@ -56,7 +58,7 @@ while pop_sorted[0][0]/aire_totale < seuil:
     # classer la population (fonction d'evaluation)
     pop_sorted = []
     for indiv in pop:
-        pop_sorted.append(aire_polygon(polygon_eclairage(gen1, liste_sommets), indiv))  # polygon_eclairage en cours de reecriture
+        pop_sorted.append(aire_polygon(polygon_eclairage(gen1, liste_sommets, canvas), indiv))  # polygon_eclairage en cours de reecriture
     pop_sorted.sort(reverse=True)
         
     # crossover (methode de la moyenne utilisée)
@@ -71,20 +73,20 @@ while pop_sorted[0][0]/aire_totale < seuil:
     # mutation
     for indiv in pop:
         if np.random.uniform(0, 1) < mutation_proba:
-        	dirX = np.random.randint(0, 1)
-        	dirY = np.random.randint(0, 1)
-        	if dirX == 1 and dirY ==1 :
-            indiv[0] += 5
-            indiv[1] += 5
-        elif dirX == 1 and dirY == 0 :
-            indiv[0] += 5
-            indiv[1] -= 5
-        elif dirX == 0 and dirY == 1 :
-            indiv[0] -= 5
-            indiv[1] += 5
-        else:
-            indiv[0] -= 5
-            indiv[1] -= 5
+            dirX = np.random.randint(0, 1)
+            dirY = np.random.randint(0, 1)
+            if dirX == 1 and dirY == 1:
+                indiv[0] += 5
+                indiv[1] += 5
+            elif dirX == 1 and dirY == 0:
+                indiv[0] += 5
+                indiv[1] -= 5
+            elif dirX == 0 and dirY == 1:
+                indiv[0] -= 5
+                indiv[1] += 5
+            else:
+                indiv[0] -= 5
+                indiv[1] -= 5
 
     # finir la nouvelle population
     for i in range(pop_taille//2):
