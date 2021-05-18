@@ -104,4 +104,4 @@ while pop_sorted[0][0]/aire_totale < seuil:
     if generation in generation_clef:
         seuil -= 5
 
-print(f"Une solution satisfaisante à {pop_sorted[0][0]} ({seuil}%) a été obtenue à la {generation}ème : {pop_sorted[0][1]}")
+print(f"Une solution satisfaisante à {pop_sorted[0][0]} ({seuil}%) a été obtenue à la {generation}ème generation: {pop_sorted[0][1]}")
