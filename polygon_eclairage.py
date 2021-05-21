@@ -74,14 +74,14 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # définie par O et le sommet et le segment considéré du polygon
             I = intersection_demi_droite_segment(segment_sommet, segment)
             # Dans le cas de points alignés
-            if I == "infinite":
+            if I == "Infinite":
                 # Le point d'intersections est celui le plus proche de O
                 liste = [[dist(O, segment.A), segment.A],
                          [dist(O, segment.B), segment.B]]
                 minimum = min(liste)
                 liste_intersections.append(minimum)
             # Si un point d'intersection existe
-            if I is not None:
+            elif I is not None:
                 # Les sommets étant détectés deux fois, on ne les compte qu'une
                 if liste_intersections.count([dist(O, I), I]) == 1:
                     continue
@@ -90,26 +90,36 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
 
         # Pour chaque sommet, une fois toutes les intersections trouvés,
         # on cherche la plus proche du point O
-        min_intersection = min(liste_intersections)
+        liste_intersections.sort()
+        min_intersection = liste_intersections[0]
+        I = min_intersection[1]
 
         # Un fois l'intersection la plus proche trouvée, il convient
         # d'identifier son status
         status_found = False
-        I = min_intersection[1]
         status = None
-
+        point_suivant = None
         # On cherche le statut du point d'intersection trouvé
         while not status_found:
             # Pour cela, on cherche tout d'abord le point juste après le
             # sommet sur la demi-droite
-            point_suivant =\
-                point_classe(I.x + (sommet.x - O.x)/dist(sommet, O),
-                             I.y + (sommet.y - O.y)/dist(sommet, O))
+            if len(liste_intersections) == 1:
+                point_suivant_in_polygon = False
+            else:
+                '''if status is not None:
+                    canvas.create_oval(point_suivant.x-size, point_suivant.y-size, point_suivant.x+size, point_suivant.y+size,
+                               fill="yellow")'''
+                a = liste_intersections[1][1].x
+                b = liste_intersections[1][1].y
+                a = (liste_intersections[1][1].x + I.x)/2
+                b = (liste_intersections[1][1].y + I.y)/2
+                point_suivant =\
+                    point_classe(a, b)
 
-            # On vérifie si ce dernier se situe dans le polygon
-            point_to_check = (point_suivant.x, point_suivant.y)
-            point_suivant_in_polygon =\
-                point_in_polygon(point_to_check, polygon, canvas)
+                # On vérifie si ce dernier se situe dans le polygon
+                point_to_check = (point_suivant.x, point_suivant.y)
+                point_suivant_in_polygon =\
+                    point_in_polygon(point_to_check, polygon, canvas)
 
             # On parcours une seconde fois la liste des sommets du polygon
             # pour savoir si le point d'intersection trouvé est un sommet
@@ -118,9 +128,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
                 # n'est pas dans le polygon (il s'agirait dans ce cas de faire
                 # une projection) ou si il n'y a pas d'autre point
                 # d'intersection detecté
-                if point_egaux(I, sommet2) and\
-                    (not point_suivant_in_polygon or
-                     len(liste_intersections) == 1):
+                if point_egaux(I, sommet2) and not point_suivant_in_polygon:
                     # Si il ne s'agit pas d'une projection
                     if status is None:
                         # Le statut est donc "EQUALS"
@@ -144,11 +152,11 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # Sinon c'est une projection
             elif not status_found:
                 # Le point d'intersection est donc un sommet
-                liste_intersections_def.append([I, "EQUALS"])
+                liste_intersections_def.append([I, "SPECIAL"])
                 # Il faut ensuite trouver sa projection
                 liste_intersections.remove(min_intersection)
                 # Il s'agit de l'intersection suivante la plus proche
-                min_intersection = min(liste_intersections)
+                min_intersection = liste_intersections[0]
                 I = min_intersection[1]
                 status = "BEYOND"
                 # On refait un tour de boucle pour déterminer le status
@@ -165,6 +173,8 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
                 continue
             elif intersection[1] == 'EQUALS':
                 color = 'green'
+            elif intersection[1] == 'SPECIAL':
+                color = 'purple'
             else:
                 color = 'blue'
             canvas.create_oval(I.x-size, I.y-size, I.x+size, I.y+size,

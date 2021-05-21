@@ -169,7 +169,7 @@ def intersection_demi_droite_segment(demi_droite, segment):
     # Vérifie que le point d'intersection se trouve sur la demi droite et non
     # la droite seulement
     if signe(I.y-demi_droite.A.y) != signe(demi_droite.B.y-demi_droite.A.y):
-        if signe(I.y-demi_droite.A.y) != signe(demi_droite.B.y-demi_droite.A.y):
+        if signe(I.x-demi_droite.A.x) != signe(demi_droite.B.x-demi_droite.A.x):
             return None
     # Vérifie si le point appartient au segment
     if point_appartient_segment(I, segment):
