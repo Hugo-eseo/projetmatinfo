@@ -73,6 +73,13 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # On cherche les points d'intersection entre la demi droite
             # définie par O et le sommet et le segment considéré du polygon
             I = intersection_demi_droite_segment(segment_sommet, segment)
+            # Dans le cas de points alignés
+            if I == "infinite":
+                # Le point d'intersections est celui le plus proche de O
+                liste = [[dist(O, segment.A), segment.A],
+                         [dist(O, segment.B), segment.B]]
+                minimum = min(liste)
+                liste_intersections.append(minimum)
             # Si un point d'intersection existe
             if I is not None:
                 # Les sommets étant détectés deux fois, on ne les compte qu'une
