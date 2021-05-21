@@ -16,16 +16,13 @@ size = 4
 
 
 def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
-    """
-    Arguments :
+    """Arguments :
         - start_point : Tuple ou liste sous la forme (x, y) ou [x, y]
         - polygon : Liste de sommets sous la forme  [(xA, yA), (xB, yB) ...]
         - canvas : Canvas de dessin
         - mode_demo : Boolean, True pour activer le mode de démonstration
-    Retourne :
-        - le polygon d'éclairage sous la forme d'une liste de points
-          au format tuple : [(xA, yA), (xB, yB) ...]
-    """
+    Retourne le polygon d'éclairage sous la forme d'une liste de points
+    au format tuple : [(xA, yA), (xB, yB) ...]"""
 
     # Vérifications élémentaires
     if not (type(start_point) == tuple or type(start_point) == list):
@@ -76,8 +73,15 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # On cherche les points d'intersection entre la demi droite
             # définie par O et le sommet et le segment considéré du polygon
             I = intersection_demi_droite_segment(segment_sommet, segment)
+            # Dans le cas de points alignés
+            if I == "Infinite":
+                # Le point d'intersections est celui le plus proche de O
+                liste = [[dist(O, segment.A), segment.A],
+                         [dist(O, segment.B), segment.B]]
+                minimum = min(liste)
+                liste_intersections.append(minimum)
             # Si un point d'intersection existe
-            if I is not None:
+            elif I is not None:
                 # Les sommets étant détectés deux fois, on ne les compte qu'une
                 if liste_intersections.count([dist(O, I), I]) == 1:
                     continue
@@ -99,8 +103,8 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # Pour cela, on cherche tout d'abord le point juste après le
             # sommet sur la demi-droite
             point_suivant =\
-                point_classe(I.x + (sommet.x - O.x)/dist(sommet, O),
-                             I.y + (sommet.y - O.y)/dist(sommet, O))
+                point_classe(I.x + (sommet.x - O.x)/(dist(sommet, O)+0.00001),
+                             I.y + (sommet.y - O.y)/(dist(sommet, O)+0.00001))
 
             # On vérifie si ce dernier se situe dans le polygon
             point_to_check = (point_suivant.x, point_suivant.y)

@@ -417,15 +417,28 @@ class Application():
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append([B, A])
+
+        # recuperer la matrice de la carte
+        image = Image.new("RGB", (600, 400), color=(255,255,255))
+        polygone = ImageDraw.Draw(image)
+        polygone.polygon(self.sommets_polygon, fill="black")
+        matrice = np.asarray(image.convert('L'))
+        np.savetxt("P2/projetmatinfo/fichier.txt", matrice, fmt='%3d')
+
+        f = open('P2/projetmatinfo/fichier2.txt','w')
+        f.write(str(self.sommets_polygon))
+        f.close()
+        
         self.cnv.delete('pts')
         self.cnv.unbind('<Button-2>')
         self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
     
     def clic_source_lumière_demo(self, event):
         self.loc_gardien = (event.x, event.y)
+        print(self.loc_gardien)
         if self.point_in_polygon_demo(self.loc_gardien):
-            # self.intersection_sommets_demo(event)
-            self.rayon_obsatcles_demo(event)
+            self.intersection_sommets_demo(event)
+            # self.rayon_obsatcles_demo(event)
 
     def point_in_polygon_demo(self, A, demo=False):
         """ Fonction permettant de vérifier si un point est dans le

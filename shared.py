@@ -21,6 +21,9 @@ class point_classe():
     def __str__(self):
         string = f"({self.x}, {self.y})"
         return string
+    
+    def __eq__(self, other):
+        return (self.x, self.y) == other
 
     def return_tuple(self):
         return (self.x, self.y)
