@@ -7,7 +7,7 @@ Created on Fri Apr 23 21:44:36 2021
 
 from shared import point_classe, segment_classe,\
     intersection_demi_droite_segment, dist,\
-    point_egaux, point_appartient_segment
+    point_egaux, point_appartient_segment, determinant_3_points, signe
 
 from point_in_polygon import point_in_polygon
 
@@ -23,7 +23,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         - mode_demo : Boolean, True pour activer le mode de démonstration
     Retourne le polygon d'éclairage sous la forme d'une liste de points
     au format tuple : [(xA, yA), (xB, yB) ...]"""
-
+    print("====================")
     # Vérifications élémentaires
     if not (type(start_point) == tuple or type(start_point) == list):
         return None
@@ -83,10 +83,10 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
             # Si un point d'intersection existe
             elif I is not None:
                 # Les sommets étant détectés deux fois, on ne les compte qu'une
-                if liste_intersections.count([dist(O, I), I]) == 1:
+                if liste_intersections.count([dist(O, I), I, liste_sommets_polygon.index(sommet)]) == 1:
                     continue
                 # On l'ajoute à la liste des intersections détectés.
-                liste_intersections.append([dist(O, I), I])
+                liste_intersections.append([dist(O, I), I, liste_sommets_polygon.index(sommet)])
 
         # Pour chaque sommet, une fois toutes les intersections trouvés,
         # on cherche la plus proche du point O
@@ -98,69 +98,60 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         # d'identifier son status
         status_found = False
         status = None
-        point_suivant = None
+        projection = False
+        i = 0
+        print(I)
         # On cherche le statut du point d'intersection trouvé
         while not status_found:
-            # Pour cela, on cherche tout d'abord le point juste après le
-            # sommet sur la demi-droite
-            if len(liste_intersections) == 1:
-                point_suivant_in_polygon = False
-            else:
-                '''if status is not None:
-                    canvas.create_oval(point_suivant.x-size, point_suivant.y-size, point_suivant.x+size, point_suivant.y+size,
-                               fill="yellow")'''
-                a = liste_intersections[1][1].x
-                b = liste_intersections[1][1].y
-                a = (liste_intersections[1][1].x + I.x)/2
-                b = (liste_intersections[1][1].y + I.y)/2
-                point_suivant =\
-                    point_classe(a, b)
-
-                # On vérifie si ce dernier se situe dans le polygon
-                point_to_check = (point_suivant.x, point_suivant.y)
-                point_suivant_in_polygon =\
-                    point_in_polygon(point_to_check, polygon, canvas)
-
-            # On parcours une seconde fois la liste des sommets du polygon
-            # pour savoir si le point d'intersection trouvé est un sommet
+            i += 1
+            projection = False
             for sommet2 in liste_sommets_polygon:
-                # Si l'intersection est un sommet et que le point suivant
-                # n'est pas dans le polygon (il s'agirait dans ce cas de faire
-                # une projection) ou si il n'y a pas d'autre point
-                # d'intersection detecté
-                if point_egaux(I, sommet2) and not point_suivant_in_polygon:
-                    # Si il ne s'agit pas d'une projection
-                    if status is None:
-                        # Le statut est donc "EQUALS"
-                        status = "EQUALS"
+                if point_egaux(I, sommet2):
+                    print("EQUALS")
+                    status = "EQUALS"
+
+                    if len(liste_intersections) == 1:
+                        status_found = True
+
+                    else:
+                        indice_sommet = min_intersection[2]
+
+                        det1 = determinant_3_points(O, sommet,
+                            liste_sommets_polygon[indice_sommet-1])
+
+                        if indice_sommet == len(liste_sommets_polygon)-1:
+                            indice_sommet = -1
+
+                        det2 = determinant_3_points(O, sommet,
+                            liste_sommets_polygon[indice_sommet+1])
+                        print(det1, det2)
+                        if signe(det1) != signe(det2):
+                            status_found = True
+                            if i > 1:
+                                status = "BEYOND"
+                        else:
+                            projection = True
+
+                    liste_intersections_def.append([I, status])
+
+            if not status_found:
+                if not projection:
+                    if i == 1:
+                        status = "AHEAD"
+                    else:
+                        status = "BEYOND"
                     # On l'ajoute à la liste finale
                     liste_intersections_def.append([I, status])
                     status_found = True
-                    # Sortie du for
-                    break
 
-            # Si le point suivant n'est pas dans le polygon
-            if not point_suivant_in_polygon and not status_found:
-                # Si il ne s'agit pas d'une projection
-                if status is None:
-                    # Le statut est donc "AHEAD"
-                    status = "AHEAD"
-                # On l'ajoute à la liste finale
-                liste_intersections_def.append([I, status])
-                status_found = True
-
-            # Sinon c'est une projection
-            elif not status_found:
-                # Le point d'intersection est donc un sommet
-                liste_intersections_def.append([I, "SPECIAL"])
-                # Il faut ensuite trouver sa projection
-                liste_intersections.remove(min_intersection)
-                # Il s'agit de l'intersection suivante la plus proche
-                min_intersection = liste_intersections[0]
-                I = min_intersection[1]
-                status = "BEYOND"
-                # On refait un tour de boucle pour déterminer le status
-                # de cette nouvelle intersection
+                else:
+                    # Il faut ensuite trouver sa projection
+                    liste_intersections.remove(min_intersection)
+                    # Il s'agit de l'intersection suivante la plus proche
+                    min_intersection = liste_intersections[0]
+                    I = min_intersection[1]
+                    # On refait un tour de boucle pour déterminer le status
+                    # de cette nouvelle intersection
 
     # Dans le mode de démonstration, on affiche les intersections définitives
     # trouvés avec la couleur associée à son status.
@@ -168,13 +159,11 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         for intersection in liste_intersections_def:
             I = intersection[0]
             canvas.create_line(O.x, O.y, I.x, I.y,
-                               fill='white', tag='demo')
+                               fill='red', tag='demo')
             if intersection[1] == 'AHEAD':
                 continue
             elif intersection[1] == 'EQUALS':
                 color = 'green'
-            elif intersection[1] == 'SPECIAL':
-                color = 'purple'
             else:
                 color = 'blue'
             canvas.create_oval(I.x-size, I.y-size, I.x+size, I.y+size,
