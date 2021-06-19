@@ -222,6 +222,7 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
         for elem in polygon_list_corner:
             final_polygon.append((angle_two_points(elem[0], (x0, y0)), elem[1], elem[0]))
         final_polygon.sort()
+        '''
         for i in range(len(final_polygon)-1):
             if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=0.01):
                 if find_direction((x0, y0), final_polygon[i][2]) == "NE" or find_direction((x0, y0), final_polygon[i][2]) == "E" or find_direction((x0, y0), final_polygon[i][2]) == "SE" or find_direction((x0, y0), final_polygon[i][2]) == "N":
@@ -230,6 +231,12 @@ def guardian_by_clic_on_corner(event, cnv, segments_list, corner_list):
                 elif find_direction((x0, y0), final_polygon[i][2]) == "NO" or find_direction((x0, y0), final_polygon[i][2]) == "O" or find_direction((x0, y0), final_polygon[i][2]) == "SO" or find_direction((x0, y0), final_polygon[i][2]) == "S":
                     if final_polygon[i][1] == "projeté d'un angle":
                         final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]
+        '''
+        for i in range(len(final_polygon)-1):
+            if isclose(final_polygon[i][0], final_polygon[i+1][0], rel_tol=0.01):
+                print(final_polygon[i][0])
+                '''if final_polygon[i][0] < 0:
+                    final_polygon[i], final_polygon[i+1] = final_polygon[i+1], final_polygon[i]'''
         for elem in final_polygon:
             light_poly_coords.append(elem[2])
         cnv.create_polygon(light_poly_coords, fill="yellow", tag="light")
