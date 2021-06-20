@@ -18,7 +18,7 @@ class point_classe():
         """Prend en argument les coordonées x et y du point"""
         self.x, self.y = x, y
 
-    def __str__(self):
+    def __repr__(self):
         string = f"({self.x}, {self.y})"
         return string
     
@@ -37,7 +37,7 @@ class segment_classe():
         définissants un segment"""
         self.A, self.B = point1, point2
 
-    def __str__(self):
+    def __repr__(self):
         string = "[" + str(self.A) + "," + str(self.B) + "]"
         return string
 

@@ -26,6 +26,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
 
     # Vérifications élémentaires
     if not (type(start_point) == tuple or type(start_point) == list):
+        print(type(start_point))
         return None
     if not (len(start_point) == 2):
         return None

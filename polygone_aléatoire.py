@@ -2,8 +2,11 @@
 # @author : ArthurM 
 
 from shared import point_classe, angle_deux_points, segment_classe
-from point_in_polygon import point_in_polygon
+from point_in_polygon import point_in_polygon_classes
 import numpy as np
+import random
+from PIL import Image, ImageDraw
+
 
 
 def polygone_aleatoire(nombre_de_points, canvas):
@@ -21,8 +24,8 @@ def polygone_aleatoire(nombre_de_points, canvas):
 
     liste_points, random_polygon, sommets_polygon, liste_segments = [], [], [], []
     
-    width = canvas.winfo_width()
-    height = canvas.info_height()
+    width = canvas.winfo_width() - 6    # correction d'un comportement étrange
+    height = canvas.winfo_height() - 6  # correction d'un comportement étrange
 
     canvas.delete('all')
 
@@ -37,7 +40,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
 
     for point in liste_points:
         random_polygon.append(((angle_deux_points(point, C)), point))
-    
+
     random_polygon.sort()
     for elem in random_polygon:
         sommets_polygon.append(elem[1])
@@ -51,16 +54,16 @@ def polygone_aleatoire(nombre_de_points, canvas):
     B = sommets_polygon[-1]
     liste_segments.append(segment_classe(A, B))
 
-    if not point_in_polygon_demo(C, liste_segments, canvas):
+    if not point_in_polygon_classes(C, liste_segments, canvas):
         polygone_aleatoire(nombre_de_points, canvas)
 
     # changement du type des données
     sommets_tuple = list()
-    for elem in polygone:
-        sommets_tuple.append(elem.return_tuple)
+    for elem in sommets_polygon:
+        sommets_tuple.append(elem.return_tuple())
 
     # recuperer la matrice de la carte (temporaire)
-    image = Image.new("RGB", (600, 400), color=(255,255,255))
+    image = Image.new("RGB", (600, 400), color=(255, 255, 255))
     polygone = ImageDraw.Draw(image)
     polygone.polygon(sommets_tuple, fill="black")
     carte = np.asarray(image.convert('L'))
@@ -73,8 +76,5 @@ def polygone_aleatoire(nombre_de_points, canvas):
 
     # dessiner le polygone
     canvas.create_polygon(sommets_tuple, fill='grey')
-
-    canvas.bind('<Button-1>', self.clic_source_lumière_demo)
-    reset_button.config(command=self.demo3)
 
     return liste_segments

@@ -52,6 +52,9 @@ def delta_y(angle_joueur):
 def dessiner_rayon_2D(cnv, carte):
     global angle_joueur, distance_max
 
+    width = cnv.winfo_width()
+    height = cnv.winfo_height()
+
     cnv3D.delete('decor')
     angle_rayon = angle_joueur - 35 * (math.pi/180)
     if angle_rayon < 0:
@@ -69,22 +72,22 @@ def dessiner_rayon_2D(cnv, carte):
         if angle_rayon == math.pi or angle_rayon == 0:
             rayon_x = joueur_x
             rayon_y = joueur_y
-            cpt = 8 
+            cpt = largeur
         elif angle_rayon > math.pi:
-            rayon_y = (joueur_y // 64) * 64 - 0.0001 # 0.0001 avoid the Division by 0 Error
+            rayon_y = (joueur_y // taille_mur) * taille_mur - 0.0001 # 0.0001 avoid the Division by 0 Error
             rayon_x = (joueur_y-rayon_y) * (-1/math.tan(angle_rayon)) + joueur_x
-            yo = -64
+            yo = -taille_mur
             xo = -yo * (-1/math.tan(angle_rayon))
         else:
-            rayon_y = (joueur_y // 64) * 64 + 64 
+            rayon_y = (joueur_y // taille_mur) * taille_mur + taille_mur 
             rayon_x = (joueur_y-rayon_y) * (-1/math.tan(angle_rayon)) + joueur_x 
-            yo = 64
+            yo = taille_mur
             xo = -yo * (-1/math.tan(angle_rayon))
 
-        while cpt < 8:
-            carte_x = int(rayon_x // 64)
-            carte_y = int(rayon_y // 64)
-            if carte_x < 8 and carte_y < 8 and carte_y >= 0 and carte_x >= 0:
+        while cpt < largeur:
+            carte_x = int(rayon_x // taille_mur)
+            carte_y = int(rayon_y // taille_mur)
+            if carte_x < largeur and carte_y < hauteur and carte_y >= 0 and carte_x >= 0:
                 
                 # mur
                 if carte[etage][carte_y][carte_x] == 1:
@@ -92,7 +95,7 @@ def dessiner_rayon_2D(cnv, carte):
                     x_horizontal = rayon_x
                     y_horizontal = rayon_y
                     distance_horizontale = distance((joueur_x, joueur_y), (x_horizontal, y_horizontal))
-                    cpt = 8
+                    cpt = largeur
                 
                 # porte
                 elif carte[etage][carte_y][carte_x] == 3:
@@ -100,7 +103,7 @@ def dessiner_rayon_2D(cnv, carte):
                     x_horizontal = rayon_x
                     y_horizontal = rayon_y
                     distance_horizontale = distance((joueur_x, joueur_y), (x_horizontal, y_horizontal))
-                    cpt = 8
+                    cpt = largeur
 
                 else: 
                     rayon_x += xo
@@ -121,23 +124,23 @@ def dessiner_rayon_2D(cnv, carte):
         if angle_rayon == math.pi/2 or angle_rayon == 3*math.pi/2:
             rayon_x = joueur_x
             rayon_y = joueur_y
-            cpt = 8
+            cpt = hauteur
 
         elif angle_rayon > math.pi/2 and angle_rayon < 3*math.pi/2:
-            rayon_x = (joueur_x // 64) * 64 - 0.0001 # 0.0001 avoid the Division by 0 Error
+            rayon_x = (joueur_x // taille_mur) * taille_mur - 0.0001 # 0.0001 avoid the Division by 0 Error
             rayon_y = (joueur_x-rayon_x) * (-math.tan(angle_rayon)) + joueur_y
-            xo = -64
+            xo = -taille_mur
             yo = -xo * (-math.tan(angle_rayon))
         else:
-            rayon_x = (joueur_x // 64) * 64 + 64 
+            rayon_x = (joueur_x // taille_mur) * taille_mur + taille_mur 
             rayon_y = (joueur_x-rayon_x) * (-math.tan(angle_rayon)) + joueur_y 
-            xo = 64
+            xo = taille_mur
             yo = -xo * (-math.tan(angle_rayon))
 
-        while cpt < 8:
-            carte_x = int(rayon_x // 64)
-            carte_y = int(rayon_y // 64)
-            if carte_x < 8 and carte_y < 8 and carte_y >= 0 and carte_x >= 0:
+        while cpt < hauteur:
+            carte_x = int(rayon_x // taille_mur)
+            carte_y = int(rayon_y // taille_mur)
+            if carte_x < largeur and carte_y < hauteur and carte_y >= 0 and carte_x >= 0:
 
                 # mur
                 if carte[etage][carte_y][carte_x] == 1:
@@ -145,7 +148,7 @@ def dessiner_rayon_2D(cnv, carte):
                     x_vectical = rayon_x
                     y_vectical = rayon_y
                     distance_vecticale = distance((joueur_x, joueur_y), (x_vectical, y_vectical))
-                    cpt = 8
+                    cpt = hauteur
 
                 # porte
                 elif carte[etage][carte_y][carte_x] == 3:
@@ -153,7 +156,7 @@ def dessiner_rayon_2D(cnv, carte):
                     x_vectical = rayon_x
                     y_vectical = rayon_y
                     distance_vecticale = distance((joueur_x, joueur_y), (x_vectical, y_vectical))
-                    cpt = 8
+                    cpt = hauteur
 
                 else:
                     rayon_x += xo
@@ -166,10 +169,10 @@ def dessiner_rayon_2D(cnv, carte):
     
         if distance_horizontale > distance_vecticale:
             distance_max = distance_vecticale
-            # cnv.create_line(joueur_x, joueur_y, x_vectical, y_vectical, fill="yellow", width=3, tag='joueur')
+            cnv.create_line(joueur_x, joueur_y, x_vectical, y_vectical, fill="yellow", width=3, tag='joueur')
         else:
             distance_max = distance_horizontale
-            # cnv.create_line(joueur_x, joueur_y, x_horizontal, y_horizontal, fill="yellow", width=3, tag='joueur')
+            cnv.create_line(joueur_x, joueur_y, x_horizontal, y_horizontal, fill="yellow", width=3, tag='joueur')
 
         angle_projection = angle_joueur - angle_rayon
         if angle_projection > 2*math.pi:
@@ -179,10 +182,10 @@ def dessiner_rayon_2D(cnv, carte):
         
         # dessin des murs
         distance_max *= math.cos(angle_projection)
-        ratio = 50 * 512 / distance_max 
-        if ratio > 530:
-            ratio = 530
-        decalage = 512 // 2  - ratio // 2
+        ratio = 50 * height / distance_max 
+        if ratio > height:
+            ratio = height
+        decalage = height // 2  - ratio // 2
         if distance_horizontale > distance_vecticale:
             if type_mur == "porte":
                 couleur = "brown"
@@ -194,7 +197,8 @@ def dessiner_rayon_2D(cnv, carte):
             else:
                 couleur = "grey20"
         
-        cnv3D.create_line(rayon*3.7, decalage, rayon*3.7, ratio+decalage, fill=couleur, width=5, tag='decor')
+        facteur_etrange = 3
+        cnv3D.create_line(rayon*facteur_etrange, decalage, rayon*facteur_etrange, ratio+decalage, fill=couleur, width=5, tag='decor')
 
         angle_rayon += (math.pi/180)/2
         
@@ -212,11 +216,11 @@ def distance(a, b):
 
 def move_up(event):
     global joueur_y, joueur_x, angle_joueur, etage
-    carte_localisation_avant = (int(joueur_x // 64), int(joueur_y // 64))
+    carte_localisation_avant = (int(joueur_x // taille_mur), int(joueur_y // taille_mur))
 
     joueur_x -= math.sin(angle_joueur-math.pi/2) * 10
     joueur_y += math.cos(angle_joueur-math.pi/2) * 10
-    carte_localisation_apres = (int(joueur_x // 64), int(joueur_y // 64))
+    carte_localisation_apres = (int(joueur_x // taille_mur), int(joueur_y // taille_mur))
 
     # vide
     if carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]] == 0 :
@@ -255,11 +259,11 @@ def move_up(event):
 def move_down(event):
     global joueur_x, joueur_y, angle_joueur, etage
 
-    carte_localisation_avant = (int(joueur_x // 64), int(joueur_y // 64))
+    carte_localisation_avant = (int(joueur_x // taille_mur), int(joueur_y // taille_mur))
 
     joueur_x += math.sin(angle_joueur-math.pi/2) * 10
     joueur_y -= math.cos(angle_joueur-math.pi/2) * 10
-    carte_localisation_apres = (int(joueur_x // 64), int(joueur_y // 64))
+    carte_localisation_apres = (int(joueur_x // taille_mur), int(joueur_y // taille_mur))
 
     # vide
     if carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]] == 0:
@@ -312,35 +316,44 @@ def turn_right(event):
     if angle_joueur > 2*math.pi:
         angle_joueur = 0
 
-carte =       [[[1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 2, 1, 0, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 1],
-                [1, 0, 1, 0, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 1, 1, 1],
-                [1, 0, 0, 0, 0, 0, 0, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1]],
 
-               [[1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 2, 1, 0, 3, 0, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 1, 1],
-                [1, 0, 0, 0, 0, 0, 4, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1]]]
+carte =       [[[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
+
+               [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                [1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+                [1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+                [1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+                [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]]
 
 
-taille_mur = 64
-largeur, hauteur = 8, 8
-joueur_x, joueur_y = 100, 300
+
+largeur, hauteur = len(carte[0][0]), len(carte[0])
+taille_mur = 512 // max(largeur, hauteur) 
+joueur_x, joueur_y = taille_mur*5.5, taille_mur*1.5
 etage = 0
-angle_joueur = 0
+angle_joueur = -3.14/2
+
+cnv_size_x = taille_mur * largeur
+cnv_size_y = taille_mur * hauteur
 
 wnd = tk.Tk()
-cnv = tk.Canvas(wnd, width=512, height=512)
-cnv3D = tk.Canvas(wnd, width=512, height=512, bg='burlywood4')
-cnv3D.create_rectangle(0, 0, 512, 512//2, width=0, fill='grey40')
+cnv = tk.Canvas(wnd, width=cnv_size_x, height=cnv_size_y)
+cnv3D = tk.Canvas(wnd, width=cnv_size_x, height=cnv_size_y, bg='burlywood4')
+cnv3D.create_rectangle(0, 0, cnv_size_x, cnv_size_y//2, width=0, fill='grey40')
 cnv.pack(side=tk.LEFT)
 cnv3D.pack(side=tk.RIGHT)
 

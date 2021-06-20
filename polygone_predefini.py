@@ -3,6 +3,7 @@
 
 from shared import point_classe, segment_classe
 import random
+from PIL import Image, ImageDraw
 import numpy as np
 
 def polygone_predefini(canvas, numero_predefini):
@@ -17,6 +18,8 @@ def polygone_predefini(canvas, numero_predefini):
         - Un polygone predefini en fonction du numero_predefini
     Retourne :
         - Une liste de tous les segments du polygone
+        - Une liste des sommets du polygone
+        - Une liste de listes representant la carte
     """
 
     database = [[(221, 183), (221, 221), (90, 223), (91, 109),
@@ -30,7 +33,7 @@ def polygone_predefini(canvas, numero_predefini):
                 (541, 21), (456, 21), (457, 81), (416, 81),
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
-                (219, 124)]]
+                (219, 124)], ]
 
     if numero_predefini is None:
         numero_predefini = random.randint(0, len(database)-1)
@@ -44,23 +47,23 @@ def polygone_predefini(canvas, numero_predefini):
     # memorisation des segments
     liste_segments = list()
     for i in range(1, len(transformed_database)):
-        A = sommets_polygon[i]
-        B = sommets_polygon[i-1]
+        A = transformed_database[i]
+        B = transformed_database[i-1]
         liste_segments.append(segment_classe(A, B))
-    A = sommets_polygon[0]
-    B = sommets_polygon[-1]
+    A = transformed_database[0]
+    B = transformed_database[-1]
     liste_segments.append(segment_classe(A, B))
 
     # recuperer la matrice de la carte (temporaire)
     image = Image.new("RGB", (600, 400), color=(255,255,255))
     polygone = ImageDraw.Draw(image)
-    polygone.polygon(database, fill="black")
+    polygone.polygon(database[numero_predefini], fill="black")
     carte = np.asarray(image.convert('L'))
     np.savetxt("P2/projetmatinfo/carte.txt", carte, fmt='%3d')
 
     # recuperer les sommets du polygone (temporaire)
     f = open('P2/projetmatinfo/sommets_polygone.txt','w')
-    f.write(str(database))
+    f.write(str(database[numero_predefini]))
     f.close()
 
     # dessiner le polygone
