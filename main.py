@@ -234,8 +234,7 @@ class Application():
     def new_polygone_eclairage(self, event):
         self.cnv.delete('light')
         O = (event.x, event.y)
-        per = pe.polygon_eclairage(O, self.sommets_polygon, self.cnv, True)
-        polygon_eclairage = per.return_polygon()
+        polygon_eclairage = pe.polygon_eclairage(O, self.sommets_polygon, self.cnv, True)
         # print(polygon_eclairage)
         self.cnv.create_polygon(polygon_eclairage, fill='yellow', tag='light')
         self.cnv.tag_raise('demo')

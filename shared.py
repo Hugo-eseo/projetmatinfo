@@ -77,7 +77,7 @@ def determinant_3_points(point1, point2, point3):
     return det3(mat)
 
 
-def point_appartient_segment(point, segment, status=None):
+def point_appartient_segment(point, segment):
     """Arguments :
         - point : objet de classe 'point'
         - segment : objet de classe 'segment'
@@ -87,11 +87,6 @@ def point_appartient_segment(point, segment, status=None):
         if abs(dist(point, segment.A) + dist(point, segment.B) -
                dist(segment.A, segment.B)) < precision:
             return True
-        elif status == "EQUAL":
-            print("Segment :", segment)
-            print("I :", point)
-            print(abs(dist(point, segment.A) + dist(point, segment.B) -
-               dist(segment.A, segment.B)))
     return False
 
 
