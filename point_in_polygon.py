@@ -25,8 +25,10 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
 
     # Vérifications élémentaires
     if not (type(point_to_check) == tuple or type(point_to_check) == list):
+        print("Error type - point_in_polygon")
         return None
     if not (len(point_to_check) == 2):
+        print("Error len - point_in_polygon")
         return None
 
     canvas.delete("demo")
@@ -69,7 +71,7 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
 
     # On parcours la liste des segments du polygon
     for segment in liste_segments_polygon:
-        # Si le point appartien à un segment du polygon, il n'est donc pas
+        # Si le point appartient à un segment du polygon, il n'est donc pas
         # considéré comme appartenant au polygon
         if point_appartient_segment(O, segment):
             return False
@@ -151,8 +153,9 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
                 if intersection.x > O.x:
                     wn -= 1
                     result = -1
-        canvas.create_text(intersection.x, intersection.y+10, text=result,
-                           tag='demo')
+        if mode_demo:
+            canvas.create_text(intersection.x, intersection.y+10, text=result,
+                               tag='demo')
         i += 1
     if wn != 0:
         return True

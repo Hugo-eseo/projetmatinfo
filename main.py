@@ -9,6 +9,7 @@ import random
 import math
 
 import point_in_polygon as pip
+import polygon_eclairage as pe
 
 # Partie 1 : fonctions mathématiques
 
@@ -186,7 +187,7 @@ class Application():
                                 (528, 225), (413, 227), (406, 162), (463, 158),
                                 (460, 116), (495, 111), (496, 65), (542, 64),
                                 (541, 21), (456, 21), (457, 81), (416, 81),
-                                (416, 120), (369, 122), (319, 123), (315, 63),
+                                (416, 120), (369, 122), (319, 122), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
         self.lancement_preset()
@@ -229,6 +230,14 @@ class Application():
                                 inter_in_order[0][0], fill='yellow',
                                 tag='lightpolygon')
         self.cnv.tag_raise('light')
+
+    def new_polygone_eclairage(self, event):
+        self.cnv.delete('light')
+        O = (event.x, event.y)
+        polygon_eclairage = pe.polygon_eclairage(O, self.sommets_polygon, self.cnv, True)
+        # print(polygon_eclairage)
+        self.cnv.create_polygon(polygon_eclairage, fill='yellow', tag='light')
+        self.cnv.tag_raise('demo')
 
     # Mode de démonstration 4
 
@@ -381,7 +390,7 @@ class Application():
             # self.intersection_sommets_demo(event)
             self.rayon_obsatcles_demo(event)'''
         if pip.point_in_polygon(A, self.sommets_polygon, self.cnv, True):
-            self.rayon_obsatcles_demo(event)
+            self.new_polygone_eclairage(event)
 
     def point_in_polygon_demo(self, A, exclude_seg=False, demo=False):
         """ Fonction permettant de vérifier si un point est dans le
