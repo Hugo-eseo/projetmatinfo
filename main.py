@@ -187,7 +187,7 @@ class Application():
                                 (528, 225), (413, 227), (406, 162), (463, 158),
                                 (460, 116), (495, 111), (496, 65), (542, 64),
                                 (541, 21), (456, 21), (457, 81), (416, 81),
-                                (416, 120), (369, 122), (319, 123), (315, 63),
+                                (416, 120), (369, 122), (319, 122), (315, 63),
                                 (373, 57), (372, 23), (266, 22), (272, 122),
                                 (219, 124)]
         self.lancement_preset()
@@ -234,7 +234,8 @@ class Application():
     def new_polygone_eclairage(self, event):
         self.cnv.delete('light')
         O = (event.x, event.y)
-        polygon_eclairage = pe.polygon_eclairage(O, self.sommets_polygon, self.cnv, True)
+        per = pe.polygon_eclairage(O, self.sommets_polygon, self.cnv, True)
+        polygon_eclairage = per.return_polygon()
         # print(polygon_eclairage)
         self.cnv.create_polygon(polygon_eclairage, fill='yellow', tag='light')
         self.cnv.tag_raise('demo')

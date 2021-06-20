@@ -77,7 +77,7 @@ def determinant_3_points(point1, point2, point3):
     return det3(mat)
 
 
-def point_appartient_segment(point, segment):
+def point_appartient_segment(point, segment, status=None):
     """Arguments :
         - point : objet de classe 'point'
         - segment : objet de classe 'segment'
@@ -87,6 +87,11 @@ def point_appartient_segment(point, segment):
         if abs(dist(point, segment.A) + dist(point, segment.B) -
                dist(segment.A, segment.B)) < precision:
             return True
+        elif status == "EQUAL":
+            print("Segment :", segment)
+            print("I :", point)
+            print(abs(dist(point, segment.A) + dist(point, segment.B) -
+               dist(segment.A, segment.B)))
     return False
 
 
@@ -138,40 +143,66 @@ def intersection_segments(segment1, segment2):
     return None
 
 
+def point_appartient_demi_droite(point, demi_droite):
+    """Arguments :
+        - point : objet de classe 'point'
+        - demi_droite : objet de classe 'segment'
+    Retourne True si le point appartient à la demi droite définie par
+    [demi_droite.A, demi_droite.B). False sinon"""
+
+    # Vecteurs directeurs de la demi-droite et de la demi_droite formée
+    # par demi_droite.A et le point
+    u = (demi_droite.B.x - demi_droite.A.x, demi_droite.B.y - demi_droite.A.y)
+    v = (point.x - demi_droite.A.x, point.y - demi_droite.A.y)
+
+    # Si les vecteurs sont colinéaires
+    if abs(u[0]*v[1] - u[1]*v[0]) < precision:
+        # Si ils sont colinéaires de même signe
+        if signe(u[0]) == signe(v[0]) and signe(u[1]) == signe(v[1]):
+            return True
+    return False
+
+
 def intersection_demi_droite_segment(demi_droite, segment):
     """Arguments :
         - demi_droite, segment : objet de classe 'segment'
-    Retourne le point d'intersection entre la demi_droite (définie par le
-    premier point) et le segment. None si ils n'en ont pas."Infinite" si
-    ils en ont une infinité"""
+    Retourne le point d'intersection entre la demi_droite
+    [demi_droite.A, demi_droite.B) et le segment. None si ils n'en ont pas."""
     a = determinant_3_points(demi_droite.A, demi_droite.B, segment.B)
     b = determinant_3_points(demi_droite.B, demi_droite.A, segment.A)
-    # Si tous les points sont alignés
+
+    # Si a=0 et b=0, alors tous les points sont alignés
     if a == 0 and b == 0:
-        # Il y a une infinité de points d'intersection
-        return 'Infinite'
-    # Si la demi-droite ou le segment est nul ou si ils sont parallèles
+        liste = [[dist(demi_droite.A, segment.A), segment.A],
+                 [dist(demi_droite.A, segment.B), segment.B]]
+        # On retourne le point le plus proche de demi_droite.A si il
+        # appartient à la demi-droite
+        I = min(liste)[1]
+        if point_appartient_demi_droite(I, demi_droite):
+            return I
+        return None
+
+    # Si a+b=0, cela signifie que la demi-droite ou le segment
+    # est nul ou qu'ils sont parallèles
     if a+b == 0:
         return None
-    x = (a*segment.A.x + b*segment.B.x)/(a + b)
-    y = (a*segment.A.y + b*segment.B.y)/(a + b)
-    I = point_classe(x, y)
-    points_to_check = [demi_droite.A, demi_droite.B, segment.A, segment.B]
-    # Vérifie que le point d'intersection trouvé est sur la droite
-    if signe(a) != signe(b):
-        equal = False
-        # Cas où le point trouvé est un des points renseigné
-        for point in points_to_check:
-            if point_egaux(I, point):
-                equal = True
-        if not equal:
-            return None
-    # Vérifie que le point d'intersection se trouve sur la demi droite et non
-    # la droite seulement
-    if signe(I.y-demi_droite.A.y) != signe(demi_droite.B.y-demi_droite.A.y):
-        if signe(I.x-demi_droite.A.x) != signe(demi_droite.B.x-demi_droite.A.x):
-            return None
-    # Vérifie si le point appartient au segment
-    if point_appartient_segment(I, segment):
-        return I
+
+    # Si a=0 ou b=0, cela signifie qu'au moins un point du segment
+    # appartient à la droite (3 points alignés)
+    if a == 0:
+        # On retourne le point concerné si il appartient à la demi-droite
+        if point_appartient_demi_droite(segment.B, demi_droite):
+            return segment.B
+        return None
+
+    if b == 0:
+        if point_appartient_demi_droite(segment.A, demi_droite):
+            return segment.A
+        return None
+    if signe(a) == signe(b):
+        x = (a*segment.A.x + b*segment.B.x)/(a + b)
+        y = (a*segment.A.y + b*segment.B.y)/(a + b)
+        I = point_classe(x, y)
+        if point_appartient_demi_droite(I, demi_droite):
+            return I
     return None
