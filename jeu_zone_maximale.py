@@ -37,12 +37,12 @@ def jouer(event):
             aire_ia.set(f'Aire IA : {int(score_ia)}')
             # afficher le resultat
             if type(indiv[0]) is list:
-                #for gardien in indiv:
-                    # cnv.create_polygon(polygon_eclairage(gardien, liste_sommets, cnv), fill='yellow')
+                for gardien in indiv:
+                    cnv.create_polygon(polygon_eclairage(gardien, liste_sommets, cnv), fill='yellow')
                 for gardien in indiv:
                     cnv.create_oval(gardien[0]-taille_point, gardien[1]-taille_point, gardien[0]+taille_point, gardien[1]+taille_point, fill='red', tag='gardien')
             else:
-                # cnv.create_polygon(polygon_eclairage(indiv, liste_sommets, cnv), fill='yellow')
+                cnv.create_polygon(polygon_eclairage(indiv, liste_sommets, cnv), fill='yellow')
                 cnv.create_oval(indiv[0]-taille_point, indiv[1]-taille_point, indiv[0]+taille_point, indiv[1]+taille_point, fill='red', tag='gardien')
 
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
     taille_point = 3
 
     # parametre de jeu
-    nombre_gardien = 3
+    nombre_gardien = 4
 
     # parametres d'ia
     generations_auto = True
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     seuil_maximal = 0.9
 
     if generations_auto:
-        generations_maximum = nombre_individus * 15
+        generations_maximum = nombre_gardien * 15
     else:
         generations_maximum = 15
 
@@ -91,3 +91,6 @@ if __name__ == '__main__':
 
 
     wnd.mainloop()
+
+
+# points qui ont l'air de bug : [175, 117] | [57, 155] (l'un ou l'autre)

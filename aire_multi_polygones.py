@@ -61,14 +61,6 @@ def aire_deux_polygones(polygones):
 
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     # polygones = [[(0, 0), (1, 0), (1, 1), (0, 1)], [(0, 0), (3, 1), (1, 3)]]
     polygones = [[[0, 0], [3, 1], [1, 3]]]

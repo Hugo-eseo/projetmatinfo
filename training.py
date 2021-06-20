@@ -131,17 +131,21 @@ def mutation(pop, mutation_proba, nombre_gardiens, carte):
                 dirX = np.random.randint(0, 1)
                 dirY = np.random.randint(0, 1)
                 if dirX == 1 and dirY == 1:
-                    indiv[0] += 1
-                    indiv[1] += 1
+                    if carte[indiv[1]+1][indiv[0]+1] == 0:
+                        indiv[0] += 1
+                        indiv[1] += 1
                 elif dirX == 1 and dirY == 0:
-                    indiv[0] += 1
-                    indiv[1] -= 1
+                    if carte[indiv[1]-1][indiv[0]+1] == 0:
+                        indiv[0] += 1
+                        indiv[1] -= 1
                 elif dirX == 0 and dirY == 1:
-                    indiv[0] -= 1
-                    indiv[1] += 1
+                    if carte[indiv[1]+1][indiv[0]-1] == 0:
+                        indiv[0] -= 1
+                        indiv[1] += 1
                 else:
-                    indiv[0] -= 1
-                    indiv[1] -= 1
+                    if carte[indiv[1]-1][indiv[0]-1] == 0:
+                        indiv[0] -= 1
+                        indiv[1] -= 1
         return pop
     else:
         for indiv in pop:
@@ -154,11 +158,11 @@ def mutation(pop, mutation_proba, nombre_gardiens, carte):
                             gardien[0] += 1
                             gardien[1] += 1
                     elif dirX == 1 and dirY == 0:
-                        if carte[gardien[1]+1][gardien[0]-1] == 0:
+                        if carte[gardien[1]-1][gardien[0]+1] == 0:
                             gardien[0] += 1
                             gardien[1] -= 1
                     elif dirX == 0 and dirY == 1:
-                        if carte[gardien[1]-1][gardien[0]+1] == 0:
+                        if carte[gardien[1]+1][gardien[0]-1] == 0:
                             gardien[0] -= 1
                             gardien[1] += 1
                     else:
