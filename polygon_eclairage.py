@@ -5,12 +5,10 @@ Created on Fri Apr 23 21:44:36 2021
 @author: hugob
 """
 
+
 from shared import point_classe, segment_classe,\
     intersection_demi_droite_segment, dist,\
     point_egaux, point_appartient_segment, determinant_3_points, signe
-
-from point_in_polygon import point_in_polygon
-import tkinter as tk
 
 # Taille des point affichés sur le canvas
 size = 4
@@ -85,7 +83,6 @@ class calcul_polygon_eclairage():
 
                 # Si un point d'intersection existe
                 if I is not None:
-                    '''Fonction de détection des sommets à revoir ?'''
                     # Les sommets étant détectés deux fois,
                     # on ne les compte qu'une
                     if liste_intersections.count([dist(self.O, I), I,
@@ -170,11 +167,20 @@ class calcul_polygon_eclairage():
 
     def status_intersections(self, liste_intersections, sommet,
                              points_indentifies):
-        '''DocString'''
+        """Arguments :
+           - liste_intersections : liste
+           - sommet : objet de type classe_point
+           - points_indentifiées : liste contenant les points identifiés
+           par la fonction, utilsiée par le recursif
+         Retourne la liste des points identifiés avec leur statut (contenant
+         l'intersection la plus proche et ses eventuels projetés"""
+
         liste_intersections.sort()
         I = liste_intersections[0][1]
         indice_sommet = liste_intersections[0][2]
 
+        # Si la liste points_identifies n'est pas vide il s'agit d'un appel
+        # récursif
         recursif = False
         if points_indentifies:
             recursif = True
@@ -186,8 +192,13 @@ class calcul_polygon_eclairage():
             est_sommet = True
 
         # Si il s'agit d'un autre sommet du polygon
-        elif self.sommet_du_polygon(I):
-            est_sommet = True
+        else:
+            est_sommet, indice = self.sommet_du_polygon(I)
+            if indice is not None:
+                # On met à jour l'indice du sommet (dans le cas d'une
+                # intersection se trouvant être un sommet)
+                liste_intersections[0][2] = indice
+                indice_sommet = indice
 
         if est_sommet:
             # On ajoute le statut du point indentifié
@@ -204,7 +215,7 @@ class calcul_polygon_eclairage():
 
             if not liste_intersections:
                 return points_indentifies
-            # On rappelle la fonction
+            # On rappelle la fonctions
             return self.status_intersections(liste_intersections, sommet,
                                              points_indentifies)
 
@@ -215,7 +226,15 @@ class calcul_polygon_eclairage():
         return points_indentifies
 
     def verif_si_projection(self, sommet, indice_sommet):
-        '''DocString'''
+        """Arguments :
+            - sommet : objet de type classe_point
+            - indice_sommet : indice du sommet dans le polygon
+        Retourne True si le sommet passé en argument a une projection"""
+
+        # Méthode basée sur le calcul de déterminant entre le point O, le
+        # sommet i, i+1 et i-1. Si le sommet i+1 et i-1 sont tous deux
+        # à droite ou à gauche du sommet i, alors il s'agit d'une projection.
+
         det1 = determinant_3_points(self.O, sommet,
             self.liste_sommets_polygon[indice_sommet-1])
 
@@ -233,11 +252,17 @@ class calcul_polygon_eclairage():
         return False
 
     def sommet_du_polygon(self, I):
-        '''DocString'''
+        """Arguments :
+            - I : objet de type classe_point
+        Retourne True et l'indice du sommet correspondant si le point I
+        est un sommet du polygon. Renvoie False et None sinon"""
+
+        # On parcours la liste des sommets du polygon et vérifie si il
+        # s'agit du point I
         for sommet in self.liste_sommets_polygon:
             if point_egaux(I, sommet):
-                return True
-        return False
+                return (True, self.liste_sommets_polygon.index(sommet))
+        return (False, None)
 
 
 def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
@@ -248,20 +273,18 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         - mode_demo : Boolean, True pour activer le mode de démonstration
     Retourne le polygon d'éclairage sous la forme d'une liste de points
     au format tuple : [(xA, yA), (xB, yB) ...]"""
-    per = calcul_polygon_eclairage(start_point, polygon, canvas, mode_demo)
+    per = calcul_polygon_eclairage(start_point, polygon, canvas, False)
     return per.return_polygon()
 
 
 if __name__ == '__main__':
+    import tkinter as tk
+    from point_in_polygon import point_in_polygon
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
     # [460, 126] probleme majeur
-    # [[437, 142], [305, 233], [82, 243], [420, 252]
-    #  [84, 113], [273, 287], [316, 71]
-
-    point = [316, 71]
-
+    point = [437, 142]
     polygone = [(221, 183), (221, 221), (90, 223), (91, 109),
                 (140, 106), (143, 168), (173, 168), (176, 70),
                 (46, 65), (50, 276), (223, 274), (225, 321),
@@ -274,12 +297,9 @@ if __name__ == '__main__':
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
                 (219, 124)]
-    
+    print(point_in_polygon(point, polygone, cnv))
     cnv.create_polygon(polygone, fill='grey')
-    cnv.create_oval(point[0]-1, point[1]-1, point[0]+1, point[1]+1, fill='blue')
     lumiere = polygon_eclairage(point, polygone, cnv, True)
-    cnv.create_polygon(lumiere, fill='yellow')
-    if point_in_polygon(point, polygone, cnv):
-        print("true")
-        
+    # cnv.create_polygon(lumiere, fill='yellow')
+    cnv.create_oval(point[0]-3, point[1]-3, point[0]+3, point[1]+3, fill='blue')
     wnd.mainloop()

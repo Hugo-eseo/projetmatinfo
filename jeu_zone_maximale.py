@@ -52,7 +52,7 @@ if __name__ == '__main__':
     taille_point = 3
 
     # parametre de jeu
-    nombre_gardien = 4
+    nombre_gardien = 3
 
     # parametres d'ia
     generations_auto = True
