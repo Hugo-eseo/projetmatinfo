@@ -303,5 +303,6 @@ if __name__ == '__main__':
     cnv.create_polygon(polygone, fill='grey')
     lumiere = polygon_eclairage(point, polygone, cnv, True)
     # cnv.create_polygon(lumiere, fill='yellow')
-    cnv.create_oval(point[0]-3, point[1]-3, point[0]+3, point[1]+3, fill='blue')
+    cnv.create_oval(point[0]-3, point[1]-3, point[0]+3, point[1]+3,
+                    fill='blue')
     wnd.mainloop()
