@@ -28,6 +28,10 @@ class point_classe():
     def return_tuple(self):
         return (self.x, self.y)
 
+    def move(self, delta_x, delta_y):
+        self.x += delta_x
+        self.y += delta_y
+
 
 class segment_classe():
     """Docstring"""
@@ -79,8 +83,8 @@ def determinant_3_points(point1, point2, point3):
 
 def point_appartient_segment(point, segment):
     """Arguments :
-        - point : objet de classe 'point'
-        - segment : objet de classe 'segment'
+        - point : objet de classe 'Point'
+        - segment : objet de classe 'Segment'
     Retourne True si 'point' appartient à 'segment' (bornes incluses).
     False sinon"""
     if abs(determinant_3_points(point, segment.A, segment.B)) < precision:
