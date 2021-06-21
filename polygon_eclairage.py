@@ -15,16 +15,15 @@ size = 4
 
 
 class calcul_polygon_eclairage():
-    """Docstring"""
+    """Classe utilisée par le calcul du polygon d'éclairage"""
 
     def __init__(self, start_point, polygon, canvas, mode_demo=False):
-        """Arguments :
+        """Atributs :
             - start_point : Tuple ou liste sous la forme (x, y) ou [x, y]
             - polygon : Liste de sommets sous la forme  [(xA, yA), (xB, yB)...]
             - canvas : Canvas de dessin
             - mode_demo : Boolean, True pour activer le mode de démonstration
-        Retourne le polygon d'éclairage sous la forme d'une liste de points
-        au format tuple : [(xA, yA), (xB, yB) ...]"""
+        """
 
         if not (type(start_point) == tuple or type(start_point) == list):
             return None
@@ -61,6 +60,9 @@ class calcul_polygon_eclairage():
                                     fill='white', tag='demo')
 
     def return_polygon(self):
+        """Retourne le polygon d'éclairage avec les paramètres
+        de la classe"""
+
         # Liste qui contiendra les intersections retenues (la plus proche
         # du point et les projections) avec leur status
         liste_intersections_def = list()
