@@ -21,7 +21,7 @@ class point_classe():
     def __str__(self):
         string = "(" + str(self.x) + "," + str(self.y) + ")"
         return string
-    
+
     def __eq__(self, other):
         return (self.x, self.y) == other
 
@@ -43,6 +43,7 @@ class segment_classe():
 
     def return_tuple(self):
         return [self.A.return_tuple(), self.B.return_tuple()]
+
 
 def det2(mat):
     """Argument :
@@ -110,6 +111,25 @@ def signe(n):
     if n > 0:
         return 1
     return -1
+
+
+def intersection_droites(droite1, droite2):
+    """Arguments :
+        - droite1, droite2 : objet de classe 'segment'
+    Retourne le point d'intersection de deux droites. None si les droites
+    sont //."""
+    a = determinant_3_points(droite2.A, droite2.B, droite1.B)
+    b = determinant_3_points(droite2.B, droite2.A, droite1.A)
+
+    # Si les droites sont parallèles
+    if a+b == 0:
+        return None
+
+    x = (a*droite1.A.x + b*droite1.B.x)/(a + b)
+    y = (a*droite1.A.y + b*droite1.B.y)/(a + b)
+    I = point_classe(x, y)
+
+    return I
 
 
 def intersection_segments(segment1, segment2):
@@ -201,3 +221,24 @@ def intersection_demi_droite_segment(demi_droite, segment):
         if point_appartient_demi_droite(I, demi_droite):
             return I
     return None
+
+
+def rotation(O, M, angle):
+    """
+    Arguments :
+        - O : objet de classe 'Point'
+        - M : objet de classe 'Point'
+        - angle : angle donné en degrés
+    Retourne :
+        - Un objet de classe 'Point' étant la rotation du point M
+        autour du centre O et d'angle 'angle'
+    """
+
+    # Angle converti en radian
+    angle = angle * math.pi / 180
+    # calcul de la rotation
+    xM = M.x - O.x
+    yM = M.y - O.y
+    x = xM*math.cos(angle) + yM*math.sin(angle) + O.x
+    y = - xM*math.sin(angle) + yM*math.cos(angle) + O.y
+    return (point_classe(x, y))

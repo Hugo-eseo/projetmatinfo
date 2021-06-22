@@ -291,25 +291,17 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
 
 if __name__ == '__main__':
     import tkinter as tk
+    import point_in_polygon as pip
+
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
-    point = [437, 142]
-    polygone = [(221, 183), (221, 221), (90, 223), (91, 109),
-                (140, 106), (143, 168), (173, 168), (176, 70),
-                (46, 65), (50, 276), (223, 274), (225, 321),
-                (81, 330), (82, 403), (116, 400), (112, 359),
-                (224, 357), (275, 356), (272, 317), (415, 315),
-                (415, 277), (481, 272), (482, 316), (530, 315),
-                (528, 225), (413, 227), (406, 162), (463, 158),
-                (460, 116), (495, 111), (496, 65), (542, 64),
-                (541, 21), (456, 21), (457, 81), (416, 81),
-                (416, 120), (369, 122), (319, 123), (315, 63),
-                (373, 57), (372, 23), (266, 22), (272, 122),
-                (219, 124)]
+    A = (490, 225)
+    polygone = [(332, 291), (438, 335), (751, 286), (725, 107), (287, 88)]
+    print(pip.point_in_polygon(A, polygone))
     cnv.create_polygon(polygone, fill='grey')
-    lumiere = polygon_eclairage(point, polygone, cnv, True)
+    lumiere = polygon_eclairage(A, polygone, cnv, True)
     # cnv.create_polygon(lumiere, fill='yellow')
-    cnv.create_oval(point[0]-3, point[1]-3, point[0]+3, point[1]+3,
+    cnv.create_oval(A[0]-3, A[1]-3, A[0]+3, A[1]+3,
                     fill='blue')
     wnd.mainloop()
