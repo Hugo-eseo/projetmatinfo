@@ -163,8 +163,9 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
 
 def point_in_polygon_classes(point_to_check, polygon, canvas, mode_demo=False):
     """Arguments :
-        - point_to_check : Tuple ou liste sous la forme (x, y) ou [x, y]
-        - polygon : Liste de sommets sous la forme [[xA, yA], [xB, yB] ...]
+        - point_to_check : objet de classe 'Point'
+        - polygon : Liste des sommets du polygone sous la forme d'objets
+                    de type 'Point'
         - canvas : Canvas de dessin
         - mode_demo : Boolean, True pour activer le mode de démonstration
     Retourne True si 'point_to_check' se trouve à l'intérieur de
@@ -183,21 +184,7 @@ def point_in_polygon_classes(point_to_check, polygon, canvas, mode_demo=False):
     canvas.delete("demo")
     # Récupération des informations de la fenêtre
     width = canvas.winfo_width()
-    """ 
-    # Création d'une liste contenant les segments du polygon
-    liste_segments_polygon = list()
-    A = point_classe(polygon[0][0], polygon[0][1])
-    for i in range(1, len(polygon)):
-        B = point_classe(polygon[i][0], polygon[i][1])
-        liste_segments_polygon.append(segment_classe(A, B))
-        A = B
-    B = point_classe(polygon[0][0], polygon[0][1])
-    liste_segments_polygon.append(segment_classe(A, B))
-
-    # Le point 0 dans tout l'algorithme correspond au point
-    # dont nous souhaitons savoir si il est dans le poylgon
-    O = point_classe(point_to_check[0], point_to_check[1])
-    """
+    
     O = point_to_check
     liste_segments_polygon = polygon
     # Cette fonction se base sur l'algorithme présenté dans cet article

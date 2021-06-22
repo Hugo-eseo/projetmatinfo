@@ -76,6 +76,7 @@ def creer_pop(nombre_gardiens, pop_taille, liste_sommets, cnv):
     pop = []
     for i in range(pop_taille):
         individu = []
+        # Création d'individus dans le polygone
         for j in range(nombre_gardiens):
             x = random.randint(0, 600)
             y = random.randint(0, 400)
@@ -103,7 +104,9 @@ def classer_pop(pop, nombre_gardiens, liste_sommets, canvas):
     if nombre_gardiens == 1:
         pop_sorted = []
         for indiv in pop:
-            polygone_lumiere = polygon_eclairage(indiv[0], liste_sommets, canvas)
+            polygone_lumiere = polygon_eclairage(indiv[0],
+                                                 liste_sommets,
+                                                 canvas)
             aire = aire_polygon(polygone_lumiere)
             pop_sorted.append((aire, indiv[0]))
         pop_sorted.sort(reverse=True)
@@ -112,14 +115,17 @@ def classer_pop(pop, nombre_gardiens, liste_sommets, canvas):
         for indiv in pop:
             polygone_lumiere = list()
             for gardien in indiv:
-                polygone_lumiere.append(polygon_eclairage(gardien, liste_sommets, canvas))
+                polygone_lumiere.append(polygon_eclairage(gardien, 
+                                                          liste_sommets, 
+                                                          canvas))
             aire = aire_multi_polygones(polygone_lumiere)
             pop_sorted.append((aire, indiv))
         pop_sorted.sort(reverse=True)
     return pop_sorted
 
 
-def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, cnv):
+def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, 
+                       liste_sommets, cnv):
     """
     Arguments :
         - pop_sorted : liste de tuples sous forme (int, [x, y]) représentant
@@ -140,10 +146,13 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, c
         pop.append(pop_sorted[0][1])
         # crossover des meilleurs individus entre eux
         for i in range(pop_taille // 2 - 1):
-            new_individu = [(pop_sorted[i][1][0] + pop_sorted[i+1][1][0]) // 2, (pop_sorted[i][1][1] + pop_sorted[i+1][1][1]) // 2]
+            new_individu = [(pop_sorted[i][1][0] + pop_sorted[i+1][1][0]) // 2,
+                            (pop_sorted[i][1][1] + pop_sorted[i+1][1][1]) // 2]
             # verification que le nouvel individu est bien dans le polygone
-            if new_individu[0] < 600 and new_individu[1] < 400 and new_individu[0] > 0 and new_individu[1] > 0: 
-                if point_in_polygon((new_individu[0], new_individu[1]), liste_sommets, cnv): 
+            if new_individu[0] < 600 and new_individu[1] < 400 and \
+               new_individu[0] > 0 and new_individu[1] > 0: 
+                if point_in_polygon((new_individu[0], new_individu[1]),
+                                    liste_sommets, cnv): 
                     pop.append(new_individu)
                 else:
                     pop.append(pop_sorted[i][1])
@@ -156,10 +165,15 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, c
         for i in range(pop_taille // 2 - 1):
             new_individu = list()
             for j in range(nombre_gardiens):
-                new_gardien = [(pop_sorted[i][1][j][0] + pop_sorted[i+1][1][j][0]) // 2, (pop_sorted[i][1][j][1] + pop_sorted[i+1][1][j][1]) // 2]
+                new_gardien = [(pop_sorted[i][1][j][0] +
+                                pop_sorted[i+1][1][j][0]) // 2,
+                                (pop_sorted[i][1][j][1] + 
+                                pop_sorted[i+1][1][j][1]) // 2]
                 # verification que le nouvel individu est bien dans le polygone
-                if new_gardien[0] < 600 and new_gardien[1] < 400 and new_gardien[0] > 0 and new_gardien[1] > 0: 
-                    if point_in_polygon((new_gardien[0], new_gardien[1]), liste_sommets, cnv):  
+                if new_gardien[0] < 600 and new_gardien[1] < 400 and \
+                   new_gardien[0] > 0 and new_gardien[1] > 0: 
+                    if point_in_polygon((new_gardien[0], new_gardien[1]),
+                                        liste_sommets, cnv):  
                         new_individu.append(new_gardien)
                     else:
                         new_individu.append(pop_sorted[i][1][j])
@@ -190,19 +204,23 @@ def mutation(pop, mutation_proba, nombre_gardiens, liste_sommets, cnv):
                 dirX = random.randint(0, 1)
                 dirY = random.randint(0, 1)
                 if dirX == 1 and dirY == 1:
-                    if point_in_polygon((indiv[0]+1, indiv[1]+1), liste_sommets, cnv):
+                    if point_in_polygon((indiv[0]+1, indiv[1]+1),
+                                        liste_sommets, cnv):
                         indiv[0] += 1
                         indiv[1] += 1
                 elif dirX == 1 and dirY == 0:
-                    if point_in_polygon((indiv[0]+1, indiv[1]-1), liste_sommets, cnv):
+                    if point_in_polygon((indiv[0]+1, indiv[1]-1),
+                                        liste_sommets, cnv):
                         indiv[0] += 1
                         indiv[1] -= 1
                 elif dirX == 0 and dirY == 1:
-                    if point_in_polygon((indiv[0]-1, indiv[1]+1), liste_sommets, cnv):
+                    if point_in_polygon((indiv[0]-1, indiv[1]+1),
+                                        liste_sommets, cnv):
                         indiv[0] -= 1
                         indiv[1] += 1
                 else:
-                    if point_in_polygon((indiv[0]-1, indiv[1]-1), liste_sommets, cnv):
+                    if point_in_polygon((indiv[0]-1, indiv[1]-1),
+                                        liste_sommets, cnv):
                         indiv[0] -= 1
                         indiv[1] -= 1
         return pop
@@ -213,19 +231,23 @@ def mutation(pop, mutation_proba, nombre_gardiens, liste_sommets, cnv):
                     dirX = random.randint(0, 1)
                     dirY = random.randint(0, 1)
                     if dirX == 1 and dirY == 1:
-                        if point_in_polygon((gardien[0]+1, gardien[1]+1), liste_sommets, cnv):
+                        if point_in_polygon((gardien[0]+1, gardien[1]+1),
+                                            liste_sommets, cnv):
                             gardien[0] += 1
                             gardien[1] += 1
                     elif dirX == 1 and dirY == 0:
-                        if point_in_polygon((gardien[0]+1, gardien[1]-1), liste_sommets, cnv):
+                        if point_in_polygon((gardien[0]+1, gardien[1]-1), 
+                                            liste_sommets, cnv):
                             gardien[0] += 1
                             gardien[1] -= 1
                     elif dirX == 0 and dirY == 1:
-                        if point_in_polygon((gardien[0]-1, gardien[1]+1), liste_sommets, cnv):
+                        if point_in_polygon((gardien[0]-1, gardien[1]+1), 
+                                            liste_sommets, cnv):
                             gardien[0] -= 1
                             gardien[1] += 1
                     else:
-                        if point_in_polygon((gardien[0]-1, gardien[1]-1), liste_sommets, cnv):
+                        if point_in_polygon((gardien[0]-1, gardien[1]-1), 
+                                            liste_sommets, cnv):
                             gardien[0] -= 1
                             gardien[1] -= 1
         return pop
@@ -293,7 +315,8 @@ def tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale):
         return True
 
 
-def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max, wnd, cnv, liste_sommets):
+def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil,
+                 generation_max, wnd, cnv, liste_sommets):
     """
     Arguments : 
         - pop_taille : nombre d'individu généré par génération 
@@ -312,32 +335,52 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_
                           du polygone dessinant le musée
         - pop_sorted[0][0] : aire du meilleur individu
     """
+    # préparation des données
     aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv, liste_sommets)
+    # création de la première population
     pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
+    # initialisation des variables
     termine = False
     generation = 1
+    # lancement de l'entrainement
     for i in range(generation_max):
         print(f'generation n°{generation}')
+        # classement de la population
         pop_sorted = classer_pop(pop, nombre_gardiens, liste_sommets, canvas)
+        # vérification du score par rapport au seuil
         termine = tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale)
+
+        # fin de l'entrainement (mission accomplie)
         if termine is True:
             print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-                  f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été obtenue à la {generation}ème "
+                  f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) "
+                  f"a été obtenue à la {generation}ème "
                   f"generation: {pop_sorted[0][1]}")
-            return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
-        print(f'aire meilleur individu : {pop_sorted[0][0]} ({(pop_sorted[0][0]/aire_totale)*100}%)')
-        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, canvas)
-        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, liste_sommets, canvas)
-        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, liste_sommets, canvas)
+            return pop_sorted[0][1], wnd, canvas, \
+                   liste_sommets, pop_sorted[0][0]
+        
+        # cross_over, mutation et création d'une nouvelle génération évoluée
+        print(f'aire meilleur individu : {pop_sorted[0][0]} '
+              f'({(pop_sorted[0][0]/aire_totale)*100}%)')
+        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, 
+                                            nombre_gardiens, liste_sommets,
+                                            canvas)
+        pop_mutation = mutation(pop_cross_over, mutation_proba,
+                                nombre_gardiens, liste_sommets, canvas)
+        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens,
+                            liste_sommets, canvas)
         generation += 1
     
+    # fin de l'entrainement (seuil non-atteint)
     print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-          f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été obtenue à la {generation}ème "
+          f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) "
+          f"a été obtenue à la {generation}ème "
           f"generation: {pop_sorted[0][1]}")
     return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
         
 
-def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max, liste_sommets):
+def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil,
+                          generation_max, liste_sommets):
     """
     Arguments : 
         - pop_taille : nombre d'individu généré par génération 
@@ -364,31 +407,47 @@ def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, ge
         termine = tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale)
         if termine is True:
             print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-                  f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été obtenue à la {generation}ème "
+                  f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été "
+                  f"obtenue à la {generation}ème "
                   f"generation: {pop_sorted[0][1]}")
-            return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
-        print(f'aire meilleur individu : {pop_sorted[0][0]} ({(pop_sorted[0][0]/aire_totale)*100}%)')
-        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, canvas)
-        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, liste_sommets, canvas)
-        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, liste_sommets, canvas)
+            return pop_sorted[0][1], wnd, canvas, \
+                   liste_sommets, pop_sorted[0][0]
+        print(f'aire meilleur individu : {pop_sorted[0][0]} '
+              f'({(pop_sorted[0][0]/aire_totale)*100}%)')
+        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille,
+                                            nombre_gardiens, liste_sommets,
+                                            canvas)
+        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens,
+                                liste_sommets, canvas)
+        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens,
+                            liste_sommets, canvas)
         generation += 1
     
     print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-          f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été obtenue à la {generation}ème "
+          f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) "
+          f"a été obtenue à la {generation}ème "
           f"generation: {pop_sorted[0][1]}")
     return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
 
 
 if __name__ == '__main__':
     taille_point = 3
-    indiv, wnd, canvas, liste_sommets, aire = entrainement_avec_wnd(10, 1, 0.05, 0.8, 10)
+    indiv, wnd, canvas, liste_sommets, aire = entrainement_avec_wnd(10, 1, 0.05,
+                                                                    0.8, 10)
     canvas.create_polygon(liste_sommets, fill='grey')
     if type(indiv[0]) is list:
         for gardien in indiv:
-            canvas.create_polygon(polygon_eclairage(gardien, liste_sommets, canvas), fill='yellow')
+            canvas.create_polygon(polygon_eclairage(gardien, liste_sommets,
+                                                    canvas),
+                                  fill='yellow')
         for gardien in indiv:
-            canvas.create_oval(gardien[0]-taille_point, gardien[1]-taille_point, gardien[0]+taille_point, gardien[1]+taille_point, fill='red')
+            canvas.create_oval(gardien[0]-taille_point, gardien[1]-taille_point,
+                               gardien[0]+taille_point, gardien[1]+taille_point,
+                               fill='red')
     else:
-        canvas.create_polygon(polygon_eclairage(indiv, liste_sommets, canvas), fill='yellow')
-        canvas.create_oval(indiv[0]-taille_point, indiv[1]-taille_point, indiv[0]+taille_point, indiv[1]+taille_point, fill='red')
+        canvas.create_polygon(polygon_eclairage(indiv, liste_sommets, canvas),
+                              fill='yellow')
+        canvas.create_oval(indiv[0]-taille_point, indiv[1]-taille_point,
+                           indiv[0]+taille_point, indiv[1]+taille_point, 
+                           fill='red')
     wnd.mainloop()

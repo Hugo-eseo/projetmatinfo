@@ -1,7 +1,7 @@
 import tkinter as tk
+import math
 from shared import point_classe, segment_classe
 from point_in_polygon import point_in_polygon_classes
-import math
 from générateur_map import generateur, zone_victoire
 
 class Gardien:
