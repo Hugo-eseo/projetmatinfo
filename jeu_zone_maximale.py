@@ -4,9 +4,9 @@ from polygone_predefini import polygone_predefini
 from polygone_aléatoire import polygone_aleatoire
 from training import entrainement
 from polygon_eclairage import polygon_eclairage
-import threading
 from point_in_polygon import point_in_polygon_classes
 from aire_multi_polygones import aire_multi_polygones
+from aire_polygone import aire_polygone
 
 
 def jouer(event):
@@ -23,7 +23,7 @@ def jouer(event):
         polygone_lumiere = polygon_eclairage(gardien.return_tuple(), sommets, cnv)
         liste_polygones.append(polygone_lumiere)
         score_joueur = aire_multi_polygones(liste_polygones)
-        aire_joueur.set(f'Aire joueur : {int(score_joueur)}')
+        aire_joueur.set(f'Aire joueur : {int(score_joueur)}   ({round(score_joueur/aire_totale * 100, 2)}%)')
         wnd.update()
         if gardien_actuels == nombre_gardien:
             # calculer un positionnement presque optimal    
@@ -34,16 +34,17 @@ def jouer(event):
                                                             generations_maximum,
                                                             wnd,
                                                             cnv)
-            aire_ia.set(f'Aire IA : {int(score_ia)}')
+            aire_ia.set(f'Aire IA : {int(score_ia)}   ({round(score_ia/aire_totale * 100, 2)}%)')
             # afficher le resultat
             if type(indiv[0]) is list:
                 for gardien in indiv:
                     cnv.create_polygon(polygon_eclairage(gardien, liste_sommets, cnv), fill='yellow')
                 for gardien in indiv:
-                    cnv.create_oval(gardien[0]-taille_point, gardien[1]-taille_point, gardien[0]+taille_point, gardien[1]+taille_point, fill='red', tag='gardien')
+                    cnv.create_oval(gardien[0]-taille_point, gardien[1]-taille_point, gardien[0]+taille_point, gardien[1]+taille_point, fill='red', tag='ia')
             else:
                 cnv.create_polygon(polygon_eclairage(indiv, liste_sommets, cnv), fill='yellow')
-                cnv.create_oval(indiv[0]-taille_point, indiv[1]-taille_point, indiv[0]+taille_point, indiv[1]+taille_point, fill='red', tag='gardien')
+                cnv.create_oval(indiv[0]-taille_point, indiv[1]-taille_point, indiv[0]+taille_point, indiv[1]+taille_point, fill='red', tag='ia')
+            cnv.tag_raise('gardien')
 
 
 if __name__ == '__main__':
@@ -52,16 +53,16 @@ if __name__ == '__main__':
     taille_point = 3
 
     # parametre de jeu
-    nombre_gardien = 3
+    nombre_gardien = 1
 
     # parametres d'ia
     generations_auto = True
-    nombre_individus = 10
+    nombre_individus = 25
     taux_mutation = 0.05
     seuil_maximal = 0.9
 
     if generations_auto:
-        generations_maximum = nombre_gardien * 15
+        generations_maximum = nombre_gardien * 20
     else:
         generations_maximum = 15
 
@@ -79,10 +80,13 @@ if __name__ == '__main__':
 
     # dessiner le polgyone
     # segments = polygone_aleatoire(None, cnv)
+
     segments = polygone_predefini(cnv, None)
     f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
     sommets = eval(f.read())
     f.close()        
+
+    aire_totale = aire_polygone(sommets)
 
     # jouer
     gardien_actuels = 0
@@ -91,6 +95,3 @@ if __name__ == '__main__':
 
 
     wnd.mainloop()
-
-
-# points qui ont l'air de bug : [175, 117] | [57, 155] (l'un ou l'autre)

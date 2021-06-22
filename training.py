@@ -2,7 +2,9 @@ import numpy as np
 from polygon_eclairage import polygon_eclairage
 from aire_multi_polygones import aire_multi_polygones
 import tkinter as tk
-
+from point_in_polygon import point_in_polygon
+import random
+import time
 
 # fonction de calcul de l'aire
 def aire_polygon(points_coords):
@@ -29,7 +31,6 @@ def preparation():
         - wnd : objet de type tkinter.Tk 
     """
     # recuperation de la carte
-    carte = np.loadtxt('P2/projetmatinfo/carte.txt', dtype=np.uint8)
 
     # recuperation des sommets du polygone
     f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
@@ -45,24 +46,22 @@ def preparation():
     canvas.pack()
     # creation de la map
     canvas.create_polygon(liste_sommets, fill='grey')
-    return carte, liste_sommets, aire_totale, canvas, wnd
+    return liste_sommets, aire_totale, canvas, wnd
 
 def preparation_sans_wnd(wnd, cnv):
     """
     Arguments :
-        - canvas : objets de type tkinter.Canvas 
+        - canvas : objet de type tkinter.Canvas 
         - wnd : objet de type tkinter.Tk 
     Retourne :
         - carte : numpy.ndarray representant le musée
         - liste_sommets : liste d'objets de type tuple représentant les sommets
                           du polygone dessinant le musée
         - aire_totale : int répresentant l'aire de tout le musée
-        - canvas : objets de type tkinter.Canvas 
+        - canvas : objet de type tkinter.Canvas 
         - wnd : objet de type tkinter.Tk 
     """
-    # recuperation de la carte
-    carte = np.loadtxt('P2/projetmatinfo/carte.txt', dtype=np.uint8)
-
+    
     # recuperation des sommets du polygone
     f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
     liste_sommets = eval(f.read())
@@ -71,15 +70,17 @@ def preparation_sans_wnd(wnd, cnv):
     # calcul de l'aire du polygone
     aire_totale = aire_polygon(liste_sommets)
 
-    return carte, liste_sommets, aire_totale, wnd, cnv
+    return liste_sommets, aire_totale, wnd, cnv
 
 
-def creer_pop(nombre_gardiens, pop_taille, carte):
+def creer_pop(nombre_gardiens, pop_taille, liste_sommets, cnv):
     """
     Arguments :
         - nombre_gardiens : nombre de gardiens à placer
         - pop_taille : nombre d'individu généré par génération
-        - carte : objet de type numpy.ndarray représentant le musée
+        - liste_sommets : liste d'objets de type tuple représentant les sommets
+                          du polygone dessinant le musée
+        - cnv : objet de type tkinter.Canvas 
     Retourne :
         - pop : liste de listes sous forme [x, y] représentant les 
                 individus de la génération
@@ -88,11 +89,11 @@ def creer_pop(nombre_gardiens, pop_taille, carte):
     for i in range(pop_taille):
         individu = []
         for j in range(nombre_gardiens):
-            cell = None
-            while cell != 0:
-                x = np.random.randint(0, 600)
-                y = np.random.randint(0, 400)
-                cell = carte[y][x]
+            x = random.randint(0, 600)
+            y = random.randint(0, 400)
+            while not point_in_polygon((x, y), liste_sommets, cnv):
+                x = random.randint(0, 600)
+                y = random.randint(0, 400)
             individu.append([x, y])
         pop.append(individu)
     return pop
@@ -130,7 +131,7 @@ def classer_pop(pop, nombre_gardiens, liste_sommets, canvas):
     return pop_sorted
 
 
-def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte):
+def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, cnv):
     """
     Arguments :
         - pop_sorted : liste de tuples sous forme (int, [x, y]) représentant
@@ -138,7 +139,9 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte):
                        polygone de lumière
         - pop_taille : nombre d'individu généré par génération 
         - nombre_gardiens : nombre de gardiens à placer
-        - carte : objet de type numpy.ndarray représentant le musée
+        - liste_sommets : liste d'objets de type tuple représentant les sommets
+                          du polygone dessinant le musée
+        - cnv : objet de type tkinter.Canvas
     Retourne :
         - pop : liste de listes sous forme [x, y] représentant les 
                 individus de la génération après cross_over
@@ -152,7 +155,7 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte):
             new_individu = [(pop_sorted[i][1][0] + pop_sorted[i+1][1][0]) // 2, (pop_sorted[i][1][1] + pop_sorted[i+1][1][1]) // 2]
             # verification que le nouvel individu est bien dans le polygone
             if new_individu[0] < 600 and new_individu[1] < 400 and new_individu[0] > 0 and new_individu[1] > 0: 
-                if carte[new_individu[1]][new_individu[0]] == 0: 
+                if point_in_polygon((new_individu[0], new_individu[1]), liste_sommets, cnv): 
                     pop.append(new_individu)
                 else:
                     pop.append(pop_sorted[i][1])
@@ -168,7 +171,7 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte):
                 new_gardien = [(pop_sorted[i][1][j][0] + pop_sorted[i+1][1][j][0]) // 2, (pop_sorted[i][1][j][1] + pop_sorted[i+1][1][j][1]) // 2]
                 # verification que le nouvel individu est bien dans le polygone
                 if new_gardien[0] < 600 and new_gardien[1] < 400 and new_gardien[0] > 0 and new_gardien[1] > 0: 
-                    if carte[new_gardien[1]][new_gardien[0]] == 0: 
+                    if point_in_polygon((new_gardien[0], new_gardien[1]), liste_sommets, cnv):  
                         new_individu.append(new_gardien)
                     else:
                         new_individu.append(pop_sorted[i][1][j])
@@ -178,7 +181,7 @@ def moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte):
         return pop
 
 
-def mutation(pop, mutation_proba, nombre_gardiens, carte):
+def mutation(pop, mutation_proba, nombre_gardiens, liste_sommets, cnv):
     """
     Arguments :
         - pop : liste de listes sous forme [x, y] représentant les 
@@ -186,66 +189,70 @@ def mutation(pop, mutation_proba, nombre_gardiens, carte):
         - mutation_proba : float representant la probabilité de mutation
                            (pas plus de 0.1)
         - nombre_gardiens : nombre de gardiens à placer
-        - carte : objet de type numpy.ndarray représentant le musée
+        - liste_sommets : liste d'objets de type tuple représentant les sommets
+                          du polygone dessinant le musée
+        - cnv : objet de type tkinter.Canvas
     Retourne :
         - pop : liste de listes sous forme [x, y] représentant les 
                 individus de la génération après mutation
     """
     if nombre_gardiens == 1:
         for indiv in pop:
-            if np.random.uniform(0, 1) < mutation_proba:
-                dirX = np.random.randint(0, 1)
-                dirY = np.random.randint(0, 1)
+            if random.random() < mutation_proba:
+                dirX = random.randint(0, 1)
+                dirY = random.randint(0, 1)
                 if dirX == 1 and dirY == 1:
-                    if carte[indiv[1]+1][indiv[0]+1] == 0:
+                    if point_in_polygon((indiv[0]+1, indiv[1]+1), liste_sommets, cnv):
                         indiv[0] += 1
                         indiv[1] += 1
                 elif dirX == 1 and dirY == 0:
-                    if carte[indiv[1]-1][indiv[0]+1] == 0:
+                    if point_in_polygon((indiv[0]+1, indiv[1]-1), liste_sommets, cnv):
                         indiv[0] += 1
                         indiv[1] -= 1
                 elif dirX == 0 and dirY == 1:
-                    if carte[indiv[1]+1][indiv[0]-1] == 0:
+                    if point_in_polygon((indiv[0]-1, indiv[1]+1), liste_sommets, cnv):
                         indiv[0] -= 1
                         indiv[1] += 1
                 else:
-                    if carte[indiv[1]-1][indiv[0]-1] == 0:
+                    if point_in_polygon((indiv[0]-1, indiv[1]-1), liste_sommets, cnv):
                         indiv[0] -= 1
                         indiv[1] -= 1
         return pop
     else:
         for indiv in pop:
             for gardien in indiv:
-                if np.random.uniform(0, 1) < mutation_proba:
-                    dirX = np.random.randint(0, 1)
-                    dirY = np.random.randint(0, 1)
+                if random.random() < mutation_proba:
+                    dirX = random.randint(0, 1)
+                    dirY = random.randint(0, 1)
                     if dirX == 1 and dirY == 1:
-                        if carte[gardien[1]+1][gardien[0]+1] == 0:
+                        if point_in_polygon((gardien[0]+1, gardien[1]+1), liste_sommets, cnv):
                             gardien[0] += 1
                             gardien[1] += 1
                     elif dirX == 1 and dirY == 0:
-                        if carte[gardien[1]-1][gardien[0]+1] == 0:
+                        if point_in_polygon((gardien[0]+1, gardien[1]-1), liste_sommets, cnv):
                             gardien[0] += 1
                             gardien[1] -= 1
                     elif dirX == 0 and dirY == 1:
-                        if carte[gardien[1]+1][gardien[0]-1] == 0:
+                        if point_in_polygon((gardien[0]-1, gardien[1]+1), liste_sommets, cnv):
                             gardien[0] -= 1
                             gardien[1] += 1
                     else:
-                        if carte[gardien[1]-1][gardien[0]-1] == 0:
+                        if point_in_polygon((gardien[0]-1, gardien[1]-1), liste_sommets, cnv):
                             gardien[0] -= 1
                             gardien[1] -= 1
         return pop
 
 
-def completer_pop(pop, pop_taille, nombre_gardiens, carte):
+def completer_pop(pop, pop_taille, nombre_gardiens, liste_sommets, cnv):
     """
     Arguments :
         - pop : liste de listes sous forme [x, y] représentant les 
                 individus de la génération après mutation
         - pop_taille : nombre d'individu généré par génération 
         - nombre_gardiens : nombre de gardiens à placer
-        - carte : objet de type numpy.ndarray représentant le musée
+        - liste_sommets : liste d'objets de type tuple représentant les sommets
+                          du polygone dessinant le musée
+        - cnv : objet de type tkinter.Canvas
     Retourne :
         - new_pop : liste de listes sous forme [x, y] représentant les 
                     individus de la nouvelle génération
@@ -256,11 +263,11 @@ def completer_pop(pop, pop_taille, nombre_gardiens, carte):
             new_pop.append([indiv])
         nombre_manquant = pop_taille - len(pop)
         for i in range(nombre_manquant):
-            cell = None
-            while cell != 0:
-                x = np.random.randint(0, 600)
-                y = np.random.randint(0, 400)
-                cell = carte[y][x]
+            x = random.randint(0, 400)
+            y = random.randint(0, 400)
+            while not point_in_polygon((x, y), liste_sommets, cnv):
+                x = random.randint(0, 600)
+                y = random.randint(0, 400)
             new_pop.append([[x, y]])
         return new_pop
     else:
@@ -271,11 +278,11 @@ def completer_pop(pop, pop_taille, nombre_gardiens, carte):
         for i in range(nombre_manquant):
             individu = []
             for j in range(nombre_gardiens):
-                cell = None
-                while cell != 0:
-                    x = np.random.randint(0, 600)
-                    y = np.random.randint(0, 400)
-                    cell = carte[y][x]
+                x = random.randint(0, 600)
+                y = random.randint(0, 400)
+                while not point_in_polygon((x, y), liste_sommets, cnv):
+                    x = random.randint(0, 600)
+                    y = random.randint(0, 400)
                 individu.append([x, y])
             new_pop.append(individu)
         return new_pop
@@ -317,8 +324,8 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_
                           du polygone dessinant le musée
         - pop_sorted[0][0] : aire du meilleur individu
     """
-    carte, liste_sommets, aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv)
-    pop = creer_pop(nombre_gardiens, pop_taille, carte)
+    liste_sommets, aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv)
+    pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
     termine = False
     generation = 1
     for i in range(generation_max):
@@ -331,9 +338,9 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_
                   f"generation: {pop_sorted[0][1]}")
             return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
         print(f'aire meilleur individu : {pop_sorted[0][0]} ({(pop_sorted[0][0]/aire_totale)*100}%)')
-        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte)
-        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, carte)
-        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, carte)
+        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, canvas)
+        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, liste_sommets, canvas)
+        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, liste_sommets, canvas)
         generation += 1
     
     print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
@@ -351,8 +358,6 @@ def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, ge
                            (pas plus de 0.1)
         - seuil : float représentant le taux de remplissage de l'aire souhaité
         - generation_max : nombre de generations maximum durant l'entrainement
-        - wnd : objet de type tkinter.Tk 
-        - cnv : objets de type tkinter.Canvas 
     Retourne : 
         - pop_sorted[1][0] : position du meilleur individu
         - wnd : objet de type tkinter.Tk 
@@ -361,8 +366,8 @@ def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, ge
                           du polygone dessinant le musée
         - pop_sorted[0][0] : aire du meilleur individu
     """
-    carte, liste_sommets, aire_totale, wnd, canvas  = preparation()
-    pop = creer_pop(nombre_gardiens, pop_taille, carte)
+    liste_sommets, aire_totale, wnd, canvas  = preparation()
+    pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
     termine = False
     generation = 1
     for i in range(generation_max):
@@ -375,9 +380,9 @@ def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, ge
                   f"generation: {pop_sorted[0][1]}")
             return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
         print(f'aire meilleur individu : {pop_sorted[0][0]} ({(pop_sorted[0][0]/aire_totale)*100}%)')
-        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, carte)
-        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, carte)
-        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, carte)
+        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille, nombre_gardiens, liste_sommets, canvas)
+        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens, liste_sommets, canvas)
+        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens, liste_sommets, canvas)
         generation += 1
     
     print(f"Une solution satisfaisante à {pop_sorted[0][0]} "

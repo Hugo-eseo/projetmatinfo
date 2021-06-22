@@ -10,6 +10,8 @@ from shared import point_classe, segment_classe,\
     intersection_demi_droite_segment, dist,\
     point_egaux, point_appartient_segment, determinant_3_points, signe
 
+import time 
+
 # Taille des point affichés sur le canvas
 size = 4
 
@@ -284,7 +286,9 @@ if __name__ == '__main__':
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
     # [460, 126] probleme majeur
-    point = [437, 142]
+    # [[173, 168], [374, 249], [413, 225]]
+
+    point = [374, 249]
     polygone = [(221, 183), (221, 221), (90, 223), (91, 109),
                 (140, 106), (143, 168), (173, 168), (176, 70),
                 (46, 65), (50, 276), (223, 274), (225, 321),
@@ -297,9 +301,12 @@ if __name__ == '__main__':
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
                 (219, 124)]
-    print(point_in_polygon(point, polygone, cnv))
+    t1 = time.time()
+    point_in_polygon(point, polygone, cnv)
+    t2 = time.time()
     cnv.create_polygon(polygone, fill='grey')
     lumiere = polygon_eclairage(point, polygone, cnv, True)
-    # cnv.create_polygon(lumiere, fill='yellow')
-    cnv.create_oval(point[0]-3, point[1]-3, point[0]+3, point[1]+3, fill='blue')
+    print('temps :', (t2-t1), 's')
+    cnv.create_polygon(lumiere, fill='yellow')
+    cnv.create_oval(point[0]-1, point[1]-1, point[0]+1, point[1]+1, fill='blue')
     wnd.mainloop()
