@@ -3,11 +3,7 @@
 
 from shared import point_classe, angle_deux_points, segment_classe
 from point_in_polygon import point_in_polygon_classes
-import numpy as np
 import random
-from PIL import Image, ImageDraw
-
-
 
 def polygone_aleatoire(nombre_de_points, canvas):
     """
@@ -62,19 +58,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
     for elem in sommets_polygon:
         sommets_tuple.append(elem.return_tuple())
 
-    # recuperer la matrice de la carte (temporaire)
-    image = Image.new("RGB", (600, 400), color=(255, 255, 255))
-    polygone = ImageDraw.Draw(image)
-    polygone.polygon(sommets_tuple, fill="black")
-    carte = np.asarray(image.convert('L'))
-    np.savetxt("P2/projetmatinfo/carte.txt", carte, fmt='%3d')
-    
-    # recuperer les sommets du polygone (temporaire)
-    f = open('P2/projetmatinfo/sommets_polygone.txt','w')
-    f.write(str(sommets_tuple))
-    f.close()
-
     # dessiner le polygone
     canvas.create_polygon(sommets_tuple, fill='grey')
 
-    return liste_segments
+    return liste_segments, sommets_tuple

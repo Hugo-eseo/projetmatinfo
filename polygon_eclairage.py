@@ -10,23 +10,21 @@ from shared import point_classe, segment_classe,\
     intersection_demi_droite_segment, dist,\
     point_egaux, point_appartient_segment, determinant_3_points, signe
 
-import time 
-
 # Taille des point affichés sur le canvas
 size = 4
+precision = 0.01
 
 
 class calcul_polygon_eclairage():
-    """Docstring"""
+    """Classe utilisée par le calcul du polygon d'éclairage"""
 
     def __init__(self, start_point, polygon, canvas, mode_demo=False):
-        """Arguments :
+        """Atributs :
             - start_point : Tuple ou liste sous la forme (x, y) ou [x, y]
             - polygon : Liste de sommets sous la forme  [(xA, yA), (xB, yB)...]
             - canvas : Canvas de dessin
             - mode_demo : Boolean, True pour activer le mode de démonstration
-        Retourne le polygon d'éclairage sous la forme d'une liste de points
-        au format tuple : [(xA, yA), (xB, yB) ...]"""
+        """
 
         if not (type(start_point) == tuple or type(start_point) == list):
             return None
@@ -63,6 +61,9 @@ class calcul_polygon_eclairage():
                                     fill='white', tag='demo')
 
     def return_polygon(self):
+        """Retourne le polygon d'éclairage avec les paramètres
+        de la classe"""
+
         # Liste qui contiendra les intersections retenues (la plus proche
         # du point et les projections) avec leur status
         liste_intersections_def = list()
@@ -152,17 +153,26 @@ class calcul_polygon_eclairage():
             intersections_sur_segment.sort()
             # Une fois dans l'ordre
             for intersection in intersections_sur_segment:
-                # On leur attribut leur numéro
-                count += 1
                 I = (intersection[1][0].x, intersection[1][0].y)
-                # On sauvegarde les coordonnées de l'intersections dans une
-                # nouvelle liste
-                liste_intersections_ordones.append(I)
-                liste_intersections_def.remove(intersection[1])
-                # Dans le mode de démo, on affiche leur numéro à côté
-                if self.mode_demo:
-                    self.canvas.create_text(I[0], I[1]-10, text=count,
-                                            tag='demo')
+
+                # Détection des doublons
+                doublons = False
+                for point in liste_intersections_ordones:
+                    if abs(I[0]-point[0]) < precision and\
+                            abs(I[1]-point[1]) < precision:
+                        doublons = True
+
+                if not doublons:
+                    # On leur attribut leur numéro
+                    count += 1
+                    # On sauvegarde les coordonnées de l'intersections dans une
+                    # nouvelle liste
+                    liste_intersections_ordones.append(I)
+                    liste_intersections_def.remove(intersection[1])
+                    # Dans le mode de démo, on affiche leur numéro à côté
+                    if self.mode_demo:
+                        self.canvas.create_text(I[0], I[1]-10, text=count,
+                                                tag='demo')
         # On retourne la liste ordonnée des intersections
         # correspondant au polygon d'éclairage
         return liste_intersections_ordones
@@ -275,7 +285,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         - mode_demo : Boolean, True pour activer le mode de démonstration
     Retourne le polygon d'éclairage sous la forme d'une liste de points
     au format tuple : [(xA, yA), (xB, yB) ...]"""
-    per = calcul_polygon_eclairage(start_point, polygon, canvas, False)
+    per = calcul_polygon_eclairage(start_point, polygon, canvas, mode_demo)
     return per.return_polygon()
 
 
@@ -305,7 +315,7 @@ if __name__ == '__main__':
     point_in_polygon(point, polygone, cnv)
     t2 = time.time()
     cnv.create_polygon(polygone, fill='grey')
-    lumiere = polygon_eclairage(point, polygone, cnv, True)
+    lumiere = polygon_eclairage(point, polygone, cnv)
     print('temps :', (t2-t1), 's')
     cnv.create_polygon(lumiere, fill='yellow')
     cnv.create_oval(point[0]-1, point[1]-1, point[0]+1, point[1]+1, fill='blue')

@@ -1,4 +1,3 @@
-import numpy as np
 from polygon_eclairage import polygon_eclairage
 from aire_multi_polygones import aire_multi_polygones
 import tkinter as tk
@@ -20,7 +19,7 @@ def aire_polygon(points_coords):
     return int(abs(0.5*(sommeX_Y1-sommeY_X1)))
 
 
-def preparation():
+def preparation(liste_sommets):
     """
     Retourne :
         - carte : numpy.ndarray representant le musée
@@ -30,13 +29,7 @@ def preparation():
         - canvas : objets de type tkinter.Canvas 
         - wnd : objet de type tkinter.Tk 
     """
-    # recuperation de la carte
-
-    # recuperation des sommets du polygone
-    f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
-    liste_sommets = eval(f.read())
-    f.close()
-
+    
     # calcul de l'aire du polygone
     aire_totale = aire_polygon(liste_sommets)
 
@@ -46,9 +39,9 @@ def preparation():
     canvas.pack()
     # creation de la map
     canvas.create_polygon(liste_sommets, fill='grey')
-    return liste_sommets, aire_totale, canvas, wnd
+    return aire_totale, canvas, wnd
 
-def preparation_sans_wnd(wnd, cnv):
+def preparation_sans_wnd(wnd, cnv, liste_sommets):
     """
     Arguments :
         - canvas : objet de type tkinter.Canvas 
@@ -62,15 +55,10 @@ def preparation_sans_wnd(wnd, cnv):
         - wnd : objet de type tkinter.Tk 
     """
     
-    # recuperation des sommets du polygone
-    f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
-    liste_sommets = eval(f.read())
-    f.close()
-
     # calcul de l'aire du polygone
     aire_totale = aire_polygon(liste_sommets)
 
-    return liste_sommets, aire_totale, wnd, cnv
+    return aire_totale, wnd, cnv
 
 
 def creer_pop(nombre_gardiens, pop_taille, liste_sommets, cnv):
@@ -305,7 +293,7 @@ def tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale):
         return True
 
 
-def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max, wnd, cnv):
+def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max, wnd, cnv, liste_sommets):
     """
     Arguments : 
         - pop_taille : nombre d'individu généré par génération 
@@ -324,7 +312,7 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_
                           du polygone dessinant le musée
         - pop_sorted[0][0] : aire du meilleur individu
     """
-    liste_sommets, aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv)
+    aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv, liste_sommets)
     pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
     termine = False
     generation = 1
@@ -349,7 +337,7 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_
     return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
         
 
-def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max):
+def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, generation_max, liste_sommets):
     """
     Arguments : 
         - pop_taille : nombre d'individu généré par génération 
@@ -366,7 +354,7 @@ def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil, ge
                           du polygone dessinant le musée
         - pop_sorted[0][0] : aire du meilleur individu
     """
-    liste_sommets, aire_totale, wnd, canvas  = preparation()
+    aire_totale, wnd, canvas  = preparation(liste_sommets)
     pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
     termine = False
     generation = 1

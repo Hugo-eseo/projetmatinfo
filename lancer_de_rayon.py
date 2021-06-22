@@ -5,7 +5,7 @@ from shared import point_classe, segment_classe, intersection_segments, dist
 from rotation import rotation
 
 
-def rayon_obsatcles_demo(canvas, position_gardien, nombre_rayons, 
+def rayon_obstacles_demo(canvas, position_gardien, nombre_rayons, 
                          angle_de_vue, direction_regard, segments_polygone,
                          demo=False):
         """
@@ -92,3 +92,4 @@ def rayon_obsatcles_demo(canvas, position_gardien, nombre_rayons,
                 canvas.create_line(position_gardien.return_tuple(), I.return_tuple(), fill='yellow', tag='light')
             # On passe au rayon suivant en effectuant une rotation du point B
             B = rotation(position_gardien, B, angle)
+

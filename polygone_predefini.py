@@ -3,8 +3,6 @@
 
 from shared import point_classe, segment_classe
 import random
-from PIL import Image, ImageDraw
-import numpy as np
 
 def polygone_predefini(canvas, numero_predefini):
     """
@@ -54,21 +52,8 @@ def polygone_predefini(canvas, numero_predefini):
     B = transformed_database[-1]
     liste_segments.append(segment_classe(A, B))
 
-    # recuperer la matrice de la carte (temporaire)
-    image = Image.new("RGB", (600, 400), color=(255,255,255))
-    polygone = ImageDraw.Draw(image)
-    polygone.polygon(database[numero_predefini], fill="black")
-    carte = np.asarray(image.convert('L'))
-    np.savetxt("P2/projetmatinfo/carte.txt", carte, fmt='%3d')
-
-    # recuperer les sommets du polygone (temporaire)
-    f = open('P2/projetmatinfo/sommets_polygone.txt','w')
-    f.write(str(database[numero_predefini]))
-    f.close()
-
-
     # dessiner le polygone
     canvas.create_polygon(database[numero_predefini], fill='grey')
 
-    return liste_segments
+    return liste_segments, database[numero_predefini]
 

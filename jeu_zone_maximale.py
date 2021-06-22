@@ -26,14 +26,19 @@ def jouer(event):
         aire_joueur.set(f'Aire joueur : {int(score_joueur)}   ({round(score_joueur/aire_totale * 100, 2)}%)')
         wnd.update()
         if gardien_actuels == nombre_gardien:
-            # calculer un positionnement presque optimal    
+            # calculer un positionnement presque optimal 
+            if mode_1v1:
+                generations_maximum = nombre_gardien * 30
+                seuil_maximal = score_joueur/aire_totale * 1.0001
+                print(seuil_maximal)
             indiv, _, _, liste_sommets, score_ia = entrainement(nombre_individus,
                                                             nombre_gardien,
                                                             taux_mutation,
                                                             seuil_maximal,
                                                             generations_maximum,
                                                             wnd,
-                                                            cnv)
+                                                            cnv,
+                                                            sommets)
             aire_ia.set(f'Aire IA : {int(score_ia)}   ({round(score_ia/aire_totale * 100, 2)}%)')
             # afficher le resultat
             if type(indiv[0]) is list:
@@ -52,14 +57,16 @@ if __name__ == '__main__':
     width, height = 600, 400
     taille_point = 3
 
-    # parametre de jeu
-    nombre_gardien = 1
+    # parametres de jeu
+    map_aleatoire = False
+    nombre_gardien = 2
 
     # parametres d'ia
     generations_auto = True
+    mode_1v1 = True
     nombre_individus = 25
     taux_mutation = 0.05
-    seuil_maximal = 0.9
+    seuil_maximal = 1
 
     if generations_auto:
         generations_maximum = nombre_gardien * 20
@@ -79,19 +86,17 @@ if __name__ == '__main__':
     wnd.update()
 
     # dessiner le polgyone
-    # segments = polygone_aleatoire(None, cnv)
+    if map_aleatoire is True:
+        segments, sommets = polygone_aleatoire(None, cnv)
+    else:
+        segments, sommets = polygone_predefini(cnv, None)       
 
-    segments = polygone_predefini(cnv, None)
-    f = open("P2/projetmatinfo/sommets_polygone.txt", 'r')
-    sommets = eval(f.read())
-    f.close()        
-
+    # calcul de l'aire de l'entièreté musée
     aire_totale = aire_polygone(sommets)
 
     # jouer
     gardien_actuels = 0
     liste_polygones = []
     cnv.bind('<Button-1>', jouer)
-
 
     wnd.mainloop()
