@@ -12,6 +12,7 @@ from shared import point_classe, segment_classe,\
 
 # Taille des point affichés sur le canvas
 size = 4
+precision = 0.01
 
 
 class calcul_polygon_eclairage():
@@ -152,17 +153,26 @@ class calcul_polygon_eclairage():
             intersections_sur_segment.sort()
             # Une fois dans l'ordre
             for intersection in intersections_sur_segment:
-                # On leur attribut leur numéro
-                count += 1
                 I = (intersection[1][0].x, intersection[1][0].y)
-                # On sauvegarde les coordonnées de l'intersections dans une
-                # nouvelle liste
-                liste_intersections_ordones.append(I)
-                liste_intersections_def.remove(intersection[1])
-                # Dans le mode de démo, on affiche leur numéro à côté
-                if self.mode_demo:
-                    self.canvas.create_text(I[0], I[1]-10, text=count,
-                                            tag='demo')
+
+                # Détection des doublons
+                doublons = False
+                for point in liste_intersections_ordones:
+                    if abs(I[0]-point[0]) < precision and\
+                            abs(I[1]-point[1]) < precision:
+                        doublons = True
+
+                if not doublons:
+                    # On leur attribut leur numéro
+                    count += 1
+                    # On sauvegarde les coordonnées de l'intersections dans une
+                    # nouvelle liste
+                    liste_intersections_ordones.append(I)
+                    liste_intersections_def.remove(intersection[1])
+                    # Dans le mode de démo, on affiche leur numéro à côté
+                    if self.mode_demo:
+                        self.canvas.create_text(I[0], I[1]-10, text=count,
+                                                tag='demo')
         # On retourne la liste ordonnée des intersections
         # correspondant au polygon d'éclairage
         return liste_intersections_ordones
@@ -281,11 +291,9 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
 
 if __name__ == '__main__':
     import tkinter as tk
-    from point_in_polygon import point_in_polygon
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
-    # [460, 126] probleme majeur
     point = [437, 142]
     polygone = [(221, 183), (221, 221), (90, 223), (91, 109),
                 (140, 106), (143, 168), (173, 168), (176, 70),
@@ -299,7 +307,6 @@ if __name__ == '__main__':
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
                 (219, 124)]
-    print(point_in_polygon(point, polygone, cnv))
     cnv.create_polygon(polygone, fill='grey')
     lumiere = polygon_eclairage(point, polygone, cnv, True)
     # cnv.create_polygon(lumiere, fill='yellow')
