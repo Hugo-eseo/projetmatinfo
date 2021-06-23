@@ -238,7 +238,6 @@ class calcul_polygon_eclairage():
         return points_indentifies
 
     def verif_si_projection(self, sommet, indice_sommet):
-
         """Arguments :
             - sommet : objet de type classe_point
             - indice_sommet : indice du sommet dans le polygon
@@ -267,7 +266,6 @@ class calcul_polygon_eclairage():
         return False
 
     def sommet_du_polygon(self, I):
-
         """Arguments :
             - I : objet de type classe_point
         Retourne True et l'indice du sommet correspondant si le point I
@@ -282,7 +280,6 @@ class calcul_polygon_eclairage():
 
 
 def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
-
     """Arguments :
         - start_point : Tuple ou liste sous la forme (x, y) ou [x, y]
         - polygon : Liste de sommets sous la forme  [(xA, yA), (xB, yB) ...]

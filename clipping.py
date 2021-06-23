@@ -6,7 +6,7 @@ Created on Mon Jun 21 14:58:12 2021
 
 
 from shared import (angle_deux_points, determinant_3_points, dist, sc,
-                    point_classe, segment_classe, intersection_segments,
+                    Point, Segment, intersection_segments,
                     point_appartient_segment)
 import math
 
@@ -17,14 +17,14 @@ arrondi_segment = 1
 def calcul_intersections(centre, rayon, seg):
     """
     Renvoie les deux intersections entre la droite donnée par les points
-    du segment seg et le cercle sous forme d'objet point_classe
+    du segment seg et le cercle sous forme d'objet Point
 
     Arguments :
         - event : évenement, permet de récupérer la position de la souris
 
     Retourne
         - G1 et G2 : Intersections entre la droite correspondant au segment
-                     et le cercle. G1 et G2 objets de type point_classe
+                     et le cercle. G1 et G2 objets de type Point
         - (None, None) : Si il n'y a pas de points d'intersections entre
                          la droite et le cercle
 
@@ -56,7 +56,7 @@ def calcul_intersections(centre, rayon, seg):
         xAG2 = (a * A.x + b * B.x)
         yAG2 = (a * A.y + b * B.y)
 
-        return point_classe(xAG1, yAG1), point_classe(xAG2, yAG2)
+        return Point(xAG1, yAG1), Point(xAG2, yAG2)
     return None, None
 
 
@@ -116,8 +116,7 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments):
     milieu_list = list()
     for i in range(nb_seg):
         if A[i] is not None and B[i] is not None:
-            milieu_list.append(dist(point_classe((A[i].x
-                                                  + B[i].x) / 2,
+            milieu_list.append(dist(Point((A[i].x + B[i].x) / 2,
                                     (A[i].y + B[i].y) / 2), centre))
         else:
             # si le segment n'est pas défini, on lui donne une valeur, afin
@@ -148,8 +147,8 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments):
             # On définit les segments seg21 et seg22 correspondant aux
             # segments entre le centre du cercle et les extrémités de la
             # projection lumineuse
-            seg21 = segment_classe(proj1, centre)
-            seg22 = segment_classe(proj2, centre)
+            seg21 = Segment(proj1, centre)
+            seg22 = Segment(proj2, centre)
             # On récupère les angles correspondants aux points A et B
             angle_A[i] = -angle_deux_points(A[i], centre, True)
             angle_B[i] = -angle_deux_points(B[i], centre, True)
@@ -182,8 +181,7 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments):
             # cercle et par conséquent le segment AB non plus, s'il n'y en
             # a pas alors pas besoin de faire le clipping.
             inter1[i], inter2[i] = calcul_intersections(centre, rayon,
-                                                        segment_classe(A[i],
-                                                                       B[i]))
+                                                        Segment(A[i], B[i]))
             if inter1[i] is not None:
                 # On récupère les angles correspondant aux intersections
                 # entre la droite AB et le cercle, puis on les trie de
@@ -215,7 +213,7 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments):
                         angle_inter1[i], angle_inter2[i]
                     inter1[i], inter2[i] = \
                         inter2[i], inter1[i]
-                segAB = segment_classe(A[i], B[i])
+                segAB = Segment(A[i], B[i])
 
                 # On teste s'il faut clip : il faut que soit le segment AB
                 # soit dans le cercle (condition 1)
@@ -475,8 +473,7 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments):
                     # des segments correspondant aux extrêmités des
                     # projections du cône de lumière
                     if clip:
-                        seg1 = segment_classe(inter1[i],
-                                              inter2[i])
+                        seg1 = Segment(inter1[i], inter2[i])
 
                         int1p = intersection_segments(seg1, seg21)
                         int2p = intersection_segments(seg1, seg22)

@@ -180,16 +180,14 @@ class Application():
             if i > 0:
                 B = self.sommets_polygon[i - 1]
                 self.d_to_check.append(
-                    Segment(Point(B[0], B[1]),
-                                   Point(A[0], A[1])))
+                    Segment(Point(B[0], B[1]), Point(A[0], A[1])))
             if demo:
                 # Si le mode démo est activé on affiche les sommets du polygon
                 self.cnv.create_oval(A[0] - size, A[1] - size, A[0] + size,
                                      A[1] + size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
-        self.d_to_check.append(Segment(Point(B[0], B[1]),
-                                              Point(A[0], A[1])))
+        self.d_to_check.append(Segment(Point(B[0], B[1]), Point(A[0], A[1])))
         # Bind du clic gauche suivant les différents modes de démo
         if type_demo == 6:
             for segment in self.d_to_check:
@@ -354,16 +352,12 @@ class Application():
         # Au lancement de la demo, seul les 4 coins de la fenêtre sont
         # renseignés
         self.polygones = list()
-        self.d_to_check = [Segment(Point(0, 0),
-                                          Point(self.width, 0)),
-                           Segment(Point(0, 0),
-                                          Point(0, self.height)),
-                           Segment(Point(self.width, 0),
-                                          Point(self.width,
-                                                       self.height)),
-                           Segment(Point(0, self.height),
-                                          Point(self.width,
-                                                       self.height))]
+        self.d_to_check = [Segment(Point(0, 0), Point(self.width, 0)),
+                           Segment(Point(0, 0), Point(0, self.height)),
+                           Segment(Point(self.width, 0), Point(self.width,
+                                                               self.height)),
+                           Segment(Point(0, self.height), Point(self.width,
+                                                                self.height))]
 
         self.cnv.bind('<Button-1>', self.rayon_obsatcles_demo)
 

@@ -9,8 +9,8 @@ Created on Mon Jun 21 14:48:30 2021
 import tkinter as tk
 import random
 import math
-from shared import (Point, Segment, determinant_3_points, sc,
-                    angle_deux_points, rotation, dist)
+from shared import Point, Segment, determinant_3_points, sc,\
+    angle_deux_points, rotation, dist
 from clipping import clip
 from point_in_polygon import point_in_polygon
 
@@ -51,7 +51,7 @@ def generateur(canvas, numero_predefini):
     for elem in database[numero_predefini]:
         transformed_database.append(Point(elem[0], elem[1]))
 
-    # memorisation des segments
+    # Memorisation des segments
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
@@ -114,8 +114,7 @@ def projection_point_cercle(centre, A, rayon):
 
 
 class Gardien:
-    def __init__(self, Point, direction, angle, puissance, vitesse, taille,
-                 identite):
+    def __init__(self, Point, direction, angle, puissance, vitesse, taille):
         """
          Arguments :
             - Point : objet de classe 'Point' représentant la position du
@@ -136,12 +135,11 @@ class Gardien:
         self.angle = angle  # En degrés
         self.puissance = puissance    # Puissance de la torche en pixels
         self.vitesse = vitesse  # Vitesse de deplacement
-        self.identite = identite
         cnv.create_oval(self.position.x - taille,
                         self.position.y - taille,
                         self.position.x + taille,
                         self.position.y + taille,
-                        fill="red", tag=f'Gardien{identite}')
+                        fill="red", tag='Gardien')
 
     def reculer(self, event, cnv):
         """
@@ -160,7 +158,7 @@ class Gardien:
                                round(math.cos(rad - math.pi / 2)
                                      * -self.vitesse))
         else:
-            cnv.move(f'Gardien{self.identite}',
+            cnv.move('Gardien',
                      round(math.sin(rad - math.pi / 2) * self.vitesse),
                      round(math.cos(rad - math.pi / 2) * self.vitesse))
 
@@ -183,7 +181,7 @@ class Gardien:
                                int(math.cos(rad - math.pi / 2)
                                    * self.vitesse))
         else:
-            cnv.move(f'Gardien{self.identite}',
+            cnv.move('Gardien',
                      int(math.sin(rad - math.pi / 2) * -self.vitesse),
                      int(math.cos(rad - math.pi / 2) * -self.vitesse))
         self.eclaire()
@@ -207,9 +205,9 @@ class Gardien:
         self.eclaire()
 
     def eclaire(self):
-        cnv.delete("cone" + str(self.identite))
-        cnv.delete("clip1" + str(self.identite))
-        cnv.delete("clip2" + str(self.identite))
+        cnv.delete("cone")
+        cnv.delete("clip1")
+        cnv.delete("clip2")
         cnv.delete("cercle")
 
         C = Point(self.position.x + self.puissance, self.position.y)
@@ -230,11 +228,10 @@ class Gardien:
                        self.position.y + self.puissance,
                        start=-angle_deux_points(proj1,
                                                 self.position, True),
-                       extents=2 * self.angle,
-                       tag="cone" + str(self.identite),
+                       extent=2 * self.angle,
+                       tag="cone",
                        fill="yellow", outline="yellow")
-        clip(cnv, proj1, proj2, self.position, self.puissance, liste_segments,
-             self.identite)
+        clip(cnv, proj1, proj2, self.position, self.puissance, liste_segments)
         cnv.tag_raise("segment")
 
 
@@ -253,7 +250,7 @@ liste_segments, liste_points = generateur(cnv, 0)
 for segment in liste_segments:
     cnv.create_line(segment.A.x, segment.A.y, segment.B.x, segment.B.y,
                     tag="segment")
-gardien1 = Gardien(Point(300, 250), 180, 30, 100, 2, 4, 1)
+gardien1 = Gardien(Point(300, 250), 180, 30, 100, 2, 4)
 gardien1.eclaire()
 
 wnd.bind("<Up>", lambda event: gardien1.avancer(event, cnv))

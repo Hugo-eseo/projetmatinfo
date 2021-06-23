@@ -75,39 +75,3 @@ def generateur(canvas, numero_predefini):
             database_lampes[numero_predefini],
             database_boutons[numero_predefini],
             database_tableaux[numero_predefini])
-
-
-def zone_victoire(cnv, numero_predefini):
-    """
-    Arguments :
-        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
-                   dessiné
-        - numero_preset : integer definissant quel polygone sera dessiné,
-                          si il est egal à None la dataset sera selectionée
-                          aleatoirement
-    Affiche :
-        - Un polygone représentant la zone d'arrivée en fonction du numero_
-        predefini
-    Retourne :
-        - Une liste de tous les segments du polygone
-    """
-    database = [[(220, 180), (240, 180), (240, 200), (220, 200)]]
-
-    transformed_database = list()
-    for elem in database[numero_predefini]:
-        transformed_database.append(Point(elem[0], elem[1]))
-
-    # mémorisation des segments
-    liste_segments = list()
-    for i in range(1, len(transformed_database)):
-        A = transformed_database[i]
-        B = transformed_database[i - 1]
-        liste_segments.append(Segment(A, B))
-    A = transformed_database[0]
-    B = transformed_database[-1]
-    liste_segments.append(Segment(A, B))
-
-    # dessiner le polygone
-    cnv.create_polygon(database[numero_predefini], fill='green')
-
-    return liste_segments

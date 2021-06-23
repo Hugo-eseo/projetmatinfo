@@ -3,7 +3,7 @@ import math
 from shared import Point, projection_point_cercle, dist
 from point_in_polygon import point_in_polygon
 from intersections_rayons_obstacles import intersections_rayons_obstacles
-from générateur_map import generateur
+from generateur_map import generateur
 
 
 class Gardien:

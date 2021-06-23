@@ -98,9 +98,9 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
         # Vecteur directeur du segment où se trouve l'intersection
         # Par similitude, on se permet de l'assimiler à une classe point
         u = Point(liste_intersections[i][1].B.x -
-                         liste_intersections[i][1].A.x,
-                         liste_intersections[i][1].B.y -
-                         liste_intersections[i][1].A.y)
+                  liste_intersections[i][1].A.x,
+                  liste_intersections[i][1].B.y -
+                  liste_intersections[i][1].A.y)
         # Dans le cas de la dernière intersection, il faut vérifier avec
         # la première
         if i == len(liste_intersections) - 1:
@@ -117,9 +117,9 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
                                    intersection.y + size,
                                    fill='blue', tag='demo')
             v = Point(liste_intersections[indice][1].B.x -
-                             liste_intersections[indice][1].A.x,
-                             liste_intersections[indice][1].B.y -
-                             liste_intersections[indice][1].A.y)
+                      liste_intersections[indice][1].A.x,
+                      liste_intersections[indice][1].B.y -
+                      liste_intersections[indice][1].A.y)
             # Si l'intersection n'est pas une entrée ou sortie du polygone
             # (une pointe par exemple), elle doit être ignoré
             # Les deux premiers if sont les cas où l'un des segments est

@@ -10,7 +10,7 @@ from shared import Point, Segment,\
 
 
 def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
-                                   direction, segments_verifs, demo=False, 
+                                   direction, segments_verifs, demo=False,
                                    return_inter=False):
     """
     Arguments :
@@ -80,12 +80,13 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
 
             if not return_inter:
                 # Affichage de la source lumineuse en jaune
-                canvas.create_oval(point.x - size, point.y - size, point.x + size,
-                                   point.y + size, fill='yellow', tag='light')
+                canvas.create_oval(point.x - size, point.y - size, point.x +
+                                   size, point.y + size, fill='yellow',
+                                   tag='light')
                 # Dans tous les cas on dessine le rayon lumineux jusqu'au
                 # point d'intersection
                 canvas.create_line(point.return_tuple(), I.return_tuple(),
-                               fill='yellow', tag='light')
+                                   fill='yellow', tag='light')
         # On passe au rayon suivant en effectuant une rotation du point B
         B = rotation(point, B, angle)
 
