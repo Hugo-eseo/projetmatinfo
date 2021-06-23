@@ -255,3 +255,51 @@ def intersection_demi_droite_segment(demi_droite, segment):
         if point_appartient_demi_droite(I, demi_droite):
             return I
     return None
+
+def projection_point_cercle(centre, A, rayon):
+    """
+
+    Arguments :
+        - centre : Centre du cercle de type point_classe
+        - A : Point extérieur au cercle que l'on veut projeter dessus, de type
+              point_classe
+        - rayon : Rayon du cercle en pixel
+
+    Retourne
+        - G1 ou G2 : L'intersection entre la droite passant par A et le centre
+                     du cercle et le cercle lui-même. L'intersection la plus
+                     proche de A est renvoyée
+
+    """
+
+    ASB = determinant_3_points(A, centre, centre)
+    AB = dist(A, centre)
+    d = vabs(ASB)/AB
+
+    vAB = (centre.x-A.x, centre.y-A.y)
+    vAS = (centre.x-A.x, centre.y-A.y)
+    h = sc(vAS, vAB)/(AB**2)
+    t = math.sqrt(rayon**2 - d**2)/AB
+
+    #1er point d'intersection
+    a = 1 - h - t
+    b = h + t
+    xG1 = (a*A.x+b*centre.x)
+    yG1 = (a*A.y+b*centre.y)
+
+    G1 = Point(xG1, yG1)
+    d1 = dist(A, G1)
+
+    #2eme point
+    a = 1 - h + t
+    b = h - t
+    xG2 = (a*A.x+b*centre.x)
+    yG2 = (a*A.y+b*centre.y)
+
+    G2 = Point(xG2, yG2)
+    d2 = dist(A, G2)
+    """Comme le point est à l'extérieur du cercle, on prend l'intersection 
+    avec la distance la plus faible"""
+    if d1 > d2:
+        return G2
+    return G1

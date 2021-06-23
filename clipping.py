@@ -579,11 +579,11 @@ def clip(cnv, proj1, proj2, centre, rayon, liste_segments, identite):
                                                 centre.y-rayon,
                                                 centre.x+rayon,
                                                 centre.y+rayon,
-                                                fill="grey",
+                                                fill="white",
                                                 tag="clip1",
                                                 start=angle_inter1[i],
                                                 extent=diff,
-                                                outline="grey")
+                                                outline="white")
 
                             cnv.create_polygon(centre.return_tuple(),
                                                     inter1[i]\
