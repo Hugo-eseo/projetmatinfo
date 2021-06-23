@@ -32,6 +32,9 @@ class Point():
         self.x += delta_x
         self.y += delta_y
 
+    def move(self, delta_x, delta_y):
+        self.x += delta_x
+        self.y += delta_y
 
 class Segment():
     """Classe correspondant à un segment"""
@@ -64,7 +67,6 @@ def sc(u, v):
 
     return(u[0] * v[0] + u[1] * v[1])
 
-
 def det3(mat):
     """Argument :
         - mat : matrice 3*3
@@ -75,13 +77,57 @@ def det3(mat):
     c = mat[0][2] * det2([[mat[1][0], mat[1][1]], [mat[2][0], mat[2][1]]])
     return a - b + c
 
-
 def dist(point1, point2):
     """Arguments :
         - point1, point2 : objets de classe 'point'
     Retourne la distance entre 'point1' et 'point2'"""
 
     return(math.sqrt((point2.x - point1.x) ** 2 + (point2.y - point1.y) ** 2))
+
+
+def sc(u, v):
+    """Renvoie le produit scalaire en dimension 2 entre deux vecteurs u et v
+    passés en arguments"""
+    return(u[0]*v[0] + u[1]*v[1])
+
+
+def vect(u, v):
+    """Renvoie le produit vectoriel de deux vecteurs u et v passés en arguments
+    en dimension 2"""
+    return(u[0]*v[1]-u[1]*v[0])
+
+
+def rotation(O, M, angle):
+    """
+    Arguments :
+        - O : objet de classe 'Point' 
+        - M : objet de classe 'Point'
+        - angle : angle donné en degrés
+    Retourne :
+        - Un objet de classe 'Point' étant la rotation du point M autour du centre O et d'angle 'angle'
+    """
+    # Angle converti en radian
+    angle = angle * math.pi / 180
+    # calcul de la rotation
+    xM = M.x - O.x
+    yM = M.y - O.y
+    x = xM*math.cos(angle) + yM*math.sin(angle) + O.x
+    y = - xM*math.sin(angle) + yM*math.cos(angle) + O.y
+    return Point(x, y)
+
+
+def angle_deux_points(A, O, deg=False):
+    """
+    Arguments : 
+        - A : objet de classe 'Point'
+        - O : objet de classe 'Point'
+    Retourne :
+        - L'angle en radians entre le point A et la droite horizontale passant par O
+    """
+    angle = math.atan2(A.y - O.y, A.x - O.x)
+    if deg:
+        return angle * 180/math.pi
+    return angle
 
 
 def determinant_3_points(point1, point2, point3):
@@ -131,7 +177,6 @@ def signe(n):
         return 1
     return -1
 
-
 def intersection_droites(droite1, droite2):
     """Arguments :
         - droite1, droite2 : objet de classe 'segment'
@@ -150,7 +195,6 @@ def intersection_droites(droite1, droite2):
     I = Point(x, y)
 
     return I
-
 
 def intersection_segments(segment1, segment2):
     """Arguments :
