@@ -5,7 +5,7 @@ Created on Fri Apr 23 12:21:25 2021
 @author: hugob
 """
 
-from shared import point_classe, segment_classe, signe,\
+from shared import Point, Segment, signe,\
     point_appartient_segment, point_egaux, intersection_demi_droite_segment
 
 # Taille des point affichés sur le canvas
@@ -38,17 +38,17 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
 
     # Création d'une liste contenant les segments du polygon
     liste_segments_polygon = list()
-    A = point_classe(polygon[0][0], polygon[0][1])
+    A = Point(polygon[0][0], polygon[0][1])
     for i in range(1, len(polygon)):
-        B = point_classe(polygon[i][0], polygon[i][1])
-        liste_segments_polygon.append(segment_classe(A, B))
+        B = Point(polygon[i][0], polygon[i][1])
+        liste_segments_polygon.append(Segment(A, B))
         A = B
-    B = point_classe(polygon[0][0], polygon[0][1])
-    liste_segments_polygon.append(segment_classe(A, B))
+    B = Point(polygon[0][0], polygon[0][1])
+    liste_segments_polygon.append(Segment(A, B))
 
     # Le point 0 dans tout l'algorithme correspond au point
     # dont nous souhaitons savoir si il est dans le poylgon
-    O = point_classe(point_to_check[0], point_to_check[1])
+    O = Point(point_to_check[0], point_to_check[1])
 
     # Cette fonction se base sur l'algorithme présenté dans cet article
     # https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119
@@ -57,9 +57,9 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
     wn = 0
     # A et B : points définissants le segment horizontal de référence
     # Possèdent la même hauteur que O
-    A = point_classe(0, O.y)
-    B = point_classe(O.x, O.y)
-    segment_horizontal = segment_classe(A, B)
+    A = Point(0, O.y)
+    B = Point(O.x, O.y)
+    segment_horizontal = Segment(A, B)
 
     if mode_demo:
         canvas.create_oval(O.x-size, O.y-size, O.x+size, O.y+size,
@@ -97,7 +97,7 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
         intersection = liste_intersections[i][0]
         # Vecteur directeur du segment où se trouve l'intersection
         # Par similitude, on se permet de l'assimiler à une classe point
-        u = point_classe(liste_intersections[i][1].B.x -
+        u = Point(liste_intersections[i][1].B.x -
                          liste_intersections[i][1].A.x,
                          liste_intersections[i][1].B.y -
                          liste_intersections[i][1].A.y)
@@ -114,7 +114,7 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
                 canvas.create_oval(intersection.x-size, intersection.y-size,
                                    intersection.x+size, intersection.y+size,
                                    fill='blue', tag='demo')
-            v = point_classe(liste_intersections[indice][1].B.x -
+            v = Point(liste_intersections[indice][1].B.x -
                              liste_intersections[indice][1].A.x,
                              liste_intersections[indice][1].B.y -
                              liste_intersections[indice][1].A.y)

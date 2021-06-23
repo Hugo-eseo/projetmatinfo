@@ -15,7 +15,7 @@ precision = 0.01
 
 def projection_point_cercle(centre, A, rayon):
     """
-    
+
     Arguments :
         - centre : Centre du cercle de type point_classe
         - A : Point extérieur au cercle que l'on veut projeter dessus, de type

@@ -11,7 +11,7 @@ import random
 from PIL import Image, ImageDraw
 import numpy as np
 import math
-from shared import (point_classe, segment_classe, det2, determinant_3_points,
+from shared import (Point, Segment, det2, determinant_3_points,
 vabs, intersection_segments, vect, sc, angle_deux_points, rotation, dist)
 from clipping import clip
 from point_in_polygon import point_in_polygon
@@ -50,17 +50,17 @@ def generateur(canvas, numero_predefini):
 
     transformed_database = list()
     for elem in database[numero_predefini]:
-        transformed_database.append(point_classe(elem[0], elem[1]))
+        transformed_database.append(Point(elem[0], elem[1]))
 
     # memorisation des segments
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
         B = transformed_database[i-1]
-        liste_segments.append(segment_classe(A, B))
+        liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]
-    liste_segments.append(segment_classe(A, B))
+    liste_segments.append(Segment(A, B))
 
     return liste_segments, database[numero_predefini]
 
@@ -68,9 +68,9 @@ def projection_point_cercle(centre, A, rayon):
     """
     
     Arguments :
-        - centre : Centre du cercle de type point_classe
+        - centre : Centre du cercle de type Point
         - A : Point extérieur au cercle que l'on veut projeter dessus, de type
-              point_classe
+              Point
         - rayon : Rayon du cercle en pixel
 
     Retourne
@@ -82,7 +82,7 @@ def projection_point_cercle(centre, A, rayon):
 
     ASB = determinant_3_points(A, centre, centre)
     AB = dist(A, centre)
-    d = vabs(ASB)/AB
+    d = abs(ASB)/AB
 
     vAB = (centre.x-A.x, centre.y-A.y)
     vAS = (centre.x-A.x, centre.y-A.y)
@@ -95,7 +95,7 @@ def projection_point_cercle(centre, A, rayon):
     xG1 = (a*A.x+b*centre.x)
     yG1 = (a*A.y+b*centre.y)
 
-    G1 = point_classe(xG1, yG1)
+    G1 = Point(xG1, yG1)
     d1 = dist(A, G1)
 
     #2eme point
@@ -104,7 +104,7 @@ def projection_point_cercle(centre, A, rayon):
     xG2 = (a*A.x+b*centre.x)
     yG2 = (a*A.y+b*centre.y)
 
-    G2 = point_classe(xG2, yG2)
+    G2 = Point(xG2, yG2)
     d2 = dist(A, G2)
     """Comme le point est à l'extérieur du cercle, on prend l'intersection 
     avec la distance la plus faible"""
@@ -208,7 +208,7 @@ class Gardien:
         cnv.delete("clip2"+str(self.identite))
         cnv.delete("cercle")
 
-        C = point_classe(self.position.x+self.puissance, self.position.y)
+        C = Point(self.position.x+self.puissance, self.position.y)
         C = rotation(self.position, C, self.direction)
         C1 = rotation(self.position, C, -self.angle)
         C2 = rotation(self.position, C, self.angle)
@@ -253,7 +253,7 @@ liste_segments, liste_points = generateur(cnv, 0)
 for segment in liste_segments:
     cnv.create_line(segment.A.x, segment.A.y, segment.B.x, segment.B.y,
                     tag="segment")
-gardien1 = Gardien(point_classe(300, 250), 180, 30, 100, 2, 4, 1)
+gardien1 = Gardien(Point(300, 250), 180, 30, 100, 2, 4, 1)
 gardien1.eclaire()
 
 wnd.bind("<Up>", lambda event : gardien1.avancer(event, cnv))

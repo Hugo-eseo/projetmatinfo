@@ -11,7 +11,7 @@ import math
 precision = 0.01
 
 
-class point_classe():
+class Point():
     """Docstring"""
 
     def __init__(self, x, y):
@@ -32,7 +32,7 @@ class point_classe():
         self.x += delta_x
         self.y += delta_y
 
-class segment_classe():
+class Segment():
     """Docstring"""
 
     def __init__(self, point1, point2):
@@ -98,7 +98,7 @@ def rotation(O, M, angle):
     yM = M.y - O.y
     x = xM*math.cos(angle) + yM*math.sin(angle) + O.x
     y = - xM*math.sin(angle) + yM*math.cos(angle) + O.y
-    return point_classe(x, y)
+    return Point(x, y)
 
 
 def angle_deux_points(A, O, deg=False):
@@ -183,7 +183,7 @@ def intersection_segments(segment1, segment2):
         return None
     x = (a*segment1.A.x + b*segment1.B.x)/(a + b)
     y = (a*segment1.A.y + b*segment1.B.y)/(a + b)
-    I = point_classe(x, y)
+    I = Point(x, y)
     # Si le point d'intersection appartient aux deux segments
     if point_appartient_segment(I, segment1) and\
             point_appartient_segment(I, segment2):
@@ -251,7 +251,7 @@ def intersection_demi_droite_segment(demi_droite, segment):
     if signe(a) == signe(b):
         x = (a*segment.A.x + b*segment.B.x)/(a + b)
         y = (a*segment.A.y + b*segment.B.y)/(a + b)
-        I = point_classe(x, y)
+        I = Point(x, y)
         if point_appartient_demi_droite(I, demi_droite):
             return I
     return None
