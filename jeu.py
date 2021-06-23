@@ -6,7 +6,7 @@ from générateur_map import generateur, zone_victoire
 import random
 
 class Gardien:
-    def __init__(self, Point, direction, angle, puissance, vitesse, id, taille):
+    def __init__(self, Point, direction, angle, puissance, vitesse, identite, taille):
         """
         Arguments :
             - Point : objet de classe 'Point' représentant la position du
@@ -123,7 +123,7 @@ class Voleur:
                                     fill='blue', tag='voleur')
 
 
-    def avancer(self, event, liste_segments, cnv):
+    def avancer(self, event, cnv):
         """
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le
@@ -138,7 +138,7 @@ class Voleur:
             cnv.move('voleur', 0, -self.vitesse)
 
 
-    def reculer(self, event, liste_segments, cnv):
+    def reculer(self, event, cnv):
         """
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le
@@ -152,7 +152,7 @@ class Voleur:
         else :
             cnv.move('voleur', 0, self.vitesse)
 
-    def droite(self, event, liste_segments, cnv):
+    def droite(self, event, cnv):
         """
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le
@@ -166,7 +166,7 @@ class Voleur:
         else :
             cnv.move('voleur', +self.vitesse, 0)
 
-    def gauche(self, event, liste_segments, cnv):
+    def gauche(self, event, cnv):
         """
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le

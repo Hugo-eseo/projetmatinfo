@@ -14,9 +14,9 @@ import math
 from shared import (point_classe, segment_classe, det2, determinant_3_points,
 vabs, intersection_segments, vect, sc, angle_deux_points, rotation, dist)
 from clipping import clip
-from point_in_polygon import point_in_polygon_classes
+from point_in_polygon import point_in_polygon
 
-def polygone_predefini(canvas, numero_predefini):
+def generateur(canvas, numero_predefini):
     """
     Arguments :
         - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
@@ -28,8 +28,6 @@ def polygone_predefini(canvas, numero_predefini):
         - Un polygone predefini en fonction du numero_predefini
     Retourne :
         - Une liste de tous les segments du polygone
-        - Une liste des sommets du polygone
-        - Une liste de listes representant la carte
     """
 
     database = [[(221, 183), (221, 221), (90, 223), (91, 109),
@@ -64,26 +62,7 @@ def polygone_predefini(canvas, numero_predefini):
     B = transformed_database[-1]
     liste_segments.append(segment_classe(A, B))
 
-    """
-    # recuperer la matrice de la carte (temporaire)
-    image = Image.new("RGB", (600, 400), color=(255,255,255))
-    polygone = ImageDraw.Draw(image)
-    polygone.polygon(database[numero_predefini], fill="black")
-    carte = np.asarray(image.convert('L'))
-    np.savetxt("P2/projetmatinfo/carte.txt", carte, fmt='%3d')
-
-    # recuperer les sommets du polygone (temporaire)
-    f = open('P2/projetmatinfo/sommets_polygone.txt','w')
-    f.write(str(database[numero_predefini]))
-    f.close()
-    """
-    for i in range(len(liste_segments)):
-        canvas.create_line(liste_segments[i].A.x, liste_segments[i].A.y,
-                           liste_segments[i].B.x, liste_segments[i].B.y,
-                           fill="black", tag="segment")
-    # dessiner le polygone
-    
-    return liste_segments
+    return liste_segments, database[numero_predefini]
 
 def projection_point_cercle(centre, A, rayon):
     """
@@ -134,49 +113,94 @@ def projection_point_cercle(centre, A, rayon):
     return G1
 
 class Gardien:
-    def __init__(self, Point, direction, angle, puissance, vitesse, identite):
-        self.position = Point   # position en pixels
-        self.direction = direction # en degrés
-        self.angle = angle  # en degrés
-        self.puissance = puissance    # puissance de la torche en pixels
-        self.vitesse = vitesse  # vitesse de deplacement
-        self.identite = identite # id d'un gardien, un nombre entier
-        cnv.create_oval(self.position.x-3, self.position.y-3,
-                        self.position.x+3, self.position.y+3,
-                        tag="gardien"+str(self.identite),
-                        fill="red")
+    def __init__(self, Point, direction, angle, puissance, vitesse, taille,
+                 identite):
+         """
+         Arguments :
+            - Point : objet de classe 'Point' représentant la position du
+                      gardien
+            - direction : int representant la rotation du gardien dans le sens
+                          trigonometrique
+            - angle : angle d'éclairage de la lampe torche
+            - puissance : distance d'éclairage de la lampe torche
+            - vitesse : int representant la vitesse de deplacement du gardien
+            - cnv : objet de type tkinter.Canvas dans lequel le polygone sera 
+                    dessiné
+            - taille : taille en pixel du point représentant le voleur
+            - id : int représentant le numero d'identification du gardien
+            - couleur : String contenant le code couleur tkinter
+        """
+         self.position = Point# position en pixels
+         self.direction = direction # en degrés
+         self.angle = angle  # en degrés
+         self.puissance = puissance    # puissance de la torche en pixels
+         self.vitesse = vitesse  # vitesse de deplacement
+         self.identite = identite
+         affichage = cnv.create_oval(self.position.x - taille,
+                                    self.position.y - taille,
+                                    self.position.x + taille, 
+                                    self.position.y + taille,
+                                    fill="red", tag=f'Gardien{identite}')
 
-    def move(self):
-        pass
-    
-    def avancer(self, event, liste_segments, cnv):
+    def reculer(self, event, cnv):
+        """
+        Arguments :
+            - liste_segments : liste d'objets de type segment représentant le
+                               musée
+            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera 
+                    deplacé
+        """
         rad = self.direction * math.pi / 180
-        self.position.move(math.sin(rad-math.pi/2) * self.vitesse,
-                           math.cos(rad-math.pi/2) * self.vitesse)
-        if not point_in_polygon_classes(self.position, liste_segments, cnv):
-            self.position.move(math.sin(rad-math.pi/2) * -self.vitesse,
-                               math.cos(rad-math.pi/2) * -self.vitesse)
+        self.position.move(round(math.sin(rad-math.pi/2) * self.vitesse),
+                           round(math.cos(rad-math.pi/2) * self.vitesse))
+        if not point_in_polygon(self.position.return_tuple(), liste_points):
+            self.position.move(round(math.sin(rad-math.pi/2) * -self.vitesse),
+                               round(math.cos(rad-math.pi/2) * -self.vitesse))
         else :
-            cnv.move('gardien'+str(self.identite),
-                     math.sin(rad-math.pi/2) * self.vitesse,
-                     math.cos(rad-math.pi/2) * self.vitesse)
+            cnv.move(f'Gardien{self.identite}',
+                     round(math.sin(rad-math.pi/2) * self.vitesse),
+                     round(math.cos(rad-math.pi/2) * self.vitesse))
+
         self.eclaire()
 
-    def reculer(self, event, liste_segments, cnv):
+    def avancer(self, event, cnv):
+        """
+        Arguments :
+            - liste_segments : liste d'objets de type segment représentant le
+                               musée
+            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera 
+                    deplacé
+        """
         rad = self.direction * math.pi / 180
-        self.position.move(math.sin(rad-math.pi/2) * -self.vitesse,
-                           math.cos(rad-math.pi/2) * -self.vitesse)
-        if not point_in_polygon_classes(self.position, liste_segments, cnv):
-            self.position.move(math.sin(rad-math.pi/2) * self.vitesse,
-                               math.cos(rad-math.pi/2) * self.vitesse)
+        self.position.move(int(math.sin(rad-math.pi/2) * -self.vitesse),
+                           int(math.cos(rad-math.pi/2) * -self.vitesse))
+        if not point_in_polygon(self.position.return_tuple(), liste_points):
+            self.position.move(int(math.sin(rad-math.pi/2) * self.vitesse),
+                               int(math.cos(rad-math.pi/2) * self.vitesse))
         else :
-            cnv.move('gardien'+str(self.identite),
-                     math.sin(rad-math.pi/2) * -self.vitesse,
-                     math.cos(rad-math.pi/2) * -self.vitesse)
+            cnv.move(f'Gardien{self.identite}',
+                     int(math.sin(rad-math.pi/2) * -self.vitesse),
+                     int(math.cos(rad-math.pi/2) * -self.vitesse))
+        
         self.eclaire()
 
-    def turn(self):
-        pass
+    def turn_right(self):
+        """
+        Permet de faire pivoter le gardien
+        """
+        self.direction -= 10
+        if self.direction <= 0:
+            self.direction = 360
+        self.eclaire()
+
+    def turn_left(self):
+        """
+        Permet de faire pivoter le gardien
+        """
+        self.direction += 10
+        if self.direction >= 360:
+            self.direction = 0
+        self.eclaire()
 
     def eclaire(self):
         cnv.delete("cone"+str(self.identite))
@@ -224,11 +248,17 @@ cnv = tk.Canvas(wnd, width=width_canvas, height=height_canvas, bg="white")
 cnv.pack(side=tk.LEFT)
 frm = tk.Frame(wnd, width=width_frame, height=height_frame)
 frm.pack(side=tk.RIGHT)
-liste_segments = polygone_predefini(cnv, 0)
-gardien1 = Gardien(point_classe(300, 250), 180, 30, 100, 2, 1)
+liste_segments, liste_points = generateur(cnv, 0)
+
+for segment in liste_segments:
+    cnv.create_line(segment.A.x, segment.A.y, segment.B.x, segment.B.y,
+                    tag="segment")
+gardien1 = Gardien(point_classe(300, 250), 180, 30, 100, 2, 4, 1)
 gardien1.eclaire()
 
-wnd.bind("<Up>", lambda event : gardien1.avancer(event, liste_segments, cnv))
-wnd.bind("<Down>", lambda event : gardien1.reculer(event, liste_segments, cnv))
+wnd.bind("<Up>", lambda event : gardien1.avancer(event, cnv))
+wnd.bind("<Down>", lambda event : gardien1.reculer(event, cnv))
+wnd.bind("<Left>", lambda event : gardien1.turn_left())
+wnd.bind("<Right>", lambda event : gardien1.turn_right())
 
 wnd.mainloop()
