@@ -23,6 +23,7 @@ class Application():
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
                 'Y', 'Z']
+    fichier_config = "config.txt"
 
     def __init__(self, width, height):
         """Prend en argument :
@@ -82,7 +83,7 @@ class Application():
                   command=self.save_polygon)\
             .grid(row=4, column=3, ipadx=10, pady=5, sticky='n')
 
-        self.preset = int()
+        self.preset = tk.IntVar()
         a = tk.Radiobutton(self.frm, text='Preset 1', variable=self.preset,
                            value=1)
         a.grid(row=5, column=2, ipadx=10, sticky='n')
@@ -94,66 +95,16 @@ class Application():
                        value=3)\
             .grid(row=5, column=4, ipadx=10, sticky='n')
 
+        self.error_label = tk.Label(self.frm, text="")
+        self.error_label.grid(row=6, column=3, ipadx=10, sticky='n')
+
         self.wnd.mainloop()
 
     def reset(self):
         """Reset du canvas. Suppression de tous les éléments de dessin"""
         self.cnv.delete(tk.ALL)
 
-    # Différents presets
-    # Coordonnés des sommets du polygon déjà mémorisés
-
-    def preset1(self):
-        """Preset 1"""
-        self.sommets_polygon = [(243, 308), (244, 286), (242, 244), (206, 242),
-                                (171, 243), (145, 241), (125, 242), (99, 241),
-                                (76, 242), (43, 240), (42, 221), (41, 199),
-                                (40, 165), (39, 148), (38, 120), (37, 96),
-                                (36, 67), (35, 37), (62, 38), (81, 36),
-                                (103, 35), (105, 60), (104, 87), (82, 84),
-                                (62, 83), (63, 101), (64, 129), (65, 155),
-                                (66, 185), (67, 199), (86, 196), (113, 195),
-                                (136, 194), (166, 193), (198, 195), (196, 169),
-                                (195, 149), (152, 148), (110, 147), (106, 114),
-                                (131, 113), (132, 83), (131, 52), (154, 49),
-                                (174, 47), (175, 71), (174, 104), (196, 105),
-                                (215, 105), (220, 80), (221, 62), (226, 32),
-                                (249, 16), (276, 17), (310, 16), (342, 17),
-                                (345, 36), (323, 38), (288, 37), (267, 44),
-                                (267, 66), (264, 101), (287, 100), (320, 101),
-                                (358, 100), (376, 95), (375, 78), (373, 56),
-                                (375, 26), (407, 21), (427, 22), (438, 21),
-                                (437, 58), (438, 94), (436, 116), (434, 139),
-                                (432, 161), (434, 195), (432, 230), (434, 278),
-                                (433, 329), (383, 336), (319, 338), (246, 340)]
-        self.lancement_preset()
-
-    def preset2(self):
-        """Preset 2"""
-        self.sommets_polygon = [(164, 302), (107, 388), (187, 371), (336, 472),
-                                (427, 371), (508, 446), (737, 472), (820, 371),
-                                (757, 105), (729, 328), (638, 261), (615, 116),
-                                (468, 49), (334, 54), (374, 201), (269, 254),
-                                (118, 115)]
-        self.lancement_preset()
-
-    def preset3(self):
-        """Preset 3"""
-        self.sommets_polygon = [(221, 183), (221, 221), (90, 223), (91, 109),
-                                (140, 106), (143, 168), (173, 168), (176, 70),
-                                (46, 65), (50, 276), (223, 274), (225, 321),
-                                (81, 330), (82, 403), (116, 400), (112, 359),
-                                (224, 357), (275, 356), (272, 317), (415, 315),
-                                (415, 277), (481, 272), (482, 316), (530, 315),
-                                (528, 225), (413, 227), (406, 162), (463, 158),
-                                (460, 116), (495, 111), (496, 65), (542, 64),
-                                (541, 21), (456, 21), (457, 81), (416, 81),
-                                (416, 120), (369, 122), (319, 122), (315, 63),
-                                (373, 57), (372, 23), (266, 22), (272, 122),
-                                (219, 124)]
-        self.lancement_preset()
-
-    def lancement_preset(self, demo=False):
+    def lancement_preset(self, type_demo, demo=False):
         """Dessin du polygon défini par les preset"""
         size = 4
         demo = True  # Pour controler le paramètre manuellement
@@ -165,15 +116,17 @@ class Application():
             A = self.sommets_polygon[i]
             if i > 0:
                 B = self.sommets_polygon[i-1]
-                self.d_to_check.append([B, A])
+                self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
+                                                      point_classe(A[0], A[1])))
             if demo:
                 self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
                                      A[1]+size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
-        self.d_to_check.append([B, A])
-        self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
-        self.reset_button.config(command=self.demo3)
+        self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
+                                              point_classe(A[0], A[1])))
+        if type_demo == 4:
+            self.cnv.bind('<Button-1>', self.clic_rayons_polygon_demo)
 
     # Mode de démonstration 5
     def demo5(self):
@@ -189,7 +142,30 @@ class Application():
 
     # Mode de démonstration 4
     def demo4(self):
-        pass
+        self.reset()
+        self.sommets_polygon = self.get_polygon_preset()
+        if self.sommets_polygon is not None:
+            self.lancement_preset(4)
+
+    def get_polygon_preset(self):
+        with open(self.fichier_config, 'r') as f:
+            for i in range(self.preset.get()):
+                line = f.readline()
+            line = line[8:-1]
+            if not line:
+                string = "Aucun fichier enregistré sur le preset " +\
+                    str(self.preset.get())
+                self.error_label.config(text=string, fg='red')
+                return None
+        with open(line, 'r') as f:
+            line = eval(f.readline())
+        return(line)
+
+    def clic_rayons_polygon_demo(self, event):
+        point = point_classe(event.x, event.y)
+        if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
+            iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
+                                               360, 0, self.d_to_check, False)
 
     # Mode de démonstration 3
 
@@ -233,23 +209,12 @@ class Application():
         if getpartern:
             print(self.sommets_polygon)
         self.cnv.delete('pts')
-        self.cnv.unbind('<Button-3>')
-        self.cnv.bind('<Button-1>', self.clic_source_lumière_demo)
+        self.cnv.unbind('<Button-1>')
 
     def save_polygon(self):
         if len(self.sommets_polygon) < 3:
             return
-        fenetre = Save_popup(self.wnd, self.sommets_polygon)
-
-        pass
-
-    def clic_source_lumière_demo(self, event):
-        A = (event.x, event.y)
-        '''if self.point_in_polygon_demo(A, True):
-            # self.intersection_sommets_demo(event)
-            self.rayon_obsatcles_demo(event)'''
-        if pip.point_in_polygon(A, self.sommets_polygon, self.cnv, True):
-            self.new_polygone_eclairage(event)
+        Save_popup(self.wnd, self.sommets_polygon)
 
     # Mode de démonstration 2
 
@@ -403,6 +368,7 @@ class Save_popup(tk.Toplevel):
         self.cnv.pack()
         self.cnv.create_polygon(polygonr, fill='grey')
 
+        # Création de la zone de commande
         self.frm = tk.Frame(self, width=self.width, height=100, pady=10,
                             relief='ridge', bd=10)
         self.frm.pack(side=tk.BOTTOM)
@@ -439,52 +405,71 @@ class Save_popup(tk.Toplevel):
         self.reponse_b2.grid(row=6, column=1, ipadx=10, sticky='n', ipady=5)
 
     def save_as(self):
-        LST_Types = [("Fichier texte", ".txt"), ("Autres types", ".*")]
+        # Types de fichier acceptés : seulement .txt dans notre cas
+        LST_Types = [("Fichier texte", ".txt")]
+        # On ouvre l'explorateur de fichier windows
         emplacement_fichier = tk.\
             filedialog.asksaveasfilename(title="Enregistrer sous",
                                          filetypes=LST_Types,
                                          defaultextension=".txt")
         if emplacement_fichier:
+            # Si un fichier a été sauvegardé par l'utilisateur
+            # On y écrit le polygon dessiné
             with open(emplacement_fichier, 'w') as f:
                 f.write(str(self.polygon))
+            # On affiche un message de confirmation
             self.reponse_b1.config(text="Fichier correctement enregistré",
                                    fg='green')
         else:
+            # Sinon on affiche un message d'erreur
             self.reponse_b1.config(text="Aucun fichier enregistré",
                                    fg='red')
         self.lift()
 
     def edit(self):
-        LST_Types = [("Fichier texte", ".txt"), ("Autres types", ".*")]
+        # Types de fichier acceptés : seulement .txt dans notre cas
+        LST_Types = [("Fichier texte", ".txt")]
+        # On ouvre l'explorateur de fichier windows
         emplacement_fichier = tk.\
             filedialog.askopenfilename(title="Ouvrir",
                                        filetypes=LST_Types,
                                        defaultextension=".txt")
         if emplacement_fichier:
+            # Si un fichier a été sélectionné, on essaie d'ouvrir le fichier
+            # config.tkt
             try:
+                # Si ce dernier existe
                 lignes_fichier = list()
                 with open(self.fichier_config, 'r') as f:
+                    # On lis et sauvegarde son contenu
                     for line in f:
                         lignes_fichier.append(line)
+                # On modifie la ligne demandée
                 string = "Preset" + str(self.preset.get()) + (":") +\
                     emplacement_fichier + "\n"
                 lignes_fichier[self.preset.get()-1] = string
+                # On réécrit le fichier
                 with open(self.fichier_config, 'w') as f:
                     for line in lignes_fichier:
                         f.write(line)
 
             except FileNotFoundError:
+                # Si config.tkt n'existe pas
                 print(self.preset)
+                # On le crée
                 with open(self.fichier_config, 'w') as f:
+                    # On renseigne la valeur du preset sélectionné
                     for i in range(1, 4):
                         emplacement = str()
                         if i == self.preset.get():
                             emplacement = emplacement_fichier
                         string = "Preset" + str(i) + (":") + emplacement + "\n"
                         f.write(string)
+            # On affiche un message de confirmation
             self.reponse_b2.config(text="Preset correctement modifié",
                                    fg='green')
         else:
+            # Sinon on affiche un message d'erreur
             self.reponse_b2.config(text="Aucun preset modifié",
                                    fg='red')
         self.lift()
