@@ -27,6 +27,10 @@ class Point():
 
     def return_tuple(self):
         return (self.x, self.y)
+    
+    def move(self, delta_x, delta_y):
+        self.x += delta_x
+        self.y += delta_y
 
 
 class Segment():
