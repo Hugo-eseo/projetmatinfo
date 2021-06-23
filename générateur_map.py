@@ -50,7 +50,7 @@ def generateur(canvas, numero_predefini):
                           (243, 77, 90, "toupie", 0)]]
 
     database_lampes = [[(291, 45, 40)], 
-                       [(579, 318, 50)]]
+                       [(579, 318, 100)]]
 
     database_boutons = [[(152, 328)],
                         [(244, 325)]]
