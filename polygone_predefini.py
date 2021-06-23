@@ -31,7 +31,7 @@ def polygone_predefini(canvas, numero_predefini):
                 (541, 21), (456, 21), (457, 81), (416, 81),
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
-                (219, 124)]]
+                (219, 124)], ]
 
     if numero_predefini is None:
         numero_predefini = random.randint(0, len(database)-1)
@@ -56,4 +56,3 @@ def polygone_predefini(canvas, numero_predefini):
     canvas.create_polygon(database[numero_predefini], fill='grey')
 
     return liste_segments, database[numero_predefini]
-

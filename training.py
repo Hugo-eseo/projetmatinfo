@@ -5,7 +5,7 @@ from point_in_polygon import point_in_polygon
 import random
 import time
 
-# fonction de calcul de l'aire
+
 def aire_polygon(points_coords):
     sommeX_Y1 = 0
     sommeY_X1 = 0
@@ -17,49 +17,6 @@ def aire_polygon(points_coords):
             sommeX_Y1 += points_coords[i][0] * points_coords[i+1][1]
             sommeY_X1 += points_coords[i][1] * points_coords[i+1][0]
     return int(abs(0.5*(sommeX_Y1-sommeY_X1)))
-
-
-def preparation(liste_sommets):
-    """
-    Retourne :
-        - carte : numpy.ndarray representant le musée
-        - liste_sommets : liste d'objets de type tuple représentant les sommets
-                          du polygoone dessinant le musée
-        - aire_totale : int répresentant l'aire de tout le musée
-        - canvas : objets de type tkinter.Canvas 
-        - wnd : objet de type tkinter.Tk 
-    """
-    
-    # calcul de l'aire du polygone
-    aire_totale = aire_polygon(liste_sommets)
-
-    # creation de la fenetre
-    wnd = tk.Tk()
-    canvas = tk.Canvas(master=wnd, width=600, height=400)
-    canvas.pack()
-    # creation de la map
-    canvas.create_polygon(liste_sommets, fill='grey')
-    return aire_totale, canvas, wnd
-
-def preparation_sans_wnd(wnd, cnv, liste_sommets):
-    """
-    Arguments :
-        - canvas : objet de type tkinter.Canvas 
-        - wnd : objet de type tkinter.Tk 
-    Retourne :
-        - carte : numpy.ndarray representant le musée
-        - liste_sommets : liste d'objets de type tuple représentant les sommets
-                          du polygone dessinant le musée
-        - aire_totale : int répresentant l'aire de tout le musée
-        - canvas : objet de type tkinter.Canvas 
-        - wnd : objet de type tkinter.Tk 
-    """
-    
-    # calcul de l'aire du polygone
-    aire_totale = aire_polygon(liste_sommets)
-
-    return aire_totale, wnd, cnv
-
 
 def creer_pop(nombre_gardiens, pop_taille, liste_sommets, cnv):
     """
@@ -316,7 +273,7 @@ def tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale):
 
 
 def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil,
-                 generation_max, wnd, cnv, liste_sommets):
+                 generation_max, wnd, canvas, liste_sommets):
     """
     Arguments : 
         - pop_taille : nombre d'individu généré par génération 
@@ -336,7 +293,7 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil,
         - pop_sorted[0][0] : aire du meilleur individu
     """
     # préparation des données
-    aire_totale, wnd, canvas  = preparation_sans_wnd(wnd, cnv, liste_sommets)
+    aire_totale = aire_polygon(liste_sommets)
     # création de la première population
     pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
     # initialisation des variables
@@ -378,76 +335,3 @@ def entrainement(pop_taille, nombre_gardiens, mutation_proba, seuil,
           f"generation: {pop_sorted[0][1]}")
     return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
         
-
-def entrainement_avec_wnd(pop_taille, nombre_gardiens, mutation_proba, seuil,
-                          generation_max, liste_sommets):
-    """
-    Arguments : 
-        - pop_taille : nombre d'individu généré par génération 
-        - nombre_gardiens : nombre de gardiens à placer
-        - mutation_proba : float representant la probabilité de mutation
-                           (pas plus de 0.1)
-        - seuil : float représentant le taux de remplissage de l'aire souhaité
-        - generation_max : nombre de generations maximum durant l'entrainement
-    Retourne : 
-        - pop_sorted[1][0] : position du meilleur individu
-        - wnd : objet de type tkinter.Tk 
-        - cnv : objets de type tkinter.Canvas 
-        - liste_sommets : liste d'objets de type tuple représentant les sommets
-                          du polygone dessinant le musée
-        - pop_sorted[0][0] : aire du meilleur individu
-    """
-    aire_totale, wnd, canvas  = preparation(liste_sommets)
-    pop = creer_pop(nombre_gardiens, pop_taille, liste_sommets, canvas)
-    termine = False
-    generation = 1
-    for i in range(generation_max):
-        print(f'generation n°{generation}')
-        pop_sorted = classer_pop(pop, nombre_gardiens, liste_sommets, canvas)
-        termine = tester_pop(pop_sorted, seuil, nombre_gardiens, aire_totale)
-        if termine is True:
-            print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-                  f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) a été "
-                  f"obtenue à la {generation}ème "
-                  f"generation: {pop_sorted[0][1]}")
-            return pop_sorted[0][1], wnd, canvas, \
-                   liste_sommets, pop_sorted[0][0]
-        print(f'aire meilleur individu : {pop_sorted[0][0]} '
-              f'({(pop_sorted[0][0]/aire_totale)*100}%)')
-        pop_cross_over = moyenne_cross_over(pop_sorted, pop_taille,
-                                            nombre_gardiens, liste_sommets,
-                                            canvas)
-        pop_mutation = mutation(pop_cross_over, mutation_proba, nombre_gardiens,
-                                liste_sommets, canvas)
-        pop = completer_pop(pop_mutation, pop_taille, nombre_gardiens,
-                            liste_sommets, canvas)
-        generation += 1
-    
-    print(f"Une solution satisfaisante à {pop_sorted[0][0]} "
-          f"({round((pop_sorted[0][0]/aire_totale)*100, 2)}%) "
-          f"a été obtenue à la {generation}ème "
-          f"generation: {pop_sorted[0][1]}")
-    return pop_sorted[0][1], wnd, canvas, liste_sommets, pop_sorted[0][0]
-
-
-if __name__ == '__main__':
-    taille_point = 3
-    indiv, wnd, canvas, liste_sommets, aire = entrainement_avec_wnd(10, 1, 0.05,
-                                                                    0.8, 10)
-    canvas.create_polygon(liste_sommets, fill='grey')
-    if type(indiv[0]) is list:
-        for gardien in indiv:
-            canvas.create_polygon(polygon_eclairage(gardien, liste_sommets,
-                                                    canvas),
-                                  fill='yellow')
-        for gardien in indiv:
-            canvas.create_oval(gardien[0]-taille_point, gardien[1]-taille_point,
-                               gardien[0]+taille_point, gardien[1]+taille_point,
-                               fill='red')
-    else:
-        canvas.create_polygon(polygon_eclairage(indiv, liste_sommets, canvas),
-                              fill='yellow')
-        canvas.create_oval(indiv[0]-taille_point, indiv[1]-taille_point,
-                           indiv[0]+taille_point, indiv[1]+taille_point, 
-                           fill='red')
-    wnd.mainloop()
