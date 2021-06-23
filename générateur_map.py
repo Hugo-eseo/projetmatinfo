@@ -1,12 +1,12 @@
-from shared import Point, Segment 
-import random
 
+from shared import Point, Segment
+import random
 
 
 def generateur(canvas, numero_predefini):
     """
     Arguments :
-        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
+        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
                    dessiné
         - numero_preset : integer definissant quel polygone sera dessiné,
                           si il est egal à None la dataset sera selectionée
@@ -43,7 +43,7 @@ def generateur(canvas, numero_predefini):
                           (537, 40)]]
 
     if numero_predefini is None:
-        numero_predefini = random.randint(0, len(database)-1)
+        numero_predefini = random.randint(0, len(database) - 1)
 
     canvas.delete('all')
 
@@ -55,7 +55,7 @@ def generateur(canvas, numero_predefini):
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
-        B = transformed_database[i-1]
+        B = transformed_database[i - 1]
         liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]
@@ -63,10 +63,10 @@ def generateur(canvas, numero_predefini):
 
     # dessiner le polygone
     canvas.create_polygon(database[numero_predefini], fill='grey')
-    canvas.create_rectangle(database_victoire[numero_predefini][0]-5,
-                            database_victoire[numero_predefini][1]-5,
-                            database_victoire[numero_predefini][0]+5,
-                            database_victoire[numero_predefini][1]+5,
+    canvas.create_rectangle(database_victoire[numero_predefini][0] - 5,
+                            database_victoire[numero_predefini][1] - 5,
+                            database_victoire[numero_predefini][0] + 5,
+                            database_victoire[numero_predefini][1] + 5,
                             fill="red")
 
     return (liste_segments, database[numero_predefini],
@@ -80,13 +80,14 @@ def generateur(canvas, numero_predefini):
 def zone_victoire(cnv, numero_predefini):
     """
     Arguments :
-        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
+        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
                    dessiné
         - numero_preset : integer definissant quel polygone sera dessiné,
                           si il est egal à None la dataset sera selectionée
                           aleatoirement
     Affiche :
-        - Un polygone représentant la zone d'arrivée en fonction du numero_predefini
+        - Un polygone représentant la zone d'arrivée en fonction du numero_
+        predefini
     Retourne :
         - Une liste de tous les segments du polygone
     """
@@ -100,7 +101,7 @@ def zone_victoire(cnv, numero_predefini):
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
-        B = transformed_database[i-1]
+        B = transformed_database[i - 1]
         liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]

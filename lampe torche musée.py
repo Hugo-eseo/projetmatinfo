@@ -8,18 +8,17 @@ Created on Mon Jun 21 14:48:30 2021
 
 import tkinter as tk
 import random
-from PIL import Image, ImageDraw
-import numpy as np
 import math
-from shared import (Point, Segment, det2, determinant_3_points,
-vabs, intersection_segments, vect, sc, angle_deux_points, rotation, dist)
+from shared import (Point, Segment, determinant_3_points, sc,
+                    angle_deux_points, rotation, dist)
 from clipping import clip
 from point_in_polygon import point_in_polygon
+
 
 def generateur(canvas, numero_predefini):
     """
     Arguments :
-        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
+        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
                    dessiné
         - numero_preset : integer definissant quel polygone sera dessiné,
                           si il est egal à None la dataset sera selectionée
@@ -44,7 +43,7 @@ def generateur(canvas, numero_predefini):
                 (219, 124)]]
 
     if numero_predefini is None:
-        numero_predefini = random.randint(0, len(database)-1)
+        numero_predefini = random.randint(0, len(database) - 1)
 
     canvas.delete('all')
 
@@ -56,7 +55,7 @@ def generateur(canvas, numero_predefini):
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
-        B = transformed_database[i-1]
+        B = transformed_database[i - 1]
         liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]
@@ -64,9 +63,10 @@ def generateur(canvas, numero_predefini):
 
     return liste_segments, database[numero_predefini]
 
+
 def projection_point_cercle(centre, A, rayon):
     """
-    
+
     Arguments :
         - centre : Centre du cercle de type Point
         - A : Point extérieur au cercle que l'on veut projeter dessus, de type
@@ -82,40 +82,41 @@ def projection_point_cercle(centre, A, rayon):
 
     ASB = determinant_3_points(A, centre, centre)
     AB = dist(A, centre)
-    d = abs(ASB)/AB
+    d = abs(ASB) / AB
 
-    vAB = (centre.x-A.x, centre.y-A.y)
-    vAS = (centre.x-A.x, centre.y-A.y)
-    h = sc(vAS, vAB)/(AB**2)
-    t = math.sqrt(rayon**2 - d**2)/AB
+    vAB = (centre.x - A.x, centre.y - A.y)
+    vAS = (centre.x - A.x, centre.y - A.y)
+    h = sc(vAS, vAB) / (AB ** 2)
+    t = math.sqrt(rayon ** 2 - d ** 2) / AB
 
-    #1er point d'intersection
+    # 1er point d'intersection
     a = 1 - h - t
     b = h + t
-    xG1 = (a*A.x+b*centre.x)
-    yG1 = (a*A.y+b*centre.y)
+    xG1 = (a * A.x + b * centre.x)
+    yG1 = (a * A.y + b * centre.y)
 
     G1 = Point(xG1, yG1)
     d1 = dist(A, G1)
 
-    #2eme point
+    # 2eme point
     a = 1 - h + t
     b = h - t
-    xG2 = (a*A.x+b*centre.x)
-    yG2 = (a*A.y+b*centre.y)
+    xG2 = (a * A.x + b * centre.x)
+    yG2 = (a * A.y + b * centre.y)
 
     G2 = Point(xG2, yG2)
     d2 = dist(A, G2)
-    """Comme le point est à l'extérieur du cercle, on prend l'intersection 
+    """Comme le point est à l'extérieur du cercle, on prend l'intersection
     avec la distance la plus faible"""
     if d1 > d2:
         return G2
     return G1
 
+
 class Gardien:
     def __init__(self, Point, direction, angle, puissance, vitesse, taille,
                  identite):
-         """
+        """
          Arguments :
             - Point : objet de classe 'Point' représentant la position du
                       gardien
@@ -124,42 +125,44 @@ class Gardien:
             - angle : angle d'éclairage de la lampe torche
             - puissance : distance d'éclairage de la lampe torche
             - vitesse : int representant la vitesse de deplacement du gardien
-            - cnv : objet de type tkinter.Canvas dans lequel le polygone sera 
+            - cnv : objet de type tkinter.Canvas dans lequel le polygone sera
                     dessiné
             - taille : taille en pixel du point représentant le voleur
             - id : int représentant le numero d'identification du gardien
             - couleur : String contenant le code couleur tkinter
         """
-         self.position = Point# position en pixels
-         self.direction = direction # en degrés
-         self.angle = angle  # en degrés
-         self.puissance = puissance    # puissance de la torche en pixels
-         self.vitesse = vitesse  # vitesse de deplacement
-         self.identite = identite
-         affichage = cnv.create_oval(self.position.x - taille,
-                                    self.position.y - taille,
-                                    self.position.x + taille, 
-                                    self.position.y + taille,
-                                    fill="red", tag=f'Gardien{identite}')
+        self.position = Point  # Position en pixels
+        self.direction = direction  # En degrés
+        self.angle = angle  # En degrés
+        self.puissance = puissance    # Puissance de la torche en pixels
+        self.vitesse = vitesse  # Vitesse de deplacement
+        self.identite = identite
+        cnv.create_oval(self.position.x - taille,
+                        self.position.y - taille,
+                        self.position.x + taille,
+                        self.position.y + taille,
+                        fill="red", tag=f'Gardien{identite}')
 
     def reculer(self, event, cnv):
         """
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le
                                musée
-            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera 
+            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera
                     deplacé
         """
         rad = self.direction * math.pi / 180
-        self.position.move(round(math.sin(rad-math.pi/2) * self.vitesse),
-                           round(math.cos(rad-math.pi/2) * self.vitesse))
+        self.position.move(round(math.sin(rad - math.pi / 2) * self.vitesse),
+                           round(math.cos(rad - math.pi / 2) * self.vitesse))
         if not point_in_polygon(self.position.return_tuple(), liste_points):
-            self.position.move(round(math.sin(rad-math.pi/2) * -self.vitesse),
-                               round(math.cos(rad-math.pi/2) * -self.vitesse))
-        else :
+            self.position.move(round(math.sin(rad - math.pi / 2)
+                                     * -self.vitesse),
+                               round(math.cos(rad - math.pi / 2)
+                                     * -self.vitesse))
+        else:
             cnv.move(f'Gardien{self.identite}',
-                     round(math.sin(rad-math.pi/2) * self.vitesse),
-                     round(math.cos(rad-math.pi/2) * self.vitesse))
+                     round(math.sin(rad - math.pi / 2) * self.vitesse),
+                     round(math.cos(rad - math.pi / 2) * self.vitesse))
 
         self.eclaire()
 
@@ -168,20 +171,21 @@ class Gardien:
         Arguments :
             - liste_segments : liste d'objets de type segment représentant le
                                musée
-            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera 
+            - cnv : objet de type tkinter.Canvas dans lequel le gardien sera
                     deplacé
         """
         rad = self.direction * math.pi / 180
-        self.position.move(int(math.sin(rad-math.pi/2) * -self.vitesse),
-                           int(math.cos(rad-math.pi/2) * -self.vitesse))
+        self.position.move(int(math.sin(rad - math.pi / 2) * -self.vitesse),
+                           int(math.cos(rad - math.pi / 2) * -self.vitesse))
         if not point_in_polygon(self.position.return_tuple(), liste_points):
-            self.position.move(int(math.sin(rad-math.pi/2) * self.vitesse),
-                               int(math.cos(rad-math.pi/2) * self.vitesse))
-        else :
+            self.position.move(int(math.sin(rad - math.pi / 2)
+                                   * self.vitesse),
+                               int(math.cos(rad - math.pi / 2)
+                                   * self.vitesse))
+        else:
             cnv.move(f'Gardien{self.identite}',
-                     int(math.sin(rad-math.pi/2) * -self.vitesse),
-                     int(math.cos(rad-math.pi/2) * -self.vitesse))
-        
+                     int(math.sin(rad - math.pi / 2) * -self.vitesse),
+                     int(math.cos(rad - math.pi / 2) * -self.vitesse))
         self.eclaire()
 
     def turn_right(self):
@@ -203,46 +207,42 @@ class Gardien:
         self.eclaire()
 
     def eclaire(self):
-        cnv.delete("cone"+str(self.identite))
-        cnv.delete("clip1"+str(self.identite))
-        cnv.delete("clip2"+str(self.identite))
+        cnv.delete("cone" + str(self.identite))
+        cnv.delete("clip1" + str(self.identite))
+        cnv.delete("clip2" + str(self.identite))
         cnv.delete("cercle")
 
-        C = Point(self.position.x+self.puissance, self.position.y)
+        C = Point(self.position.x + self.puissance, self.position.y)
         C = rotation(self.position, C, self.direction)
         C1 = rotation(self.position, C, -self.angle)
         C2 = rotation(self.position, C, self.angle)
 
-        #on veut l'intersection sur le cercle
-        #projection 1
+        # On veut l'intersection sur le cercle
+        # Projection 1
         proj1 = projection_point_cercle(self.position, C1, self.puissance)
 
-        #projection 2
+        # Projection 2
         proj2 = projection_point_cercle(self.position, C2, self.puissance)
-        #Cone de lumière
-        cnv.create_arc(self.position.x-self.puissance,
-                       self.position.y-self.puissance, 
-                       self.position.x+self.puissance,
-                       self.position.y+self.puissance,
+        # Cone de lumière
+        cnv.create_arc(self.position.x - self.puissance,
+                       self.position.y - self.puissance,
+                       self.position.x + self.puissance,
+                       self.position.y + self.puissance,
                        start=-angle_deux_points(proj1,
-                                                self.position,True),
-                       extent=2*self.angle,
-                       tag="cone"+str(self.identite),
+                                                self.position, True),
+                       extents=2 * self.angle,
+                       tag="cone" + str(self.identite),
                        fill="yellow", outline="yellow")
-        '''cnv.create_oval(self.position.x-self.puissance,
-                        self.position.y-self.puissance, 
-                        self.position.x+self.puissance,
-                        self.position.y+self.puissance, tag="cercle")'''
         clip(cnv, proj1, proj2, self.position, self.puissance, liste_segments,
              self.identite)
         cnv.tag_raise("segment")
 
-# parametres du jeu
+
+# Parametres du jeu
 width_canvas, height_canvas = 600, 400
 width_frame, height_frame = 100, 400
 
-
-# création de l'interface graphique
+# Création de l'interface graphique
 wnd = tk.Tk()
 cnv = tk.Canvas(wnd, width=width_canvas, height=height_canvas, bg="white")
 cnv.pack(side=tk.LEFT)
@@ -256,9 +256,9 @@ for segment in liste_segments:
 gardien1 = Gardien(Point(300, 250), 180, 30, 100, 2, 4, 1)
 gardien1.eclaire()
 
-wnd.bind("<Up>", lambda event : gardien1.avancer(event, cnv))
-wnd.bind("<Down>", lambda event : gardien1.reculer(event, cnv))
-wnd.bind("<Left>", lambda event : gardien1.turn_left())
-wnd.bind("<Right>", lambda event : gardien1.turn_right())
+wnd.bind("<Up>", lambda event: gardien1.avancer(event, cnv))
+wnd.bind("<Down>", lambda event: gardien1.reculer(event, cnv))
+wnd.bind("<Left>", lambda event: gardien1.turn_left())
+wnd.bind("<Right>", lambda event: gardien1.turn_right())
 
 wnd.mainloop()
