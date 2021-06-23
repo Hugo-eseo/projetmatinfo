@@ -5,8 +5,9 @@ Created on Fri Apr 23 12:21:25 2021
 @author: hugob
 """
 
-from shared import point_classe, segment_classe, signe,\
-    point_appartient_segment, point_egaux, intersection_segments
+from shared import (point_classe, segment_classe, signe,
+    point_appartient_segment, point_egaux, intersection_segments,
+    intersection_demi_droite_segment)
 
 # Taille des point affichés sur le canvas
 size = 4
