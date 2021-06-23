@@ -18,33 +18,37 @@ from shared import point_classe, segment_classe, intersection_droites,\
 
 
 class Application():
-    """Crée la fenêtre de l'application"""
-    nbrayons = 60  # Nombre de rayon partants de la source lumineuse
-    d = list()
-    sommets_polygon = list()
+    """Crée la fenêtre de l'application de démonstration"""
+    nbrayons = 60  # Nombre de rayon partants de la source lumineuse pour la
+    # demo 2 et 4
+    sommets_polygon = list()  # Liste contenant les futurs sommets du polygon
     alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
                 'Y', 'Z']
-    fichier_config = "config.txt"
+    fichier_config = "config.txt"  # Fichier contenant les chemins des presets
     puissance = 100  # Rayon du cercle
+    angle = 30  # Angle du clipping pour la demo 6
 
     def __init__(self, width, height):
         """Prend en argument :
             width : largeur de la fenêtre
             height : hauteur de la fenêtre
         """
+
         # Création de la fenêtre, du canvas et de la frame de commande
         self.width, self.height = width, height
         self.wnd = tk.Tk()
         self.wnd.title("Galerie d'art - Demonstrateur")
-        self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height)
+        self.cnv = tk.Canvas(self.wnd, width=self.width, height=self.height,
+                             bg='white')
         self.cnv.pack()
         self.frm = tk.Frame(self.wnd, width=self.width, height=100, pady=10,
                             relief='ridge', bd=10)
         self.frm.pack(side=tk.BOTTOM)
 
         self.frm.columnconfigure(1, minsize=50)
-        # Différents modes de demonstration
+
+        # Configuration des widgets graphiques
         tk.Label(self.frm, text="CONFIGURATION DEMONSTRATIONS")\
             .grid(row=0, column=0, columnspan=5, ipadx=10, ipady=10,
                   sticky='new')
@@ -79,7 +83,7 @@ class Application():
                   command=lambda: self.demo4_5_6(6))\
             .grid(row=7, column=0, ipadx=10, pady=5, sticky='n')
 
-        tk.Button(self.frm, text="Effacer la planche", command=self.reset)\
+        tk.Button(self.frm, text="Reset", command=self.reset)\
             .grid(row=2, column=3, ipadx=10, pady=5, sticky='n')
 
         tk.Label(self.frm, text="Nombre d'obstacles :")\
@@ -105,8 +109,19 @@ class Application():
                        value=3)\
             .grid(row=5, column=4, ipadx=10, sticky='n')
 
+        tk.Label(self.frm, text="Angle de la torche :")\
+            .grid(row=6, column=2, ipadx=10, sticky='n')
+        self.angle_torche = tk.Scale(self.frm, from_=0, to=360,
+                                     orient=tk.HORIZONTAL)
+        self.angle_torche.set(180)
+        self.angle_torche.grid(row=6, column=3, ipadx=10, sticky='n')
+
+        self.mode_demo = tk.IntVar()
+        tk.Checkbutton(self.frm, text="Mode demo", variable=self.mode_demo)\
+            .grid(row=6, column=4, ipadx=10, sticky='n')
+
         self.error_label = tk.Label(self.frm, text="")
-        self.error_label.grid(row=6, column=3, ipadx=10, sticky='n')
+        self.error_label.grid(row=7, column=3, ipadx=10, sticky='n')
 
         self.wnd.mainloop()
 
@@ -114,15 +129,51 @@ class Application():
 
     def reset(self):
         """Reset du canvas. Suppression de tous les éléments de dessin"""
+
+        self.cnv.unbind('<Button-1>')
         self.cnv.delete(tk.ALL)
         self.error_label.config(text="")
 
+    def get_polygon_preset(self):
+        """Fonction permettant de récupérer le polygon correspondant
+        au preset sélectionné par l'utilisateur"""
+
+        try:
+            # On ouvre le fichier config
+            with open(self.fichier_config, 'r') as f:
+                for i in range(self.preset.get()):
+                    line = f.readline()
+                # On lit l'adresse du fichier du preset
+                line = line[8:-1]
+                if not line:
+                    string = "Aucun fichier enregistré sur le preset " +\
+                        str(self.preset.get())
+                    self.error_label.config(text=string, fg='red')
+                    return None
+            # On lit le polygon dans le fichier correspondant
+            with open(line, 'r') as f:
+                line = eval(f.readline())
+            return(line)
+        except FileNotFoundError:
+            # Si un des fichier n'est pas trouvé
+            string = "Fichier d'accès du preset" + str(self.preset.get())\
+                + " invalide. Ou fichier config inexistant"
+            self.error_label.config(text=string, fg='red')
+
     def lancement_preset(self, type_demo, demo=False):
-        """Dessin du polygon défini par les preset"""
+        """Dessin du polygon dans le canvas et mémorisation des segments
+        Arguments:
+            type_demo: numéro de la demo (de 4 à 6)"""
+
         size = 4
-        self.d_to_check = []
+        self.d_to_check = list()
         self.cnv.delete(tk.ALL)
-        self.cnv.create_polygon(self.sommets_polygon, fill='grey')
+        color = 'grey'
+        if type_demo == 6:
+            color = 'white'
+        # Création du polygon
+        self.cnv.create_polygon(self.sommets_polygon, fill=color)
+
         # Mémorisation des segments
         for i in range(len(self.sommets_polygon)):
             A = self.sommets_polygon[i]
@@ -132,12 +183,20 @@ class Application():
                     segment_classe(point_classe(B[0], B[1]),
                                    point_classe(A[0], A[1])))
             if demo:
+                # Si le mode démo est activé on affiche les sommets du polygon
                 self.cnv.create_oval(A[0] - size, A[1] - size, A[0] + size,
                                      A[1] + size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
                                               point_classe(A[0], A[1])))
+        # Bind du clic gauche suivant les différents modes de démo
+        if type_demo == 6:
+            for segment in self.d_to_check:
+                # Affichage d'une bordure du polygon pour le clipping
+                self.cnv.create_line(segment.A.x, segment.A.y,
+                                     segment.B.x, segment.B.y,
+                                     width=1, tag='polygon')
         if type_demo == 4:
             self.cnv.bind('<Button-1>', self.clic_rayons_polygon_demo)
 
@@ -148,7 +207,10 @@ class Application():
             self.cnv.bind('<Button-1>', self.clipping)
 
     def demo4_5_6(self, id_demo):
+        """Fonction appellée par les boutons demo 4, 5, 6"""
+
         self.reset()
+        # Récupération du polygon sélectionné par le preset
         self.sommets_polygon = self.get_polygon_preset()
         if self.sommets_polygon is not None:
             self.lancement_preset(id_demo)
@@ -156,84 +218,77 @@ class Application():
     # Fonctions utilisés par le mode de démonstration 6
 
     def clipping(self, event):
-        self.cnv.delete("cone")
-        self.cnv.delete("clip1")
-        self.cnv.delete("clip2")
-        self.cnv.delete("cercle")
+        """Fonction appelant le clipping lorsque l'utilisateur clic dans
+        le polygon"""
 
-        self.angle = 30
-        self.direction = 180
+        # Si le point est dans le polygon
+        if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
+            # On supprime le précédent clip
+            self.cnv.delete("cone")
+            self.cnv.delete("clip1")
+            self.cnv.delete("clip2")
+            self.cnv.delete("cercle")
 
-        position = point_classe(event.x, event.y)
-        C = point_classe(position.x + self.puissance + 50, position.y)
-        C = rotation(position, C, self.direction)
-        C1 = rotation(position, C, -self.angle)
-        C2 = rotation(position, C, self.angle)
+            direction = self.angle_torche.get()
 
-        # On veut l'intersection sur le cercle
-        # Projection 1
-        proj1 = projection_point_cercle(position, C1, self.puissance)
+            position = point_classe(event.x, event.y)
+            C = point_classe(position.x + self.puissance + 50, position.y)
+            C = rotation(position, C, direction)
+            C1 = rotation(position, C, -self.angle)
+            C2 = rotation(position, C, self.angle)
 
-        # Projection 2
-        proj2 = projection_point_cercle(position, C2, self.puissance)
-        # Cone de lumière
-        self.cnv.create_arc(position.x - self.puissance,
-                            position.y - self.puissance,
-                            position.x + self.puissance,
-                            position.y + self.puissance,
-                            start=-angle_deux_points(proj1, position, True),
-                            extent=2 * self.angle,
-                            tag="cone",
-                            fill="yellow", outline="yellow")
+            # On veut l'intersection sur le cercle
+            # Projection 1
+            proj1 = projection_point_cercle(position, C1, self.puissance)
 
-        cl.clip(self.cnv, proj1, proj2, position, self.puissance,
-                self.d_to_check)
-        for seg in self.d_to_check:
-            print(seg)
-        self.cnv.tag_raise("segment")
+            # Projection 2
+            proj2 = projection_point_cercle(position, C2, self.puissance)
+            # Cone de lumière
+            self.cnv.create_arc(position.x - self.puissance,
+                                position.y - self.puissance,
+                                position.x + self.puissance,
+                                position.y + self.puissance,
+                                start=-angle_deux_points(proj1, position,
+                                                         True),
+                                extent=2 * self.angle,
+                                tag="cone",
+                                fill="yellow", outline="yellow")
+
+            cl.clip(self.cnv, proj1, proj2, position, self.puissance,
+                    self.d_to_check)
+            self.cnv.tag_raise('polygon')
 
     # Fonctions utilisés par le mode de démonstration 5
 
     def polygone_eclairage(self, event):
+        """Fonction affichant le polygon d'éclairage lorsque
+        l'utilisateur clic dans le polygon"""
+
         if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
             self.cnv.delete('light')
             polygon = pe.polygon_eclairage((event.x, event.y),
                                            self.sommets_polygon,
-                                           self.cnv, True)
+                                           self.cnv, self.mode_demo.get())
             self.cnv.create_polygon(polygon, fill='yellow', tag='light')
             self.cnv.tag_raise('demo')
 
     # Fonctions utilisés par le mode de démonstration 4
 
-    def get_polygon_preset(self):
-        try:
-            with open(self.fichier_config, 'r') as f:
-                for i in range(self.preset.get()):
-                    line = f.readline()
-                line = line[8:-1]
-                if not line:
-                    string = "Aucun fichier enregistré sur le preset " +\
-                        str(self.preset.get())
-                    self.error_label.config(text=string, fg='red')
-                    return None
-            with open(line, 'r') as f:
-                line = eval(f.readline())
-            return(line)
-        except FileNotFoundError:
-            string = "Fichier d'accès du preset" + str(self.preset.get())\
-                + " invalide"
-            self.error_label.config(text=string, fg='red')
-
     def clic_rayons_polygon_demo(self, event):
+        """Fonction affichant les rayons envoyés depuis le clic
+        de l'utilisateur dans le polygon"""
+
         point = point_classe(event.x, event.y)
         if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
             iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
-                                               360, 0, self.d_to_check, False)
+                                               360, 0, self.d_to_check,
+                                               self.mode_demo.get())
 
     # Fonctions utilisés par le mode de démonstration 3
 
     def demo3(self):
         """Lancement de la demo 3 : Dessiner un polygon"""
+
         self.reset()
         # Liste des sommets du polygon
         self.sommets_polygon = list()
@@ -243,6 +298,7 @@ class Application():
 
     def dessin_polygone_demo(self, event):
         """Pour chaque clic, on dessine le point correspondant"""
+
         # Taille des points du polygon
         size = 4
         # A chaque clic, au affiche le point correspondant
@@ -262,6 +318,7 @@ class Application():
         Prend un paramètre facultatif supplémentaire en argument :
         getpatern : si True, affiche dans la console la liste des points
         du polygon"""
+
         # Si le polygon ne contient pas au moins 3 points
         if len(self.sommets_polygon) < 3:
             return
@@ -275,6 +332,9 @@ class Application():
         self.cnv.unbind('<Button-1>')
 
     def save_polygon(self):
+        """Ouvre le menu de sauvegarde du polygon et de modification
+        des presets"""
+
         if self.sommets_polygon is not None:
             if len(self.sommets_polygon) < 3:
                 Save_popup(self.wnd)
@@ -285,6 +345,7 @@ class Application():
 
     def demo2(self):
         """Lancement de la demo 2 : Rayons contre obstacles"""
+
         nbobstacle = self.nb_obstacles.get()
         self.reset()
 
@@ -312,6 +373,7 @@ class Application():
 
     def draw_obstacle(self):
         """Dessine un obsacle rectangulaire quelconque sur le canas"""
+
         # Choix aléatoire de la hauteur et largeur de l'obstacle
         width, height = random.randint(10, 60), random.randint(100, 200)
         # Choix aléatoire de ses coordonnées
@@ -338,26 +400,28 @@ class Application():
                                 C.return_tuple(), D.return_tuple(),
                                 fill='green')
 
-    def rayon_obsatcles_demo(self, event, demo=False):
+    def rayon_obsatcles_demo(self, event):
         """Fonction appellée dans le mode demo2 en cas de clic"""
+
         point = point_classe(event.x, event.y)
         for polygone in self.polygones:
             if pip.point_in_polygon((event.x, event.y), polygone):
                 return
         iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
-                                           360, 0, self.d_to_check, True)
+                                           360, 0, self.d_to_check,
+                                           self.mode_demo.get())
 
     # Fonctions utilisés par le mode de démonstration 1
 
     def demo1(self):
         """Lancement de la demo 1 : Intersection simple entre deux droites"""
-        self.reset()
 
+        self.reset()
         # Variables utilisé pour le mode de démonstration 1
         self.state = 1  # Utilisé par la machine à état
         self.nbd = 0
         self.A, self.B = None, None
-        self.d = []
+        self.d = list()
 
         self.cnv.delete(tk.ALL)
         self.cnv.bind('<Button-1>', self.intersection_deux_droites_demo)
@@ -365,6 +429,7 @@ class Application():
 
     def intersection_deux_droites_demo(self, event):
         """Demo : Machine à état pour le dessin des droites"""
+
         size = 4  # Taille des points dessinés
         # Clic gauche : dessin du point sur le clic
         self.cnv.create_oval(event.x - size, event.y - size, event.x + size,
@@ -404,6 +469,7 @@ class Application():
 
 class Save_popup(tk.Toplevel):
     """Crée une fenêtre popup permettant de sauvegarder le polygon dessiné"""
+
     width, height = 500, 300
     fichier_config = "config.txt"
 
@@ -412,6 +478,7 @@ class Save_popup(tk.Toplevel):
 
         super().__init__(parent)
         self.title("Gestionnaire de fichiers")
+        self.bg = 'white'
         self.lift()
         self.minsize(self.width, self.height)
 
@@ -435,7 +502,7 @@ class Save_popup(tk.Toplevel):
 
             # On affiche le polygon réduit dans un canvas
             self.cnv = tk.Canvas(self, width=(max_x - min_x) * 0.5,
-                                 height=(max_y - min_y) * 0.5)
+                                 height=(max_y - min_y) * 0.5, bg='white')
             self.cnv.pack()
             self.cnv.create_polygon(polygonr, fill='grey')
 
@@ -480,6 +547,7 @@ class Save_popup(tk.Toplevel):
             .grid(row=7, column=1, ipadx=10, sticky='n', ipady=5)
 
     def save_as(self):
+        """Sauvegarde le polygon dans le fichier demandé par l'utilisateur"""
         # Types de fichier acceptés : seulement .txt dans notre cas
         LST_Types = [("Fichier texte", ".txt")]
         # On ouvre l'explorateur de fichier windows
@@ -502,6 +570,8 @@ class Save_popup(tk.Toplevel):
         self.lift()
 
     def edit(self):
+        """Modifie le preset demandé par l'utilisateur"""
+
         # Types de fichier acceptés : seulement .txt dans notre cas
         LST_Types = [("Fichier texte", ".txt")]
         # On ouvre l'explorateur de fichier windows
@@ -530,7 +600,6 @@ class Save_popup(tk.Toplevel):
 
             except FileNotFoundError:
                 # Si config.tkt n'existe pas
-                print(self.preset)
                 # On le crée
                 with open(self.fichier_config, 'w') as f:
                     # On renseigne la valeur du preset sélectionné

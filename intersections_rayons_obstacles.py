@@ -27,6 +27,7 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
         - les rayons de lumière
         - le gardien (surement à supprimer dans le futur)
     """
+
     # Taille des points d'intersection
     size = 4
 

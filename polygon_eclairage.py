@@ -25,7 +25,6 @@ class calcul_polygon_eclairage():
             - canvas : Canvas de dessin
             - mode_demo : Boolean, True pour activer le mode de démonstration
         """
-
         if not (type(start_point) == tuple or type(start_point) == list):
             return None
         if not (len(start_point) == 2):
@@ -54,11 +53,10 @@ class calcul_polygon_eclairage():
         # d'éclairage
         self.O = point_classe(start_point[0], start_point[1])
 
-        if self.mode_demo:
-            # Affichage de la source lumineuse en jaune
-            self.canvas.create_oval(self.O.x - size, self.O.y - size,
-                                    self.O.x + size, self.O.y + size,
-                                    fill='white', tag='demo')
+        # Affichage de la source lumineuse en blanche
+        self.canvas.create_oval(self.O.x - size, self.O.y - size,
+                                self.O.x + size, self.O.y + size,
+                                fill='white', tag='demo')
 
     def return_polygon(self):
         """Retourne le polygon d'éclairage avec les paramètres
@@ -240,6 +238,7 @@ class calcul_polygon_eclairage():
         return points_indentifies
 
     def verif_si_projection(self, sommet, indice_sommet):
+
         """Arguments :
             - sommet : objet de type classe_point
             - indice_sommet : indice du sommet dans le polygon
@@ -268,6 +267,7 @@ class calcul_polygon_eclairage():
         return False
 
     def sommet_du_polygon(self, I):
+
         """Arguments :
             - I : objet de type classe_point
         Retourne True et l'indice du sommet correspondant si le point I
@@ -282,6 +282,7 @@ class calcul_polygon_eclairage():
 
 
 def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
+
     """Arguments :
         - start_point : Tuple ou liste sous la forme (x, y) ou [x, y]
         - polygon : Liste de sommets sous la forme  [(xA, yA), (xB, yB) ...]
@@ -289,7 +290,7 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
         - mode_demo : Boolean, True pour activer le mode de démonstration
     Retourne le polygon d'éclairage sous la forme d'une liste de points
     au format tuple : [(xA, yA), (xB, yB) ...]"""
-    per = calcul_polygon_eclairage(start_point, polygon, canvas, True)
+    per = calcul_polygon_eclairage(start_point, polygon, canvas, mode_demo)
     return per.return_polygon()
 
 
