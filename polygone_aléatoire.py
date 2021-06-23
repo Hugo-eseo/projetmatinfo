@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author : ArthurM 
 
-from shared import point_classe, angle_deux_points, segment_classe
+from shared import Point, Segment, angle_deux_points
 from point_in_polygon import point_in_polygon_classes
 import random
 
@@ -31,11 +31,11 @@ def polygone_aleatoire(nombre_de_points, canvas):
         nombre_de_points = random.randint(3, 50)
     
     for i in range(nombre_de_points):
-        liste_points.append(point_classe(random.randint(1, width-1),
-                                         random.randint(1, height-1)))
+        liste_points.append(Point(random.randint(1, width-1),
+                                  random.randint(1, height-1)))
     
     # centre du canvas
-    C = point_classe(width//2, height//2)
+    C = Point(width//2, height//2)
 
     for point in liste_points:
         random_polygon.append(((angle_deux_points(point, C)), point))
@@ -48,10 +48,10 @@ def polygone_aleatoire(nombre_de_points, canvas):
     for i in range(1, len(sommets_polygon)):
         A = sommets_polygon[i]
         B = sommets_polygon[i-1]
-        liste_segments.append(segment_classe(A, B))
+        liste_segments.append(Segment(A, B))
     A = sommets_polygon[0]
     B = sommets_polygon[-1]
-    liste_segments.append(segment_classe(A, B))
+    liste_segments.append(Segment(A, B))
 
     if not point_in_polygon_classes(C, liste_segments, canvas):
         polygone_aleatoire(nombre_de_points, canvas)

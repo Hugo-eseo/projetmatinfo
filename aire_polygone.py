@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author : ArthurM 
 
-from shared import point_classe
-import time
+from shared import Point
 
 def aire_polygone(liste_sommets):
     """
@@ -15,9 +14,9 @@ def aire_polygone(liste_sommets):
     liste_points = []
     for elem in liste_sommets:
         if type(elem) is tuple or type(elem) is list:
-            A = point_classe(elem[0], elem[1])
+            A = Point(elem[0], elem[1])
             liste_points.append(A)
-        elif type(elem) is point_classe:
+        elif type(elem) is Point:
             liste_points.append(elem)
 
     sommeX_Y1, sommeY_X1 = 0, 0
@@ -30,12 +29,3 @@ def aire_polygone(liste_sommets):
             sommeY_X1 += liste_points[i].y * liste_points[i+1].x
     aire = int(abs(0.5*(sommeX_Y1-sommeY_X1)))
     return aire
-
-    
-if __name__ == "__main__":
-    # test
-    t1 = time.time()
-    aire = aire_polygone([point_classe(0, 0), (0, 3), point_classe(3, 3), (3, 0)])  # retourne 9
-    t2 = time.time()
-    print(t2-t1, 'secondes')    # sans numba : 2.288818359375e-05 secondes
-    

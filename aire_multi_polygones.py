@@ -1,6 +1,6 @@
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
-from shared import intersection_segments, point_classe, segment_classe
+from shared import intersection_segments
 from aire_polygone import aire_polygone
 
 def aire_multi_polygones(polygones):
@@ -21,9 +21,3 @@ def aire_multi_polygones(polygones):
     polygone_fusion = unary_union(liste_classe_polygon)
     aire = polygone_fusion.area
     return aire
-
-
-if __name__ == '__main__':
-    # polygones = [[(0, 0), (1, 0), (1, 1), (0, 1)], [(0, 0), (3, 1), (1, 3)]]
-    polygones = [[[0, 0], [3, 1], [1, 3]]]
-    print(aire_multi_polygones(polygones))

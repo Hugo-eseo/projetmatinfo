@@ -1,9 +1,7 @@
 from polygon_eclairage import polygon_eclairage
 from aire_multi_polygones import aire_multi_polygones
-import tkinter as tk
 from point_in_polygon import point_in_polygon
 import random
-import time
 
 
 def aire_polygon(points_coords):

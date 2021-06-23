@@ -6,11 +6,13 @@ Created on Fri Apr 23 21:44:36 2021
 """
 
 
-from shared import point_classe, segment_classe,\
-    intersection_demi_droite_segment, dist,\
-    point_egaux, point_appartient_segment, determinant_3_points, signe
+from shared import (Point, Segment,
+    intersection_demi_droite_segment, dist,
+    point_egaux, point_appartient_segment, determinant_3_points, signe,
+    angle_deux_points)
 
-import time
+import math
+
 # Taille des point affichés sur le canvas
 size = 4
 precision = 0.01
@@ -38,22 +40,22 @@ class calcul_polygon_eclairage():
 
         # Création d'une liste contenant les segments du polygon
         self.liste_segments_polygon = list()
-        A = point_classe(polygon[0][0], polygon[0][1])
+        A = Point(polygon[0][0], polygon[0][1])
         for i in range(1, len(polygon)):
-            B = point_classe(polygon[i][0], polygon[i][1])
-            self.liste_segments_polygon.append(segment_classe(A, B))
+            B = Point(polygon[i][0], polygon[i][1])
+            self.liste_segments_polygon.append(Segment(A, B))
             A = B
-        B = point_classe(polygon[0][0], polygon[0][1])
-        self.liste_segments_polygon.append(segment_classe(A, B))
+        B = Point(polygon[0][0], polygon[0][1])
+        self.liste_segments_polygon.append(Segment(A, B))
 
         # Création d'une liste contenant les sommets du polygon
         self.liste_sommets_polygon = list()
         for point in polygon:
-            self.liste_sommets_polygon.append(point_classe(point[0], point[1]))
+            self.liste_sommets_polygon.append(Point(point[0], point[1]))
 
         # Le point O est le point où l'on souhaite connaître le polygon
         # d'éclairage
-        self.O = point_classe(start_point[0], start_point[1])
+        self.O = Point(start_point[0], start_point[1])
 
         if self.mode_demo:
             # Affichage de la source lumineuse en jaune
@@ -76,7 +78,7 @@ class calcul_polygon_eclairage():
             liste_intersections = list()
 
             # Segment de référence du point O au sommet
-            segment_sommet = segment_classe(self.O, sommet)
+            segment_sommet = Segment(self.O, sommet)
 
             # Pour chaque sommet : on parcours la liste de tous les segments
             # du polygon
@@ -293,13 +295,12 @@ def polygon_eclairage(start_point, polygon, canvas, mode_demo=False):
 if __name__ == '__main__':
     import tkinter as tk
     from point_in_polygon import point_in_polygon
+
     wnd = tk.Tk()
     cnv = tk.Canvas(wnd, width=600, height=400)
     cnv.pack()
-    # [460, 126] probleme majeur
-    # [[173, 168], [374, 249], [413, 225]]
 
-    point = [297, 21]
+    point = [300, 200]
     polygone = [(221, 183), (221, 221), (90, 223), (91, 109),
                 (140, 106), (143, 168), (173, 168), (176, 70),
                 (46, 65), (50, 276), (223, 274), (225, 321),
@@ -312,12 +313,11 @@ if __name__ == '__main__':
                 (416, 120), (369, 122), (319, 123), (315, 63),
                 (373, 57), (372, 23), (266, 22), (272, 122),
                 (219, 124)]
-    t1 = time.time()
-    print(point_in_polygon(point, polygone, cnv))
-    t2 = time.time()
+
     cnv.create_polygon(polygone, fill='grey')
-    lumiere = polygon_eclairage(point, polygone, cnv)
-    print('temps :', (t2-t1), 's')
-    cnv.create_polygon(lumiere, fill='yellow')
+    lumiere1 = polygon_eclairage(point, polygone, cnv)
+    cnv.create_polygon(lumiere1, fill='yellow')
+    lumiere = polygon_eclairage_angle(point, polygone, 0, 60, cnv)
+    cnv.create_polygon(lumiere, fill='blue')
     cnv.create_oval(point[0]-1, point[1]-1, point[0]+1, point[1]+1, fill='blue')
     wnd.mainloop()

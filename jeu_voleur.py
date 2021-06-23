@@ -1,7 +1,8 @@
 import tkinter as tk
 import math
-from shared import point_classe, segment_classe
+from shared import Point, Segment
 from point_in_polygon import point_in_polygon
+from intersections_rayons_obstacles import intersections_rayons_obstacles
 from générateur_map import generateur
 import random
 
@@ -39,6 +40,7 @@ class Gardien:
                                 self.position.x + taille, 
                                 self.position.y + taille,
                                 fill="black", tag=f'Gardien{identite}')
+        self.eclaire()
 
     def reculer(self):
         """
@@ -96,8 +98,20 @@ class Gardien:
 
     def eclaire(self):
         """
+        Crée l'éclairage
         """
-        pass
+        self.app.cnv.delete(f'Lumiere_gardien_{self.identite}')
+        torche_tuple = []
+        torche_infinie = intersections_rayons_obstacles(self.app.cnv, self.position,
+                                                300, self.angle,
+                                                self.direction,
+                                                self.app.liste_segments,
+                                                demo=False, return_inter=True)
+        for point in torche_infinie:
+            torche_tuple.append(point.return_tuple())
+
+        torche_tuple.append(self.position.return_tuple())
+        self.app.cnv.create_polygon(torche_tuple, fill="yellow", tag=f'Lumiere_gardien_{self.identite}')
 
     def agir(self):
         """
@@ -380,7 +394,6 @@ class Application:
         self.width_frame, self.height_frame = 100, height
 
         puissance_gardien = 50
-        x_depart, y_depart = 100, 100
 
         self.wnd = tk.Tk()
         self.cnv = tk.Canvas(self.wnd, width=self.width_canvas, 
@@ -410,14 +423,14 @@ class Application:
         self.nb_tableaux = len(self.emplacements_tableaux)
         for i in range(self.nb_tableaux):
             self.liste_tableaux.append(
-                Tableau(point_classe(self.emplacements_tableaux[i][0],
+                Tableau(Point(self.emplacements_tableaux[i][0],
                                      self.emplacements_tableaux[i][1]),
                         self.cnv, i))
         
         # Création des gardiens
         for i in range(len(self.emplacements_gardiens)):
             self.liste_gardiens.append(
-                Gardien(point_classe(self.emplacements_gardiens[i][0],
+                Gardien(Point(self.emplacements_gardiens[i][0],
                                      self.emplacements_gardiens[i][1]),
                         self.emplacements_gardiens[i][2],
                         puissance_gardien, 
@@ -429,17 +442,19 @@ class Application:
         # Création des lampes et des boutons
         for i in range(len(self.emplacements_lampes)):
             self.liste_lampes.append(
-                Lampe(point_classe(self.emplacements_lampes[i][0],
+                Lampe(Point(self.emplacements_lampes[i][0],
                                    self.emplacements_lampes[i][1]),
                       self.cnv, self.emplacements_lampes[i][2],i))
 
             self.liste_boutons.append(
-                Bouton(point_classe(self.emplacements_boutons[i][0],
+                Bouton(Point(self.emplacements_boutons[i][0],
                                     self.emplacements_boutons[i][1]),
                        self.liste_lampes[i], self.cnv, i))
 
         # Création du voleur
-        voleur = Voleur(point_classe(x_depart, y_depart), self)
+        voleur = Voleur(Point(self.emplacement_victoire[0],
+                              self.emplacement_victoire[1]),
+                        self)
 
         # lancement de l'animation des gardiens
         for gardien in self.liste_gardiens:

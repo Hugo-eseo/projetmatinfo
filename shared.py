@@ -11,9 +11,7 @@ import math
 precision = 0.01
 
 
-class point_classe():
-    """Docstring"""
-
+class Point:
     def __init__(self, x, y):
         """Prend en argument les coordonées x et y du point"""
         self.x, self.y = x, y
@@ -33,11 +31,9 @@ class point_classe():
         self.y += delta_y
 
 
-class segment_classe():
-    """Docstring"""
-
+class Segment:
     def __init__(self, point1, point2):
-        """Prend en argument deux points (de classe 'point')
+        """Prend en argument deux objets de classe 'point'
         définissants un segment"""
         self.A, self.B = point1, point2
 
@@ -67,7 +63,7 @@ def det3(mat):
 
 def dist(point1, point2):
     """Arguments :
-        - point1, point2 : objets de classe 'point'
+        - point1, point2 : objets de classe 'Point'
     Retourne la distance entre 'point1' et 'point2'"""
     return(math.sqrt((point2.x - point1.x)**2+(point2.y - point1.y)**2))
 
@@ -96,7 +92,7 @@ def point_appartient_segment(point, segment):
 
 def point_egaux(point1, point2):
     """Arguments :
-        - point1, point2 : objets de classe 'point'
+        - point1, point2 : objets de classe 'Point'
     Retourne True si les points sont égaux à precision près
     False sinon"""
     if abs(point1.x - point2.x) < precision and\
@@ -133,7 +129,7 @@ def intersection_segments(segment1, segment2):
         return None
     x = (a*segment1.A.x + b*segment1.B.x)/(a + b)
     y = (a*segment1.A.y + b*segment1.B.y)/(a + b)
-    I = point_classe(x, y)
+    I = Point(x, y)
     # Si le point d'intersection appartient aux deux segments
     if point_appartient_segment(I, segment1) and\
             point_appartient_segment(I, segment2):
@@ -201,7 +197,7 @@ def intersection_demi_droite_segment(demi_droite, segment):
     if signe(a) == signe(b):
         x = (a*segment.A.x + b*segment.B.x)/(a + b)
         y = (a*segment.A.y + b*segment.B.y)/(a + b)
-        I = point_classe(x, y)
+        I = Point(x, y)
         if point_appartient_demi_droite(I, demi_droite):
             return I
     return None
@@ -213,7 +209,8 @@ def angle_deux_points(A, O):
         - A : objet de classe 'Point'
         - O : objet de classe 'Point'
     Retourne :
-        - L'angle en radians entre le point A et la droite horizontale passant par O
+        - L'angle en radians entre le point A et la droite horizontale
+          passant par O
     """
     angle = math.atan2(A.y - O.y, A.x - O.x)
     return angle
@@ -237,8 +234,4 @@ def rotation(O, M, angle):
     yM = M.y - O.y
     x = xM*math.cos(angle) + yM*math.sin(angle) + O.x
     y = - xM*math.sin(angle) + yM*math.cos(angle) + O.y
-    return point_classe(x, y)
-
-
-if __name__ == "__main__":
-    print(type(point_classe(0, 0)))
+    return Point(x, y)

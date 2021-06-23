@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @author : ArthurM 
 
-from shared import point_classe, segment_classe
+from shared import Point, Segment
 import random
 
 def polygone_predefini(canvas, numero_predefini):
@@ -51,17 +51,17 @@ def polygone_predefini(canvas, numero_predefini):
 
     transformed_database = list()
     for elem in database[numero_predefini]:
-        transformed_database.append(point_classe(elem[0], elem[1]))
+        transformed_database.append(Point(elem[0], elem[1]))
 
     # memorisation des segments
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
         B = transformed_database[i-1]
-        liste_segments.append(segment_classe(A, B))
+        liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]
-    liste_segments.append(segment_classe(A, B))
+    liste_segments.append(Segment(A, B))
 
     # dessiner le polygone
     canvas.create_polygon(database[numero_predefini], fill='grey')

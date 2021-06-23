@@ -1,8 +1,8 @@
 import tkinter as tk
-from shared import point_classe, segment_classe
+from shared import Point, Segment
 from polygone_predefini import polygone_predefini
 from polygone_aléatoire import polygone_aleatoire
-from training import entrainement
+from algorithme_genetique import entrainement
 from polygon_eclairage import polygon_eclairage
 from point_in_polygon import point_in_polygon_classes
 from aire_multi_polygones import aire_multi_polygones
@@ -140,7 +140,7 @@ class Application():
             self.cnv.delete('lumiere')
             self.aire_ia.set(f'Aire IA : 0')
 
-        gardien = point_classe(event.x, event.y)
+        gardien = Point(event.x, event.y)
         if point_in_polygon_classes(gardien, self.segments, self.cnv):
             self.gardien_actuels += 1
 
