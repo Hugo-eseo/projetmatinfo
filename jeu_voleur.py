@@ -1,14 +1,14 @@
 import tkinter as tk
 import math
-from shared import Point, Segment
+from shared import Point, Segment, projection_point_cercle, dist
 from point_in_polygon import point_in_polygon
 from intersections_rayons_obstacles import intersections_rayons_obstacles
 from générateur_map import generateur
 import random
 
 class Gardien:
-    def __init__(self, Point, direction, puissance, identite, app, comportement,
-                 amplitude):
+    def __init__(self, Point, direction, puissance, identite, app,
+                 comportement, amplitude):
         """
         Arguments :
         - Point : objet de classe 'Point' représentant la position du
@@ -101,17 +101,26 @@ class Gardien:
         Crée l'éclairage
         """
         self.app.cnv.delete(f'Lumiere_gardien_{self.identite}')
-        torche_tuple = []
-        torche_infinie = intersections_rayons_obstacles(self.app.cnv, self.position,
-                                                300, self.angle,
-                                                self.direction,
-                                                self.app.liste_segments,
-                                                demo=False, return_inter=True)
+        self.torche_tuple = []
+        torche_infinie = intersections_rayons_obstacles(self.app.cnv,
+                                                        self.position,
+                                                        5, self.angle,
+                                                        self.direction,
+                                                        self.app.\
+                                                            liste_segments,
+                                                        demo=False,
+                                                        return_inter=True)
         for point in torche_infinie:
-            torche_tuple.append(point.return_tuple())
+            if dist(self.position, point) <= self.puissance:
+                self.torche_tuple.append(point.return_tuple())
+            else:
+                self.torche_tuple.append(
+                    projection_point_cercle(self.position, point,
+                                            self.puissance).return_tuple())
 
-        torche_tuple.append(self.position.return_tuple())
-        self.app.cnv.create_polygon(torche_tuple, fill="yellow", tag=f'Lumiere_gardien_{self.identite}')
+        self.torche_tuple.append(self.position.return_tuple())
+        self.app.cnv.create_polygon(self.torche_tuple, fill="yellow",
+                                    tag=f'Lumiere_gardien_{self.identite}')
 
     def agir(self):
         """
@@ -128,6 +137,7 @@ class Gardien:
         """
         if self.app.in_game:
             self.turn_left()
+            self.app.voleur.test_defaite()
             self.app.cnv.after(500, self.toupie)
 
     def ronde(self):
@@ -143,6 +153,7 @@ class Gardien:
                 self.direction += 180
                 if self.direction >= 360:
                     self.direction -= 360
+            self.app.voleur.test_defaite()
             self.app.cnv.after(500, self.ronde)
 
 class Voleur:
@@ -154,7 +165,7 @@ class Voleur:
             - app : objet de type 'Application'
         """
         self.position = Point 
-        self.vitesse = 5 
+        self.vitesse = 4
         self.score = 0
         self.inventaire = list()
         self.nb_tableaux_restants = app.nb_tableaux
@@ -171,12 +182,14 @@ class Voleur:
         Permet de déplacer le gardien au clavier
         """
         if self.app.in_game:
-            self.position.move(0, -self.vitesse)
-            if not point_in_polygon(self.position.return_tuple(), 
-                                    self.app.liste_points):
-                self.position.move(0, +self.vitesse)
-            else :
-                self.app.cnv.move('voleur', 0, -self.vitesse)
+            for i in range(self.vitesse):
+                self.position.move(0, -self.vitesse / self.vitesse)
+                if not point_in_polygon(self.position.return_tuple(), 
+                                        self.app.liste_points):
+                    self.position.move(0, +self.vitesse / self.vitesse)
+                else :
+                    self.app.cnv.move('voleur', 0, -self.vitesse / self.vitesse)
+                self.test_defaite()
 
 
     def reculer(self, event):
@@ -184,36 +197,44 @@ class Voleur:
         Permet de déplacer le gardien au clavier
         """
         if self.app.in_game:
-            self.position.move(0, self.vitesse)
-            if not point_in_polygon(self.position.return_tuple(), 
-                                    self.app.liste_points):
-                self.position.move(0, -self.vitesse)
-            else :
-                self.app.cnv.move('voleur', 0, self.vitesse)
+            for i in range(self.vitesse):
+                self.position.move(0, self.vitesse / self.vitesse)
+                if not point_in_polygon(self.position.return_tuple(), 
+                                        self.app.liste_points):
+                    self.position.move(0, -self.vitesse / self.vitesse)
+                else :
+                    self.app.cnv.move('voleur', 0, self.vitesse / self.vitesse)
+                self.test_defaite()
 
     def droite(self, event):
         """
         Permet de déplacer le gardien au clavier
         """
         if self.app.in_game:
-            self.position.move(+self.vitesse, 0)
-            if not point_in_polygon(self.position.return_tuple(), 
-                                    self.app.liste_points):
-                self.position.move(-self.vitesse, 0)
-            else :
-                self.app.cnv.move('voleur', +self.vitesse, 0)
+            for i in range(self.vitesse):
+                self.position.move(+self.vitesse / self.vitesse, 0)
+                if not point_in_polygon(self.position.return_tuple(), 
+                                        self.app.liste_points):
+                    self.position.move(-self.vitesse / self.vitesse, 0)
+                else :
+                    self.app.cnv.move('voleur', +self.vitesse / self.vitesse,
+                                      0)
+                self.test_defaite()
 
     def gauche(self, event):
         """
         Permet de déplacer le gardien au clavier
         """
         if self.app.in_game:
-            self.position.move(-self.vitesse, 0)
-            if not point_in_polygon(self.position.return_tuple(), 
-                                    self.app.liste_points):
-                self.position.move(self.vitesse, 0)
-            else :
-                self.app.cnv.move('voleur', -self.vitesse, 0)
+            for i in range(self.vitesse):
+                self.position.move(-self.vitesse / self.vitesse, 0)
+                if not point_in_polygon(self.position.return_tuple(), 
+                                        self.app.liste_points):
+                    self.position.move(self.vitesse / self.vitesse, 0)
+                else :
+                    self.app.cnv.move('voleur', -self.vitesse / self.vitesse,
+                                      0)
+                self.test_defaite()
 
     def interagir(self, event):
         """
@@ -260,9 +281,6 @@ class Voleur:
             self.app.in_game = False
             tk.Label(self.app.frm, text="Vous avez gagné",
                      fg="red", font=(None, 16)).pack()
-            ############
-            # CREER UNE POP-UP ICI
-            ############
 
     def defaite(self):
         """
@@ -271,6 +289,21 @@ class Voleur:
         self.app.in_game = False
         tk.Label(self.app.frm, text="Vous avez perdu",
                      fg="red", font=(None, 16)).pack()
+
+    def test_defaite(self):
+        if self.app.in_game:
+            lose = False
+            for lampe in self.app.liste_lampes:
+                if lampe.etat:
+                    if point_in_polygon(self.position.return_tuple(),
+                                        lampe.torche_tuple):
+                        lose = True
+            for gardien in self.app.liste_gardiens:
+                if point_in_polygon(self.position.return_tuple(),
+                                    gardien.torche_tuple):
+                    lose = True
+            if lose:
+                self.defaite()
 
 class Bouton:
     def __init__(self, Point, lien, cnv, identifiant):
@@ -315,7 +348,7 @@ class Bouton:
             self.lien.switch()
 
 class Lampe:
-    def __init__(self, Point, cnv, puissance, identifiant):
+    def __init__(self, Point, puissance, identifiant, app):
         """
         Arguments :
             - Point : objet de classe 'Point' représentant la position de la 
@@ -328,16 +361,18 @@ class Lampe:
         """
         self.localisation = Point
         self.identifiant = identifiant
-        self.cnv = cnv
+        self.app = app
+        self.puissance = puissance
         self.etat = True
         taille = 3
         couleur = "yellow"
-        cnv.create_oval(self.localisation.x - taille,
+        self.app.cnv.create_oval(self.localisation.x - taille,
                              self.localisation.y - taille,
                              self.localisation.x + taille, 
                              self.localisation.y + taille, 
                              fill=couleur,
                              tag=f'Lampe_{identifiant}')
+        self.allume()
 
     def switch(self):
         """
@@ -354,13 +389,32 @@ class Lampe:
         """
         Éteint la lampe
         """
-        self.cnv.itemconfigure(f'Lampe_{self.identifiant}', fill="black")
+        self.app.cnv.itemconfigure(f'Lampe_{self.identifiant}', fill="black")
+        self.app.cnv.delete(f'Lumiere_lampe_{self.identifiant}')
 
     def allume(self):
         """
-        Allume la lampe
+        Crée l'éclairage
         """
-        self.cnv.itemconfigure(f'Lampe_{self.identifiant}', fill="yellow")
+        self.torche_tuple = []
+        torche_infinie = intersections_rayons_obstacles(self.app.cnv,
+                                                        self.localisation,
+                                                        30, 360,
+                                                        0,
+                                                        self.app.\
+                                                            liste_segments,
+                                                        demo=False,
+                                                        return_inter=True)
+        for point in torche_infinie:
+            if dist(self.localisation, point) <= self.puissance:
+                self.torche_tuple.append(point.return_tuple())
+            else:
+                self.torche_tuple.append(
+                    projection_point_cercle(self.localisation, point,
+                                            self.puissance).return_tuple())
+
+        self.app.cnv.create_polygon(self.torche_tuple, fill="yellow",
+                                    tag=f'Lumiere_lampe_{self.identifiant}')
 
 class Tableau:
     def __init__(self, Point, cnv, identifiant):
@@ -390,6 +444,11 @@ class Tableau:
 
 class Application:
     def __init__(self, width, height):
+        """
+        Arguments :
+            - width : largeur du canvas
+            - height : hauteur du canvas
+        """
         self.width_canvas, self.height_canvas = width, height
         self.width_frame, self.height_frame = 100, height
 
@@ -410,7 +469,7 @@ class Application:
         self.liste_segments, self.liste_points, self.emplacement_victoire, \
         self.emplacements_gardiens, self.emplacements_lampes, \
         self.emplacements_boutons, \
-        self.emplacements_tableaux = generateur(self.cnv, None)
+        self.emplacements_tableaux = generateur(self.cnv, 1)
         self.in_game = True
 
         # initialisation de variables
@@ -444,7 +503,7 @@ class Application:
             self.liste_lampes.append(
                 Lampe(Point(self.emplacements_lampes[i][0],
                                    self.emplacements_lampes[i][1]),
-                      self.cnv, self.emplacements_lampes[i][2],i))
+                      self.emplacements_lampes[i][2],i, self))
 
             self.liste_boutons.append(
                 Bouton(Point(self.emplacements_boutons[i][0],
@@ -452,7 +511,7 @@ class Application:
                        self.liste_lampes[i], self.cnv, i))
 
         # Création du voleur
-        voleur = Voleur(Point(self.emplacement_victoire[0],
+        self.voleur = Voleur(Point(self.emplacement_victoire[0],
                               self.emplacement_victoire[1]),
                         self)
 
@@ -461,12 +520,11 @@ class Application:
             gardien.agir()
 
         # liaison des actions de deplacement avec les flèches directionnelles
-        self.wnd.bind("<Up>", lambda event : voleur.avancer(event))
-        self.wnd.bind("<Down>", lambda event : voleur.reculer(event))
-        self.wnd.bind("<Right>", lambda event : voleur.droite(event))
-        self.wnd.bind("<Left>", lambda event : voleur.gauche(event))
-        self.wnd.bind("<e>", lambda event : voleur.interagir(event))
-        self.wnd.bind("<Button-1>", affiche_truc)
+        self.wnd.bind("<Up>", lambda event : self.voleur.avancer(event))
+        self.wnd.bind("<Down>", lambda event : self.voleur.reculer(event))
+        self.wnd.bind("<Right>", lambda event : self.voleur.droite(event))
+        self.wnd.bind("<Left>", lambda event : self.voleur.gauche(event))
+        self.wnd.bind("<e>", lambda event : self.voleur.interagir(event))
 
         self.wnd.mainloop()
 
@@ -477,12 +535,6 @@ class Application:
         if not self.in_game:
             self.wnd.destroy()
             self.__init__(self.width_canvas, self.height_canvas)
-
-def affiche_truc(event):
-    """
-    fonction temporaire
-    """
-    print(event.x, event.y)
 
 if __name__ == '__main__':
     Application(600, 400)
