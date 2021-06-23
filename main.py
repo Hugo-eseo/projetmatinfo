@@ -13,7 +13,7 @@ import polygon_eclairage as pe
 import intersections_rayons_obstacles as iro
 import clipping as cl
 
-from shared import point_classe, segment_classe, intersection_droites,\
+from shared import Point, Segment, intersection_droites,\
     rotation, projection_point_cercle, angle_deux_points
 
 
@@ -180,16 +180,16 @@ class Application():
             if i > 0:
                 B = self.sommets_polygon[i - 1]
                 self.d_to_check.append(
-                    segment_classe(point_classe(B[0], B[1]),
-                                   point_classe(A[0], A[1])))
+                    Segment(Point(B[0], B[1]),
+                                   Point(A[0], A[1])))
             if demo:
                 # Si le mode démo est activé on affiche les sommets du polygon
                 self.cnv.create_oval(A[0] - size, A[1] - size, A[0] + size,
                                      A[1] + size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
-        self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
-                                              point_classe(A[0], A[1])))
+        self.d_to_check.append(Segment(Point(B[0], B[1]),
+                                              Point(A[0], A[1])))
         # Bind du clic gauche suivant les différents modes de démo
         if type_demo == 6:
             for segment in self.d_to_check:
@@ -231,8 +231,8 @@ class Application():
 
             direction = self.angle_torche.get()
 
-            position = point_classe(event.x, event.y)
-            C = point_classe(position.x + self.puissance + 50, position.y)
+            position = Point(event.x, event.y)
+            C = Point(position.x + self.puissance + 50, position.y)
             C = rotation(position, C, direction)
             C1 = rotation(position, C, -self.angle)
             C2 = rotation(position, C, self.angle)
@@ -278,7 +278,7 @@ class Application():
         """Fonction affichant les rayons envoyés depuis le clic
         de l'utilisateur dans le polygon"""
 
-        point = point_classe(event.x, event.y)
+        point = Point(event.x, event.y)
         if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
             iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
                                                360, 0, self.d_to_check,
@@ -354,15 +354,15 @@ class Application():
         # Au lancement de la demo, seul les 4 coins de la fenêtre sont
         # renseignés
         self.polygones = list()
-        self.d_to_check = [segment_classe(point_classe(0, 0),
-                                          point_classe(self.width, 0)),
-                           segment_classe(point_classe(0, 0),
-                                          point_classe(0, self.height)),
-                           segment_classe(point_classe(self.width, 0),
-                                          point_classe(self.width,
+        self.d_to_check = [Segment(Point(0, 0),
+                                          Point(self.width, 0)),
+                           Segment(Point(0, 0),
+                                          Point(0, self.height)),
+                           Segment(Point(self.width, 0),
+                                          Point(self.width,
                                                        self.height)),
-                           segment_classe(point_classe(0, self.height),
-                                          point_classe(self.width,
+                           Segment(Point(0, self.height),
+                                          Point(self.width,
                                                        self.height))]
 
         self.cnv.bind('<Button-1>', self.rayon_obsatcles_demo)
@@ -384,17 +384,17 @@ class Application():
         angle = random.randint(0, 360)
         # Définition des 4 points de l'obstacle
         x1, y1 = x + width, y + height
-        A, B, C, D = point_classe(x, y), point_classe(x1, y),\
-            point_classe(x1, y1), point_classe(x, y1)
+        A, B, C, D = Point(x, y), Point(x1, y),\
+            Point(x1, y1), Point(x, y1)
         # Rotation autour du premier point des autres
         B, C, D = rotation(A, B, angle), rotation(A, C, angle),\
             rotation(A, D, angle)
         self.polygones.append([(A.x, A.y), (B.x, B.y), (C.x, C.y), (D.x, D.y)])
         # Chaque côtés de l'obstacle est un nouveau segment à contrôler
-        self.d_to_check.append(segment_classe(A, B))
-        self.d_to_check.append(segment_classe(B, C))
-        self.d_to_check.append(segment_classe(C, D))
-        self.d_to_check.append(segment_classe(D, A))
+        self.d_to_check.append(Segment(A, B))
+        self.d_to_check.append(Segment(B, C))
+        self.d_to_check.append(Segment(C, D))
+        self.d_to_check.append(Segment(D, A))
         # Création du rectangle
         self.cnv.create_polygon(A.return_tuple(), B.return_tuple(),
                                 C.return_tuple(), D.return_tuple(),
@@ -403,7 +403,7 @@ class Application():
     def rayon_obsatcles_demo(self, event):
         """Fonction appellée dans le mode demo2 en cas de clic"""
 
-        point = point_classe(event.x, event.y)
+        point = Point(event.x, event.y)
         for polygone in self.polygones:
             if pip.point_in_polygon((event.x, event.y), polygone):
                 return
@@ -436,12 +436,12 @@ class Application():
                              event.y + size, fill='black')
         # State 1 : Premier point du segment
         if self.state == 1:
-            self.A = point_classe(event.x, event.y)
+            self.A = Point(event.x, event.y)
             self.state = 2  # En attente du second point
 
         # State 2 : Deuxième point du segment
         elif self.state == 2:
-            self.B = point_classe(event.x, event.y)
+            self.B = Point(event.x, event.y)
             # On trace la droite
             self.cnv.create_line(self.A.x, self.A.y, self.B.x, self.B.y,
                                  fill='black')
@@ -450,7 +450,7 @@ class Application():
             # Compte le nombre de droite en cours de dessin
             self.nbd += 1
             # On mémorise la droite
-            self.d.append(segment_classe(self.A, self.B))
+            self.d.append(Segment(self.A, self.B))
 
         # Si l'utilisateur a dessiné deux segments
         if self.nbd == 2:

@@ -11,7 +11,7 @@ import math
 precision = 0.01
 
 
-class point_classe():
+class Point():
     """Classe correspondant à un point"""
 
     def __init__(self, x, y):
@@ -29,7 +29,7 @@ class point_classe():
         return (self.x, self.y)
 
 
-class segment_classe():
+class Segment():
     """Classe correspondant à un segment"""
 
     def __init__(self, point1, point2):
@@ -143,7 +143,7 @@ def intersection_droites(droite1, droite2):
 
     x = (a * droite1.A.x + b * droite1.B.x) / (a + b)
     y = (a * droite1.A.y + b * droite1.B.y) / (a + b)
-    I = point_classe(x, y)
+    I = Point(x, y)
 
     return I
 
@@ -166,7 +166,7 @@ def intersection_segments(segment1, segment2):
         return None
     x = (a * segment1.A.x + b * segment1.B.x) / (a + b)
     y = (a * segment1.A.y + b * segment1.B.y) / (a + b)
-    I = point_classe(x, y)
+    I = Point(x, y)
     # Si le point d'intersection appartient aux deux segments
     if point_appartient_segment(I, segment1) and\
             point_appartient_segment(I, segment2):
@@ -177,8 +177,8 @@ def intersection_segments(segment1, segment2):
 
 def point_appartient_demi_droite(point, demi_droite):
     """Arguments :
-        - point : objet de classe 'point'
-        - demi_droite : objet de classe 'segment'
+        - point : objet de classe 'Point'
+        - demi_droite : objet de classe 'Segment'
     Retourne True si le point appartient à la demi droite définie par
     [demi_droite.A, demi_droite.B). False sinon"""
 
@@ -196,7 +196,7 @@ def point_appartient_demi_droite(point, demi_droite):
 
 def intersection_demi_droite_segment(demi_droite, segment):
     """Arguments :
-        - demi_droite, segment : objet de classe 'segment'
+        - demi_droite, segment : objet de classe 'Segment'
     Retourne le point d'intersection entre la demi_droite
     [demi_droite.A, demi_droite.B) et le segment. None si ils n'en ont pas."""
 
@@ -236,7 +236,7 @@ def intersection_demi_droite_segment(demi_droite, segment):
     if signe(a) == signe(b):
         x = (a * segment.A.x + b * segment.B.x) / (a + b)
         y = (a * segment.A.y + b * segment.B.y) / (a + b)
-        I = point_classe(x, y)
+        I = Point(x, y)
         if point_appartient_demi_droite(I, demi_droite):
             return I
     return None
@@ -260,15 +260,15 @@ def rotation(O, M, angle):
     yM = M.y - O.y
     x = xM * math.cos(angle) + yM * math.sin(angle) + O.x
     y = - xM * math.sin(angle) + yM * math.cos(angle) + O.y
-    return (point_classe(x, y))
+    return (Point(x, y))
 
 
 def projection_point_cercle(centre, A, rayon):
     """
     Arguments :
-        - centre : Centre du cercle de type point_classe
+        - centre : Centre du cercle de type Point
         - A : Point extérieur au cercle que l'on veut projeter dessus, de type
-              point_classe
+              Point
         - rayon : Rayon du cercle en pixel
     Retourne
         - G1 ou G2 : L'intersection entre la droite passant par A et le centre
@@ -291,7 +291,7 @@ def projection_point_cercle(centre, A, rayon):
     xG1 = (a * A.x + b * centre.x)
     yG1 = (a * A.y + b * centre.y)
 
-    G1 = point_classe(xG1, yG1)
+    G1 = Point(xG1, yG1)
     d1 = dist(A, G1)
 
     # 2eme point
@@ -300,7 +300,7 @@ def projection_point_cercle(centre, A, rayon):
     xG2 = (a * A.x + b * centre.x)
     yG2 = (a * A.y + b * centre.y)
 
-    G2 = point_classe(xG2, yG2)
+    G2 = Point(xG2, yG2)
     d2 = dist(A, G2)
     """Comme le point est à l'extérieur du cercle, on prend l'intersection
     avec la distance la plus faible"""

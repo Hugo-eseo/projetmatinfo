@@ -5,7 +5,7 @@ Created on Tue Jun 22 17:20:44 2021
 @author: hugob
 """
 
-from shared import point_classe, segment_classe,\
+from shared import Point, Segment,\
     intersection_demi_droite_segment, dist, rotation
 
 
@@ -15,7 +15,7 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
     Arguments :
         - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
                    dessiné
-        - point : objet de classe 'point_classe'
+        - point : objet de classe 'Point'
         - nombre_rayons : integer, nombre de rayons projetés
         - angle_de_vue : integer, angle en degrés du projeté (360 = cercle)
         - direction : integer, en degrés suivant le cercle trigonometrique
@@ -43,14 +43,14 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
 
     # besoin de faire un changement pour avoir la mesure en degres entre A et
     # le placement de B.
-    B = point_classe(point.x + 1, point.y)
+    B = Point(point.x + 1, point.y)
     B = rotation(point, B, direction - angle_de_vue / 2)
 
     # Pour le nombre de rayon demandés
     for i in range(nombre_rayons):
         # On cherche toutes les intersections avec les segments renseignés
         inter = []
-        rayon_lumiere = segment_classe(point, B)
+        rayon_lumiere = Segment(point, B)
         for segment in segments_verifs:
             I = intersection_demi_droite_segment(rayon_lumiere, segment)
             # Si il y a un point d'intersection

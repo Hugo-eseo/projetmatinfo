@@ -6,7 +6,7 @@ Created on Fri Apr 23 21:44:36 2021
 """
 
 
-from shared import point_classe, segment_classe,\
+from shared import Point, Segment,\
     intersection_demi_droite_segment, dist,\
     point_egaux, point_appartient_segment, determinant_3_points, signe
 
@@ -36,22 +36,22 @@ class calcul_polygon_eclairage():
 
         # Création d'une liste contenant les segments du polygon
         self.liste_segments_polygon = list()
-        A = point_classe(polygon[0][0], polygon[0][1])
+        A = Point(polygon[0][0], polygon[0][1])
         for i in range(1, len(polygon)):
-            B = point_classe(polygon[i][0], polygon[i][1])
-            self.liste_segments_polygon.append(segment_classe(A, B))
+            B = Point(polygon[i][0], polygon[i][1])
+            self.liste_segments_polygon.append(Segment(A, B))
             A = B
-        B = point_classe(polygon[0][0], polygon[0][1])
-        self.liste_segments_polygon.append(segment_classe(A, B))
+        B = Point(polygon[0][0], polygon[0][1])
+        self.liste_segments_polygon.append(Segment(A, B))
 
         # Création d'une liste contenant les sommets du polygon
         self.liste_sommets_polygon = list()
         for point in polygon:
-            self.liste_sommets_polygon.append(point_classe(point[0], point[1]))
+            self.liste_sommets_polygon.append(Point(point[0], point[1]))
 
         # Le point O est le point où l'on souhaite connaître le polygon
         # d'éclairage
-        self.O = point_classe(start_point[0], start_point[1])
+        self.O = Point(start_point[0], start_point[1])
 
         # Affichage de la source lumineuse en blanche
         self.canvas.create_oval(self.O.x - size, self.O.y - size,
@@ -73,7 +73,7 @@ class calcul_polygon_eclairage():
             liste_intersections = list()
 
             # Segment de référence du point O au sommet
-            segment_sommet = segment_classe(self.O, sommet)
+            segment_sommet = Segment(self.O, sommet)
 
             # Pour chaque sommet : on parcours la liste de tous les segments
             # du polygon
