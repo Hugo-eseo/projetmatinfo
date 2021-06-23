@@ -12,7 +12,7 @@ from shared import point_classe, segment_classe, signe,\
 size = 4
 
 
-def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
+def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
     """Arguments :
         - point_to_check : Tuple ou liste sous la forme (x, y) ou [x, y]
         - polygon : Liste de sommets sous la forme [[xA, yA], [xB, yB] ...]
@@ -31,9 +31,10 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
         print("Error len - point_in_polygon")
         return None
 
-    canvas.delete("demo")
-    # Récupération des informations de la fenêtre
-    width = canvas.winfo_width()
+    if mode_demo:
+        canvas.delete("demo")
+        # Récupération des informations de la fenêtre
+        width = canvas.winfo_width()
 
     # Création d'une liste contenant les segments du polygon
     liste_segments_polygon = list()
@@ -57,7 +58,7 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
     # A et B : points définissants le segment horizontal de référence
     # Possèdent la même hauteur que O
     A = point_classe(0, O.y)
-    B = point_classe(width, O.y)
+    B = point_classe(O.x, O.y)
     segment_horizontal = segment_classe(A, B)
 
     if mode_demo:
@@ -75,7 +76,7 @@ def point_in_polygon(point_to_check, polygon, canvas, mode_demo=False):
         # considéré comme appartenant au polygon
         if point_appartient_segment(O, segment):
             return False
-        I = intersection_segments(segment_horizontal, segment)
+        I = intersection_demi_droite_segment(segment_horizontal, segment)
 
         # Différents cas possibles
 
