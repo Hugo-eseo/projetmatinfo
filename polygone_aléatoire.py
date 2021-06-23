@@ -31,11 +31,11 @@ def polygone_aleatoire(nombre_de_points, canvas):
         nombre_de_points = random.randint(3, 50)
     
     for i in range(nombre_de_points):
-        liste_points.append(Point(random.randint(1, width-1),
-                                  random.randint(1, height-1)))
+        liste_points.append(Point(random.randint(1, width - 1),
+                                  random.randint(1, height - 1)))
     
     # centre du canvas
-    C = Point(width//2, height//2)
+    C = Point(width // 2, height // 2)
 
     for point in liste_points:
         random_polygon.append(((angle_deux_points(point, C)), point))
@@ -47,7 +47,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
     # memorisation des segments
     for i in range(1, len(sommets_polygon)):
         A = sommets_polygon[i]
-        B = sommets_polygon[i-1]
+        B = sommets_polygon[i - 1]
         liste_segments.append(Segment(A, B))
     A = sommets_polygon[0]
     B = sommets_polygon[-1]

@@ -45,7 +45,7 @@ def polygone_predefini(canvas, numero_predefini):
                 (280, 165), (215, 165)]]
 
     if numero_predefini is None:
-        numero_predefini = random.randint(0, len(database)-1)
+        numero_predefini = random.randint(0, len(database) - 1)
 
     canvas.delete('all')
 
@@ -57,7 +57,7 @@ def polygone_predefini(canvas, numero_predefini):
     liste_segments = list()
     for i in range(1, len(transformed_database)):
         A = transformed_database[i]
-        B = transformed_database[i-1]
+        B = transformed_database[i - 1]
         liste_segments.append(Segment(A, B))
     A = transformed_database[0]
     B = transformed_database[-1]

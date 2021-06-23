@@ -169,7 +169,8 @@ class Application():
                 self.mode_1v1 = self.mode_1v1_boutton.get()
                 if self.mode_1v1 == 1:
                     self.generations_maximum = self.nombre_gardien * 30
-                    self.seuil_maximal = score_joueur/self.aire_totale * 1.0001
+                    self.seuil_maximal = score_joueur / self.aire_totale \
+                    * 1.0001
                 else:
                     self.seuil_maximal = 1
 

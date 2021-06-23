@@ -21,11 +21,11 @@ def aire_polygone(liste_sommets):
 
     sommeX_Y1, sommeY_X1 = 0, 0
     for i in range(len(liste_points)):
-        if i+1 == len(liste_points):
+        if i + 1 == len(liste_points):
             sommeX_Y1 += liste_points[i].x * liste_points[0].y
             sommeY_X1 += liste_points[i].y * liste_points[0].x
         else:
             sommeX_Y1 += liste_points[i].x * liste_points[i+1].y
             sommeY_X1 += liste_points[i].y * liste_points[i+1].x
-    aire = int(abs(0.5*(sommeX_Y1-sommeY_X1)))
+    aire = int(abs(0.5 * (sommeX_Y1 - sommeY_X1)))
     return aire
