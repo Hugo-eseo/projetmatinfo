@@ -62,7 +62,7 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
     segment_horizontal = Segment(A, B)
 
     if mode_demo:
-        canvas.create_oval(O.x-size, O.y-size, O.x+size, O.y+size,
+        canvas.create_oval(O.x - size, O.y - size, O.x + size, O.y + size,
                            fill='green', tag='demo')
         canvas.create_line((0, O.y), (width, O.y), fill='red', tag='demo')
 
@@ -103,16 +103,18 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
                          liste_intersections[i][1].A.y)
         # Dans le cas de la dernière intersection, il faut vérifier avec
         # la première
-        if i == len(liste_intersections)-1:
+        if i == len(liste_intersections) - 1:
             indice = 0
         else:
-            indice = i+1
+            indice = i + 1
         ignore = False
         # Si l'intersection est un sommet
         if point_egaux(intersection, liste_intersections[indice][0]):
             if mode_demo:
-                canvas.create_oval(intersection.x-size, intersection.y-size,
-                                   intersection.x+size, intersection.y+size,
+                canvas.create_oval(intersection.x - size,
+                                   intersection.y - size,
+                                   intersection.x + size,
+                                   intersection.y + size,
                                    fill='blue', tag='demo')
             v = Point(liste_intersections[indice][1].B.x -
                              liste_intersections[indice][1].A.x,
@@ -137,8 +139,8 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
             if i == len(liste_intersections):
                 continue
         elif mode_demo:
-            canvas.create_oval(intersection.x-size, intersection.y-size,
-                               intersection.x+size, intersection.y+size,
+            canvas.create_oval(intersection.x - size, intersection.y - size,
+                               intersection.x + size, intersection.y + size,
                                fill='red', tag='demo')
         # Si l'intersection ne doit pas être ignorée
         result = 0
@@ -155,8 +157,8 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
                     wn -= 1
                     result = -1
         if mode_demo:
-            canvas.create_text(intersection.x, intersection.y+10, text=result,
-                               tag='demo')
+            canvas.create_text(intersection.x, intersection.y + 10,
+                               text=result, tag='demo')
         i += 1
     if wn != 0:
         return True

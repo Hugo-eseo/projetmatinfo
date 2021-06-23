@@ -16,7 +16,7 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
     Arguments :
         - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
                    dessiné
-        - point : objet de classe 'point_classe'
+        - point : objet de classe 'Point'
         - nombre_rayons : integer, nombre de rayons projetés
         - angle_de_vue : integer, angle en degrés du projeté (360 = cercle)
         - direction : integer, en degrés suivant le cercle trigonometrique
@@ -28,6 +28,7 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
         - les rayons de lumière
         - le gardien (surement à supprimer dans le futur)
     """
+
     # Taille des points d'intersection
     size = 4
 
@@ -47,6 +48,7 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
     B = rotation(point, B, direction - angle_de_vue / 2)
 
     liste_inter = []
+
     # Pour le nombre de rayon demandés
     for i in range(nombre_rayons):
         # On cherche toutes les intersections avec les segments renseignés
