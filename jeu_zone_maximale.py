@@ -28,7 +28,7 @@ class Application():
 
         self.frm.columnconfigure(1, minsize=50)
 
-        # Différents parametres 
+        # Différents paramètres 
         tk.Label(self.frm, text="REGLAGES DU JEU")\
             .grid(row=0, column=1, columnspan=5, ipadx=10, ipady=10,
                   sticky='new')
@@ -38,28 +38,25 @@ class Application():
 
         tk.Label(self.frm, text="Reglages de l'IA :")\
             .grid(row=1, column=3, ipadx=10, sticky='n')
-        
-        self.map_aleatoire = int()
-        tk.Radiobutton(self.frm, text='carte aléatoire', 
-                       variable=self.map_aleatoire,
-                       value=1) \
-            .grid(row=2, column=1, ipadx=10, sticky='n')
-
-        tk.Radiobutton(self.frm, text='carte prédéfinie', 
-                       variable=self.map_aleatoire,
-                       value=0) \
+       
+        self.map_aleatoire_boutton = tk.IntVar()
+        tk.Checkbutton(self.frm, text='carte prédéfinie', 
+                       variable=self.map_aleatoire_boutton) \
             .grid(row=3, column=1, ipadx=10, sticky='n')
         
-        self.mode_1v1 = int()
-        tk.Radiobutton(self.frm, text='mode_1v1', variable=self.mode_1v1,
-                       value=1)\
+        self.mode_1v1_boutton = tk.IntVar()
+        tk.Checkbutton(self.frm, text='mode_1v1', 
+                      variable=self.mode_1v1_boutton) \
             .grid(row=4, column=1, ipadx=10, sticky='n')
 
-        self.generations_auto = int()
-        tk.Radiobutton(self.frm, text='générations_auto', 
-                       variable=self.generations_auto,
-                       value=1) \
-            .grid(row=2, column=3, ipadx=10, sticky='n')
+        # Réglage du nombre de générations
+        tk.Label(self.frm, text="Nombre de générations :") \
+            .grid(row=2, column=2, ipadx=10, sticky='n')
+
+        self.nombre_generation_scale = tk.Scale(self.frm, from_=1, to=100,
+                                     orient=tk.HORIZONTAL)
+        self.nombre_generation_scale.set(20)
+        self.nombre_generation_scale.grid(row=2, column=3, ipadx=10, sticky='n')
 
         # Réglage du nombre de gardiens
         tk.Label(self.frm, text="Nombre de gardiens :")\
@@ -79,7 +76,6 @@ class Application():
         self.nombre_individus_scale.set(10)
         self.nombre_individus_scale.grid(row=4, column=3, ipadx=10, sticky='n')
 
-
         # Réglage du taux de mutation
         tk.Label(self.frm, text="Taux de mutation (%) :")\
             .grid(row=5, column=2, ipadx=10, sticky='n')
@@ -88,13 +84,10 @@ class Application():
                                      orient=tk.HORIZONTAL)
         self.taux_mutation_scale.set(10)
         self.taux_mutation_scale.grid(row=5, column=3, ipadx=10, sticky='n')
-
-        """
-        # Bouton effacer
-        tk.Button(self.frm, text="Rejouer",
-                  command=self.rejouer) \
-            .grid(row=3, column=0, ipadx=10, pady=5, sticky='n')
-        """ 
+        
+        # Bouton créer map
+        tk.Button(self.frm, text="Créer map", command=self.creer_map) \
+            .grid(row=5, column=1, ipadx=10, pady=5, sticky='n')
         
         # Écriture des scores
         self.aire_joueur, self.aire_ia = tk.StringVar(), tk.StringVar()
@@ -106,10 +99,8 @@ class Application():
         self.aire_ia_label = tk.Label(self.wnd, textvariable=self.aire_ia) \
                                      .pack(side=tk.BOTTOM)
 
-        if self.map_aleatoire:
-            self.segments, self.sommets = polygone_aleatoire(None, self.cnv)
-        else:
-            self.segments, self.sommets = polygone_predefini(self.cnv, None)
+        # Créer une map par defaut
+        self.segments, self.sommets = polygone_predefini(self.cnv, None)
         
         # Définition des variables 
         self.aire_totale = aire_polygone(self.sommets)
@@ -117,28 +108,39 @@ class Application():
         self.gardien_actuels = 0
         self.liste_polygones = []
         self.taille_point = 3
-        if self.generations_auto:
-            self.generations_maximum = self.nombre_gardien * 20
-        else:
-            self.generations_maximum = 15
 
         self.cnv.bind('<Button-1>', self.jouer)
 
         self.wnd.mainloop()
 
+
+    def creer_map(self):
+        self.cnv.delete('all')
+        self.map_aleatoire = self.map_aleatoire_boutton.get()
+        if self.map_aleatoire == 0:
+            self.segments, self.sommets = polygone_aleatoire(None, self.cnv)
+            self.aire_totale = aire_polygone(self.sommets)
+        else:
+            self.segments, self.sommets = polygone_predefini(self.cnv, None)
+            self.aire_totale = aire_polygone(self.sommets)
+
+
     def jouer(self, event):
+        # Récuperer les données de la fenêtre paramètres
         self.nombre_gardien = self.nombre_gardien_scale.get()
         self.taux_mutation = self.taux_mutation_scale.get() / 100
         self.nombre_individus = self.nombre_individus_scale.get()
+        self.generations_maximum = self.nombre_generation_scale.get()
 
-        if self.gardien_actuels == self.nombre_gardien:
-            self.gardien_actuels = 0
+        # Vérification du statut de la partie en cours
+        if self.gardien_actuels == 0:
             self.liste_polygones.clear()
             self.cnv.delete('joueur')
             self.cnv.delete('ia')
             self.cnv.delete('lumiere')
-        gardien = point_classe(event.x, event.y)
+            self.aire_ia.set(f'Aire IA : 0')
 
+        gardien = point_classe(event.x, event.y)
         if point_in_polygon_classes(gardien, self.segments, self.cnv):
             self.gardien_actuels += 1
 
@@ -158,15 +160,18 @@ class Application():
                             f'({round(score_joueur/self.aire_totale * 100, 2)}'
                             f'%)')
             
-
             self.wnd.update()
 
             if self.gardien_actuels == self.nombre_gardien:
                 self.gardien_actuels = 0
-                # calculer un positionnement presque optimal 
+
+                # calculer un positionnement meilleur que le joueur
+                self.mode_1v1 = self.mode_1v1_boutton.get()
                 if self.mode_1v1 == 1:
                     self.generations_maximum = self.nombre_gardien * 30
                     self.seuil_maximal = score_joueur/self.aire_totale * 1.0001
+                else:
+                    self.seuil_maximal = 1
 
                 indiv, _, _, liste_sommets, score_ia = entrainement(
                                                     self.nombre_individus,
