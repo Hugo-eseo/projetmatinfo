@@ -30,6 +30,8 @@ def generateur(canvas, numero_predefini):
                 (373, 57), (372, 23), (266, 22), (272, 122),
                 (219, 124)]]
 
+    database_victoire = [(156, 153)]
+
     if numero_predefini is None:
         numero_predefini = random.randint(0, len(database)-1)
 
@@ -51,9 +53,14 @@ def generateur(canvas, numero_predefini):
 
     # dessiner le polygone
     canvas.create_polygon(database[numero_predefini], fill='grey')
+    canvas.create_rectangle(database_victoire[numero_predefini][0] - 5,
+                            database_victoire[numero_predefini][1] - 5,
+                            database_victoire[numero_predefini][0] + 5,
+                            database_victoire[numero_predefini][1] + 5,
+                            fill="red")
 
-    return liste_segments
-
+    return (liste_segments, database[numero_predefini],
+            database_victoire[numero_predefini])
 
 def zone_victoire(cnv, numero_predefini):
     """
