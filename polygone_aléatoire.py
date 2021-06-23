@@ -8,8 +8,9 @@ import random
 def polygone_aleatoire(nombre_de_points, canvas):
     """
     Arguments : 
-        - nombre_de_points : si None, le polygone à un nombre de points aleatoire compris entre 3 et 50
-                             sinon, le polygone à un nombre defini de points
+        - nombre_de_points : si None, le polygone à un nombre de points 
+                             aleatoire compris entre 3 et 50 sinon,
+                             le polygone à un nombre defini de points
         - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
                    dessiné 
     Affiche :
@@ -18,7 +19,8 @@ def polygone_aleatoire(nombre_de_points, canvas):
         - Une liste d'objets de type 'segment' dans leur ordre d'apparition
     """
 
-    liste_points, random_polygon, sommets_polygon, liste_segments = [], [], [], []
+    liste_points, random_polygon = [], []
+    sommets_polygon, liste_segments = [], []
     
     width = canvas.winfo_width() - 6    # correction d'un comportement étrange
     height = canvas.winfo_height() - 6  # correction d'un comportement étrange
@@ -29,7 +31,8 @@ def polygone_aleatoire(nombre_de_points, canvas):
         nombre_de_points = random.randint(3, 50)
     
     for i in range(nombre_de_points):
-        liste_points.append(point_classe(random.randint(1, width-1), random.randint(1, height-1)))
+        liste_points.append(point_classe(random.randint(1, width-1),
+                                         random.randint(1, height-1)))
     
     # centre du canvas
     C = point_classe(width//2, height//2)

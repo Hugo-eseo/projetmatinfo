@@ -32,6 +32,16 @@ def generateur(canvas, numero_predefini):
 
     database_victoire = [(156, 153)]
 
+    database_gardiens = [[(322, 230, 90, "ronde", 50),
+                          (75, 246, 225, "toupie", 0)]]
+
+    database_lampes = [[(291, 45, 40)]]
+
+    database_boutons = [[(152, 328)]]
+
+    database_tableaux = [[(146, 273), (369, 37), (100, 395), (505, 314),
+                          (537, 40)]]
+
     if numero_predefini is None:
         numero_predefini = random.randint(0, len(database)-1)
 
@@ -60,4 +70,8 @@ def generateur(canvas, numero_predefini):
                             fill="red")
 
     return (liste_segments, database[numero_predefini],
-            database_victoire[numero_predefini])
+            database_victoire[numero_predefini],
+            database_gardiens[numero_predefini],
+            database_lampes[numero_predefini],
+            database_boutons[numero_predefini],
+            database_tableaux[numero_predefini])
