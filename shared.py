@@ -56,7 +56,7 @@ def sc(u, v):
     """Argument :
         - u, v : tupple
     Retourne le produit scalaire u.v"""
-    return(u[0] * v[1] - u[1] * v[0])
+    return(u[0] * v[0] + u[1] * v[1])
 
 
 def det3(mat):

@@ -162,10 +162,10 @@ class Application():
         self.cnv.delete("cercle")
 
         self.angle = 30
-        self.direction = 0
+        self.direction = 180
 
         position = point_classe(event.x, event.y)
-        C = point_classe(position.x + self.puissance, position.y)
+        C = point_classe(position.x + self.puissance + 50, position.y)
         C = rotation(position, C, self.direction)
         C1 = rotation(position, C, -self.angle)
         C2 = rotation(position, C, self.angle)
@@ -188,6 +188,8 @@ class Application():
 
         cl.clip(self.cnv, proj1, proj2, position, self.puissance,
                 self.d_to_check)
+        for seg in self.d_to_check:
+            print(seg)
         self.cnv.tag_raise("segment")
 
     # Fonctions utilisés par le mode de démonstration 5
