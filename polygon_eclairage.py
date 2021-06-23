@@ -56,8 +56,8 @@ class calcul_polygon_eclairage():
 
         if self.mode_demo:
             # Affichage de la source lumineuse en jaune
-            self.canvas.create_oval(self.O.x-size, self.O.y-size,
-                                    self.O.x+size, self.O.y+size,
+            self.canvas.create_oval(self.O.x - size, self.O.y - size,
+                                    self.O.x + size, self.O.y + size,
                                     fill='white', tag='demo')
 
     def return_polygon(self):
@@ -89,11 +89,13 @@ class calcul_polygon_eclairage():
                     # Les sommets étant détectés deux fois,
                     # on ne les compte qu'une
                     if liste_intersections.count([dist(self.O, I), I,
-                        self.liste_sommets_polygon.index(sommet)]) == 1:
+                                                  self.liste_sommets_polygon
+                                                  .index(sommet)]) == 1:
                         continue
                     # On l'ajoute à la liste des intersections détectés.
                     liste_intersections.append([dist(self.O, I), I,
-                        self.liste_sommets_polygon.index(sommet)])
+                                                self.liste_sommets_polygon.
+                                                index(sommet)])
 
             # Pour chaque sommet, une fois toutes les intersections trouvés,
             # on cherche la plus proche du point O
@@ -121,8 +123,8 @@ class calcul_polygon_eclairage():
                     color = 'green'
                 else:
                     color = 'blue'
-                self.canvas.create_oval(I.x-size, I.y-size, I.x+size, I.y+size,
-                                        fill=color, tag='demo')
+                self.canvas.create_oval(I.x - size, I.y - size, I.x + size,
+                                        I.y + size, fill=color, tag='demo')
 
         # Liste des intersections dans l'ordre
         liste_intersections_ordones = list()
@@ -158,8 +160,8 @@ class calcul_polygon_eclairage():
                 # Détection des doublons
                 doublons = False
                 for point in liste_intersections_ordones:
-                    if abs(I[0]-point[0]) < precision and\
-                            abs(I[1]-point[1]) < precision:
+                    if abs(I[0] - point[0]) < precision and\
+                            abs(I[1] - point[1]) < precision:
                         doublons = True
 
                 if not doublons:
@@ -171,7 +173,7 @@ class calcul_polygon_eclairage():
                     liste_intersections_def.remove(intersection[1])
                     # Dans le mode de démo, on affiche leur numéro à côté
                     if self.mode_demo:
-                        self.canvas.create_text(I[0], I[1]-10, text=count,
+                        self.canvas.create_text(I[0], I[1] - 10, text=count,
                                                 tag='demo')
         # On retourne la liste ordonnée des intersections
         # correspondant au polygon d'éclairage
@@ -248,13 +250,15 @@ class calcul_polygon_eclairage():
         # à droite ou à gauche du sommet i, alors il s'agit d'une projection.
 
         det1 = determinant_3_points(self.O, sommet,
-            self.liste_sommets_polygon[indice_sommet-1])
+                                    self.liste_sommets_polygon
+                                    [indice_sommet - 1])
 
-        if indice_sommet == len(self.liste_sommets_polygon)-1:
+        if indice_sommet == len(self.liste_sommets_polygon) - 1:
             indice_sommet = -1
 
         det2 = determinant_3_points(self.O, sommet,
-            self.liste_sommets_polygon[indice_sommet+1])
+                                    self.liste_sommets_polygon
+                                    [indice_sommet + 1])
 
         if signe(det1) == 0 or signe(det2) == 0:
             return False
@@ -302,6 +306,6 @@ if __name__ == '__main__':
     cnv.create_polygon(polygone, fill='grey')
     lumiere = polygon_eclairage(A, polygone, cnv, True)
     # cnv.create_polygon(lumiere, fill='yellow')
-    cnv.create_oval(A[0]-3, A[1]-3, A[0]+3, A[1]+3,
+    cnv.create_oval(A[0] - 3, A[1] - 3, A[0] + 3, A[1] + 3,
                     fill='blue')
     wnd.mainloop()

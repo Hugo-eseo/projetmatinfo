@@ -5,14 +5,16 @@ Created on Mon Apr  5 17:23:28 2021
 @author: hugob
 """
 import tkinter as tk
+import tkinter.filedialog
 import random
 
 import point_in_polygon as pip
 import polygon_eclairage as pe
 import intersections_rayons_obstacles as iro
+import clipping as cl
 
 from shared import point_classe, segment_classe, intersection_droites,\
-    rotation
+    rotation, projection_point_cercle, angle_deux_points
 
 
 class Application():
@@ -24,6 +26,7 @@ class Application():
                 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
                 'Y', 'Z']
     fichier_config = "config.txt"
+    puissance = 100  # Rayon du cercle
 
     def __init__(self, width, height):
         """Prend en argument :
@@ -65,12 +68,19 @@ class Application():
             .grid(row=4, column=0, ipadx=10, pady=5, sticky='n')
 
         tk.Button(self.frm, text="[DEMO 4] Lancer de rayons",
-                  command=self.demo4)\
+                  command=lambda: self.demo4_5_6(4))\
             .grid(row=5, column=0, ipadx=10, pady=5, sticky='n')
 
         tk.Button(self.frm, text="[DEMO 5] Polygon éclairage",
-                  command=self.demo5)\
+                  command=lambda: self.demo4_5_6(5))\
             .grid(row=6, column=0, ipadx=10, pady=5, sticky='n')
+
+        tk.Button(self.frm, text="[DEMO 6] Clipping",
+                  command=lambda: self.demo4_5_6(6))\
+            .grid(row=7, column=0, ipadx=10, pady=5, sticky='n')
+
+        tk.Button(self.frm, text="Effacer la planche", command=self.reset)\
+            .grid(row=2, column=3, ipadx=10, pady=5, sticky='n')
 
         tk.Label(self.frm, text="Nombre d'obstacles :")\
             .grid(row=3, column=2, ipadx=10, sticky='n')
@@ -100,14 +110,16 @@ class Application():
 
         self.wnd.mainloop()
 
+    # Fonctions utilisés par plusieurs modes de démo
+
     def reset(self):
         """Reset du canvas. Suppression de tous les éléments de dessin"""
         self.cnv.delete(tk.ALL)
+        self.error_label.config(text="")
 
     def lancement_preset(self, type_demo, demo=False):
         """Dessin du polygon défini par les preset"""
         size = 4
-        demo = True  # Pour controler le paramètre manuellement
         self.d_to_check = []
         self.cnv.delete(tk.ALL)
         self.cnv.create_polygon(self.sommets_polygon, fill='grey')
@@ -115,12 +127,13 @@ class Application():
         for i in range(len(self.sommets_polygon)):
             A = self.sommets_polygon[i]
             if i > 0:
-                B = self.sommets_polygon[i-1]
-                self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
-                                                      point_classe(A[0], A[1])))
+                B = self.sommets_polygon[i - 1]
+                self.d_to_check.append(
+                    segment_classe(point_classe(B[0], B[1]),
+                                   point_classe(A[0], A[1])))
             if demo:
-                self.cnv.create_oval(A[0]-size, A[1]-size, A[0]+size,
-                                     A[1]+size, fill='black')
+                self.cnv.create_oval(A[0] - size, A[1] - size, A[0] + size,
+                                     A[1] + size, fill='black')
         A = self.sommets_polygon[0]
         B = self.sommets_polygon[-1]
         self.d_to_check.append(segment_classe(point_classe(B[0], B[1]),
@@ -128,38 +141,86 @@ class Application():
         if type_demo == 4:
             self.cnv.bind('<Button-1>', self.clic_rayons_polygon_demo)
 
-    # Mode de démonstration 5
-    def demo5(self):
-        pass
+        elif type_demo == 5:
+            self.cnv.bind('<Button-1>', self.polygone_eclairage)
 
-    def new_polygone_eclairage(self, event):
-        self.cnv.delete('light')
-        O = (event.x, event.y)
-        polygon_eclairage = pe.polygon_eclairage(O, self.sommets_polygon,
-                                                 self.cnv, True)
-        self.cnv.create_polygon(polygon_eclairage, fill='yellow', tag='light')
-        self.cnv.tag_raise('demo')
+        elif type_demo == 6:
+            self.cnv.bind('<Button-1>', self.clipping)
 
-    # Mode de démonstration 4
-    def demo4(self):
+    def demo4_5_6(self, id_demo):
         self.reset()
         self.sommets_polygon = self.get_polygon_preset()
         if self.sommets_polygon is not None:
-            self.lancement_preset(4)
+            self.lancement_preset(id_demo)
+
+    # Fonctions utilisés par le mode de démonstration 6
+
+    def clipping(self, event):
+        self.cnv.delete("cone")
+        self.cnv.delete("clip1")
+        self.cnv.delete("clip2")
+        self.cnv.delete("cercle")
+
+        self.angle = 30
+        self.direction = 0
+
+        position = point_classe(event.x, event.y)
+        C = point_classe(position.x + self.puissance, position.y)
+        C = rotation(position, C, self.direction)
+        C1 = rotation(position, C, -self.angle)
+        C2 = rotation(position, C, self.angle)
+
+        # On veut l'intersection sur le cercle
+        # Projection 1
+        proj1 = projection_point_cercle(position, C1, self.puissance)
+
+        # Projection 2
+        proj2 = projection_point_cercle(position, C2, self.puissance)
+        # Cone de lumière
+        self.cnv.create_arc(position.x - self.puissance,
+                            position.y - self.puissance,
+                            position.x + self.puissance,
+                            position.y + self.puissance,
+                            start=-angle_deux_points(proj1, position, True),
+                            extent=2 * self.angle,
+                            tag="cone",
+                            fill="yellow", outline="yellow")
+
+        cl.clip(self.cnv, proj1, proj2, position, self.puissance,
+                self.d_to_check)
+        self.cnv.tag_raise("segment")
+
+    # Fonctions utilisés par le mode de démonstration 5
+
+    def polygone_eclairage(self, event):
+        if pip.point_in_polygon((event.x, event.y), self.sommets_polygon):
+            self.cnv.delete('light')
+            polygon = pe.polygon_eclairage((event.x, event.y),
+                                           self.sommets_polygon,
+                                           self.cnv, True)
+            self.cnv.create_polygon(polygon, fill='yellow', tag='light')
+            self.cnv.tag_raise('demo')
+
+    # Fonctions utilisés par le mode de démonstration 4
 
     def get_polygon_preset(self):
-        with open(self.fichier_config, 'r') as f:
-            for i in range(self.preset.get()):
-                line = f.readline()
-            line = line[8:-1]
-            if not line:
-                string = "Aucun fichier enregistré sur le preset " +\
-                    str(self.preset.get())
-                self.error_label.config(text=string, fg='red')
-                return None
-        with open(line, 'r') as f:
-            line = eval(f.readline())
-        return(line)
+        try:
+            with open(self.fichier_config, 'r') as f:
+                for i in range(self.preset.get()):
+                    line = f.readline()
+                line = line[8:-1]
+                if not line:
+                    string = "Aucun fichier enregistré sur le preset " +\
+                        str(self.preset.get())
+                    self.error_label.config(text=string, fg='red')
+                    return None
+            with open(line, 'r') as f:
+                line = eval(f.readline())
+            return(line)
+        except FileNotFoundError:
+            string = "Fichier d'accès du preset" + str(self.preset.get())\
+                + " invalide"
+            self.error_label.config(text=string, fg='red')
 
     def clic_rayons_polygon_demo(self, event):
         point = point_classe(event.x, event.y)
@@ -167,7 +228,7 @@ class Application():
             iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
                                                360, 0, self.d_to_check, False)
 
-    # Mode de démonstration 3
+    # Fonctions utilisés par le mode de démonstration 3
 
     def demo3(self):
         """Lancement de la demo 3 : Dessiner un polygon"""
@@ -183,15 +244,15 @@ class Application():
         # Taille des points du polygon
         size = 4
         # A chaque clic, au affiche le point correspondant
-        self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                             event.y+size, fill='black', tag='pts')
+        self.cnv.create_oval(event.x - size, event.y - size, event.x + size,
+                             event.y + size, fill='black', tag='pts')
         # On l'ajoute à la liste des sommets du polygon
         self.sommets_polygon.append((event.x, event.y))
         # On affiche une lettre à côté du point
-        i = (len(self.sommets_polygon)-1)//26
+        i = (len(self.sommets_polygon) - 1) // 26
         # On ajoute un ' à chaque tour d'alphabet
-        lettre = self.alphabet[(len(self.sommets_polygon) % 26)-1] + i*"'"
-        self.cnv.create_text(event.x, event.y-10,
+        lettre = self.alphabet[(len(self.sommets_polygon) % 26) - 1] + i * "'"
+        self.cnv.create_text(event.x, event.y - 10,
                              text=lettre, tag='lettre')
 
     def fin_dessin_polygone(self, event, getpartern=False):
@@ -212,11 +273,13 @@ class Application():
         self.cnv.unbind('<Button-1>')
 
     def save_polygon(self):
-        if len(self.sommets_polygon) < 3:
-            return
+        if self.sommets_polygon is not None:
+            if len(self.sommets_polygon) < 3:
+                Save_popup(self.wnd)
+                return
         Save_popup(self.wnd, self.sommets_polygon)
 
-    # Mode de démonstration 2
+    # Fonctions utilisés par le mode de démonstration 2
 
     def demo2(self):
         """Lancement de la demo 2 : Rayons contre obstacles"""
@@ -227,6 +290,7 @@ class Application():
         # d'intersection des droites définies par deux points dans cette liste
         # Au lancement de la demo, seul les 4 coins de la fenêtre sont
         # renseignés
+        self.polygones = list()
         self.d_to_check = [segment_classe(point_classe(0, 0),
                                           point_classe(self.width, 0)),
                            segment_classe(point_classe(0, 0),
@@ -250,17 +314,18 @@ class Application():
         width, height = random.randint(10, 60), random.randint(100, 200)
         # Choix aléatoire de ses coordonnées
         maxi = max(width, height)
-        x, y = random.randint(maxi, self.width-maxi),\
-            random.randint(maxi, self.height-maxi)
+        x, y = random.randint(maxi, self.width - maxi),\
+            random.randint(maxi, self.height - maxi)
         # Choix aléatoire de son angle d'inclinaison
         angle = random.randint(0, 360)
         # Définition des 4 points de l'obstacle
-        x1, y1 = x+width, y+height
+        x1, y1 = x + width, y + height
         A, B, C, D = point_classe(x, y), point_classe(x1, y),\
             point_classe(x1, y1), point_classe(x, y1)
         # Rotation autour du premier point des autres
         B, C, D = rotation(A, B, angle), rotation(A, C, angle),\
             rotation(A, D, angle)
+        self.polygones.append([(A.x, A.y), (B.x, B.y), (C.x, C.y), (D.x, D.y)])
         # Chaque côtés de l'obstacle est un nouveau segment à contrôler
         self.d_to_check.append(segment_classe(A, B))
         self.d_to_check.append(segment_classe(B, C))
@@ -274,10 +339,13 @@ class Application():
     def rayon_obsatcles_demo(self, event, demo=False):
         """Fonction appellée dans le mode demo2 en cas de clic"""
         point = point_classe(event.x, event.y)
+        for polygone in self.polygones:
+            if pip.point_in_polygon((event.x, event.y), polygone):
+                return
         iro.intersections_rayons_obstacles(self.cnv, point, self.nbrayons,
-                                           360, 0, self.d_to_check, demo)
+                                           360, 0, self.d_to_check, True)
 
-    # Mode de démonstration 1
+    # Fonctions utilisés par le mode de démonstration 1
 
     def demo1(self):
         """Lancement de la demo 1 : Intersection simple entre deux droites"""
@@ -297,8 +365,8 @@ class Application():
         """Demo : Machine à état pour le dessin des droites"""
         size = 4  # Taille des points dessinés
         # Clic gauche : dessin du point sur le clic
-        self.cnv.create_oval(event.x-size, event.y-size, event.x+size,
-                             event.y+size, fill='black')
+        self.cnv.create_oval(event.x - size, event.y - size, event.x + size,
+                             event.y + size, fill='black')
         # State 1 : Premier point du segment
         if self.state == 1:
             self.A = point_classe(event.x, event.y)
@@ -327,8 +395,8 @@ class Application():
                 # Si un point d'intersection est trouvé on le dessine
                 # Condition : le point d'intersection se trouve sur au moins
                 # un des deux segments.
-                self.cnv.create_oval(I.x-size, I.y-size, I.x+size,
-                                     I.y+size, fill='red')
+                self.cnv.create_oval(I.x - size, I.y - size, I.x + size,
+                                     I.y + size, fill='red')
             self.nbd = 0
 
 
@@ -337,49 +405,51 @@ class Save_popup(tk.Toplevel):
     width, height = 500, 300
     fichier_config = "config.txt"
 
-    def __init__(self, parent, polygon):
+    def __init__(self, parent, polygon=None):
         """Prend en argument la fenêtre parent"""
 
         super().__init__(parent)
-        self.title("Sauvegarder un polygon")
-        tk.Label(self, text="Sauvegarder le polygon ci-dessous :")\
-            .pack(pady=10)
+        self.title("Gestionnaire de fichiers")
         self.lift()
         self.minsize(self.width, self.height)
 
-        self.polygon = polygon
+        if polygon:
+            tk.Label(self, text="Sauvegarder le polygon ci-dessous :")\
+                .pack(pady=10)
+            self.polygon = polygon
 
-        # On récupère le point le plus proche de x=0 et le point le plus
-        # proche de y = 0
-        min_x, max_x = min(polygon)[0], max(polygon)[0]
-        min_y, max_y = min(polygon, key=lambda t: t[1])[1],\
-            max(polygon, key=lambda t: t[1])[1]
+            # On récupère le point le plus proche de x=0 et le point le plus
+            # proche de y = 0
+            min_x, max_x = min(polygon)[0], max(polygon)[0]
+            min_y, max_y = min(polygon, key=lambda t: t[1])[1],\
+                max(polygon, key=lambda t: t[1])[1]
 
-        # On translate le polygon dans le coin supérieur gauche et
-        # redimensionne le polygon par 0.5
-        polygonr = list()
-        for i in range(len(polygon)):
-            polygonr.append(((polygon[i][0]-min_x)*0.5,
-                            (polygon[i][1]-min_y)*0.5))
+            # On translate le polygon dans le coin supérieur gauche et
+            # redimensionne le polygon par 0.5
+            polygonr = list()
+            for i in range(len(polygon)):
+                polygonr.append(((polygon[i][0] - min_x) * 0.5,
+                                (polygon[i][1] - min_y) * 0.5))
 
-        # On affiche le polygon réduit dans un canvas
-        self.cnv = tk.Canvas(self, width=(max_x-min_x)*0.5,
-                             height=(max_y-min_y)*0.5)
-        self.cnv.pack()
-        self.cnv.create_polygon(polygonr, fill='grey')
+            # On affiche le polygon réduit dans un canvas
+            self.cnv = tk.Canvas(self, width=(max_x - min_x) * 0.5,
+                                 height=(max_y - min_y) * 0.5)
+            self.cnv.pack()
+            self.cnv.create_polygon(polygonr, fill='grey')
 
         # Création de la zone de commande
         self.frm = tk.Frame(self, width=self.width, height=100, pady=10,
                             relief='ridge', bd=10)
         self.frm.pack(side=tk.BOTTOM)
 
-        tk.Label(self.frm, text="Options d'enregistrement :")\
-            .grid(row=0, column=0, columnspan=3, ipadx=10, ipady=5,
-                  sticky='new')
+        if polygon:
+            tk.Label(self.frm, text="Options d'enregistrement :")\
+                .grid(row=0, column=0, columnspan=3, ipadx=10, ipady=5,
+                      sticky='new')
 
-        tk.Button(self.frm, text="Enregistrer le polygon sous",
-                  command=self.save_as)\
-            .grid(row=1, column=1, ipadx=10, sticky='n', ipady=5)
+            tk.Button(self.frm, text="Enregistrer le polygon sous",
+                      command=self.save_as)\
+                .grid(row=1, column=1, ipadx=10, sticky='n', ipady=5)
 
         self.reponse_b1 = tk.Label(self.frm, text="")
         self.reponse_b1.grid(row=2, column=1, ipadx=10, sticky='n', ipady=5)
@@ -404,11 +474,14 @@ class Save_popup(tk.Toplevel):
         self.reponse_b2 = tk.Label(self.frm, text="")
         self.reponse_b2.grid(row=6, column=1, ipadx=10, sticky='n', ipady=5)
 
+        tk.Button(self.frm, text="OK", command=self.destroy)\
+            .grid(row=7, column=1, ipadx=10, sticky='n', ipady=5)
+
     def save_as(self):
         # Types de fichier acceptés : seulement .txt dans notre cas
         LST_Types = [("Fichier texte", ".txt")]
         # On ouvre l'explorateur de fichier windows
-        emplacement_fichier = tk.\
+        emplacement_fichier = tkinter.\
             filedialog.asksaveasfilename(title="Enregistrer sous",
                                          filetypes=LST_Types,
                                          defaultextension=".txt")
@@ -430,7 +503,7 @@ class Save_popup(tk.Toplevel):
         # Types de fichier acceptés : seulement .txt dans notre cas
         LST_Types = [("Fichier texte", ".txt")]
         # On ouvre l'explorateur de fichier windows
-        emplacement_fichier = tk.\
+        emplacement_fichier = tkinter.\
             filedialog.askopenfilename(title="Ouvrir",
                                        filetypes=LST_Types,
                                        defaultextension=".txt")
@@ -447,7 +520,7 @@ class Save_popup(tk.Toplevel):
                 # On modifie la ligne demandée
                 string = "Preset" + str(self.preset.get()) + (":") +\
                     emplacement_fichier + "\n"
-                lignes_fichier[self.preset.get()-1] = string
+                lignes_fichier[self.preset.get() - 1] = string
                 # On réécrit le fichier
                 with open(self.fichier_config, 'w') as f:
                     for line in lignes_fichier:

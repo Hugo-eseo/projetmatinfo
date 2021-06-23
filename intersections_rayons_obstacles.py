@@ -27,14 +27,12 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
         - les rayons de lumière
         - le gardien (surement à supprimer dans le futur)
     """
-
     # Taille des points d'intersection
     size = 4
 
     # Angle pour la rotation
-    angle = angle_de_vue/nombre_rayons
+    angle = angle_de_vue / nombre_rayons
 
-    demo = False  # Pour controler le paramètre manuellement
     # Suppression de la précédente source lumineuse
     canvas.delete('light')
 
@@ -44,15 +42,15 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
 
     # besoin de faire un changement pour avoir la mesure en degres entre A et
     # le placement de B.
-    B = point_classe(point.x+1, point.y)
-    B = rotation(point, B, direction-angle_de_vue/2)
+    B = point_classe(point.x + 1, point.y)
+    B = rotation(point, B, direction - angle_de_vue / 2)
 
     # Pour le nombre de rayon demandés
     for i in range(nombre_rayons):
         # On cherche toutes les intersections avec les segments renseignés
         inter = []
+        rayon_lumiere = segment_classe(point, B)
         for segment in segments_verifs:
-            rayon_lumiere = segment_classe(point, B)
             I = intersection_demi_droite_segment(rayon_lumiere, segment)
             # Si il y a un point d'intersection
             if I is not None:
@@ -69,17 +67,16 @@ def intersections_rayons_obstacles(canvas, point, nombre_rayons, angle_de_vue,
             if demo:
                 if inter.count(I_p) > 1:
                     color = 'green'
-                    print(inter.count(I_p))
-                    canvas.create_oval(I.x-size, I.y-size, I.x+size,
-                                       I.y+size, fill=color, tag='light')
+                    canvas.create_oval(I.x - size, I.y - size, I.x + size,
+                                       I.y + size, fill=color, tag='light')
                 else:
                     color = 'red'
-                    canvas.create_oval(I.x-size, I.y-size, I.x+size, I.y+size,
-                                       fill=color, tag='light')
+                    canvas.create_oval(I.x - size, I.y - size, I.x + size,
+                                       I.y + size, fill=color, tag='light')
 
             # Affichage de la source lumineuse en jaune
-            canvas.create_oval(point.x-size, point.y-size, point.x+size,
-                               point.y+size, fill='yellow', tag='light')
+            canvas.create_oval(point.x - size, point.y - size, point.x + size,
+                               point.y + size, fill='yellow', tag='light')
             # Dans tous les cas on dessine le rayon lumineux jusqu'au
             # point d'intersection
             canvas.create_line(point.return_tuple(), I.return_tuple(),
