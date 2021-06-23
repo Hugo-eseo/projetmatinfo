@@ -12,7 +12,7 @@ import polygon_eclairage as pe
 import intersections_rayons_obstacles as iro
 
 from shared import point_classe, segment_classe, intersection_droites,\
-    rotation, dist
+    rotation
 
 
 class Application():
@@ -78,7 +78,7 @@ class Application():
         self.nb_obstacles.set(1)
         self.nb_obstacles.grid(row=3, column=3, ipadx=10, sticky='n')
 
-        tk.Button(self.frm, text="Sauvegarder polygon",
+        tk.Button(self.frm, text="Sauvegarder polygon/Modifier preset",
                   command=self.save_polygon)\
             .grid(row=4, column=3, ipadx=10, pady=5, sticky='n')
 
@@ -239,8 +239,7 @@ class Application():
     def save_polygon(self):
         if len(self.sommets_polygon) < 3:
             return
-        fenetre = Save_popup(self.wnd, self.sommets_polygon, self.width,
-                             self.height)
+        fenetre = Save_popup(self.wnd, self.sommets_polygon)
 
         pass
 
@@ -370,12 +369,20 @@ class Application():
 
 class Save_popup(tk.Toplevel):
     """Crée une fenêtre popup permettant de sauvegarder le polygon dessiné"""
+    width, height = 500, 300
+    fichier_config = "config.txt"
 
-    def __init__(self, parent, polygon, width, height):
+    def __init__(self, parent, polygon):
         """Prend en argument la fenêtre parent"""
 
         super().__init__(parent)
         self.title("Sauvegarder un polygon")
+        tk.Label(self, text="Sauvegarder le polygon ci-dessous :")\
+            .pack(pady=10)
+        self.lift()
+        self.minsize(self.width, self.height)
+
+        self.polygon = polygon
 
         # On récupère le point le plus proche de x=0 et le point le plus
         # proche de y = 0
@@ -383,19 +390,104 @@ class Save_popup(tk.Toplevel):
         min_y, max_y = min(polygon, key=lambda t: t[1])[1],\
             max(polygon, key=lambda t: t[1])[1]
 
-        print(polygon)
         # On translate le polygon dans le coin supérieur gauche et
         # redimensionne le polygon par 0.5
+        polygonr = list()
         for i in range(len(polygon)):
-            polygon[i] = ((polygon[i][0]-min_x)*0.5,
-                          (polygon[i][1]-min_y)*0.5)
+            polygonr.append(((polygon[i][0]-min_x)*0.5,
+                            (polygon[i][1]-min_y)*0.5))
 
         # On affiche le polygon réduit dans un canvas
-        cnv = tk.Canvas(self, width=(max_x-min_x)*0.5,
-                        height=(max_y-min_y)*0.5)
-        cnv.pack()
-        print(polygon)
-        cnv.create_polygon(polygon, fill='grey')
+        self.cnv = tk.Canvas(self, width=(max_x-min_x)*0.5,
+                             height=(max_y-min_y)*0.5)
+        self.cnv.pack()
+        self.cnv.create_polygon(polygonr, fill='grey')
+
+        self.frm = tk.Frame(self, width=self.width, height=100, pady=10,
+                            relief='ridge', bd=10)
+        self.frm.pack(side=tk.BOTTOM)
+
+        tk.Label(self.frm, text="Options d'enregistrement :")\
+            .grid(row=0, column=0, columnspan=3, ipadx=10, ipady=5,
+                  sticky='new')
+
+        tk.Button(self.frm, text="Enregistrer le polygon sous",
+                  command=self.save_as)\
+            .grid(row=1, column=1, ipadx=10, sticky='n', ipady=5)
+
+        self.reponse_b1 = tk.Label(self.frm, text="")
+        self.reponse_b1.grid(row=2, column=1, ipadx=10, sticky='n', ipady=5)
+
+        tk.Label(self.frm, text="Modifier le polygon d'un preset :")\
+            .grid(row=3, column=1, ipadx=10, sticky='n', ipady=5)
+
+        self.preset = tk.IntVar()
+        a = tk.Radiobutton(self.frm, text='Preset 1', variable=self.preset,
+                           value=1)
+        a.grid(row=4, column=0, ipadx=10, sticky='n', ipady=5)
+        a.select()
+        tk.Radiobutton(self.frm, text='Preset 2', variable=self.preset,
+                       value=2)\
+            .grid(row=4, column=1, ipadx=10, sticky='n', ipady=5)
+        tk.Radiobutton(self.frm, text='Preset 3', variable=self.preset,
+                       value=3)\
+            .grid(row=4, column=2, ipadx=10, sticky='n', ipady=5)
+        tk.Button(self.frm, text="Modifier le preset", command=self.edit)\
+            .grid(row=5, column=1, ipadx=10, sticky='n', ipady=5)
+
+        self.reponse_b2 = tk.Label(self.frm, text="")
+        self.reponse_b2.grid(row=6, column=1, ipadx=10, sticky='n', ipady=5)
+
+    def save_as(self):
+        LST_Types = [("Fichier texte", ".txt"), ("Autres types", ".*")]
+        emplacement_fichier = tk.\
+            filedialog.asksaveasfilename(title="Enregistrer sous",
+                                         filetypes=LST_Types,
+                                         defaultextension=".txt")
+        if emplacement_fichier:
+            with open(emplacement_fichier, 'w') as f:
+                f.write(str(self.polygon))
+            self.reponse_b1.config(text="Fichier correctement enregistré",
+                                   fg='green')
+        else:
+            self.reponse_b1.config(text="Aucun fichier enregistré",
+                                   fg='red')
+        self.lift()
+
+    def edit(self):
+        LST_Types = [("Fichier texte", ".txt"), ("Autres types", ".*")]
+        emplacement_fichier = tk.\
+            filedialog.askopenfilename(title="Ouvrir",
+                                       filetypes=LST_Types,
+                                       defaultextension=".txt")
+        if emplacement_fichier:
+            try:
+                lignes_fichier = list()
+                with open(self.fichier_config, 'r') as f:
+                    for line in f:
+                        lignes_fichier.append(line)
+                string = "Preset" + str(self.preset.get()) + (":") +\
+                    emplacement_fichier + "\n"
+                lignes_fichier[self.preset.get()-1] = string
+                with open(self.fichier_config, 'w') as f:
+                    for line in lignes_fichier:
+                        f.write(line)
+
+            except FileNotFoundError:
+                print(self.preset)
+                with open(self.fichier_config, 'w') as f:
+                    for i in range(1, 4):
+                        emplacement = str()
+                        if i == self.preset.get():
+                            emplacement = emplacement_fichier
+                        string = "Preset" + str(i) + (":") + emplacement + "\n"
+                        f.write(string)
+            self.reponse_b2.config(text="Preset correctement modifié",
+                                   fg='green')
+        else:
+            self.reponse_b2.config(text="Aucun preset modifié",
+                                   fg='red')
+        self.lift()
 
 
 Application(1000, 500)

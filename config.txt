@@ -1,0 +1,3 @@
+Preset1:D:/hugob/Documents/Python/Projet_info/projetmatinfo/polygon_2.txt
+Preset2:
+Preset3:D:/hugob/Documents/Python/Projet_info/projetmatinfo/polygon_3.txt
