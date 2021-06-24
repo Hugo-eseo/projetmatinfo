@@ -1,16 +1,24 @@
+# -*- coding: utf-8 -*-
+"""
+Projet maths-info - Galerie d'art
+
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
+"""
+
 import tkinter as tk
-from shared import Point, Segment
+from shared import Point
 from polygone_predefini import polygone_predefini
 from polygone_aléatoire import polygone_aleatoire
 from algorithme_genetique import entrainement
 from polygon_eclairage import polygon_eclairage
-from point_in_polygon import point_in_polygon_classes
+from point_in_polygon import point_in_polygon
 from aire_multi_polygones import aire_multi_polygones
 from aire_polygone import aire_polygone
 
 
 class Application():
     """Crée la fenêtre de l'application"""
+
     def __init__(self, width, height):
         """Prend en argument :
             width : largeur de la fenêtre
@@ -28,7 +36,7 @@ class Application():
 
         self.frm.columnconfigure(1, minsize=50)
 
-        # Différents paramètres 
+        # Différents paramètres
         tk.Label(self.frm, text="REGLAGES DU JEU")\
             .grid(row=0, column=1, columnspan=5, ipadx=10, ipady=10,
                   sticky='new')
@@ -38,15 +46,15 @@ class Application():
 
         tk.Label(self.frm, text="Reglages de l'IA :")\
             .grid(row=1, column=3, ipadx=10, sticky='n')
-       
+
         self.map_aleatoire_boutton = tk.IntVar()
-        tk.Checkbutton(self.frm, text='carte prédéfinie', 
+        tk.Checkbutton(self.frm, text='carte prédéfinie',
                        variable=self.map_aleatoire_boutton) \
             .grid(row=3, column=1, ipadx=10, sticky='n')
-        
+
         self.mode_1v1_boutton = tk.IntVar()
-        tk.Checkbutton(self.frm, text='mode_1v1', 
-                      variable=self.mode_1v1_boutton) \
+        tk.Checkbutton(self.frm, text='mode_1v1',
+                       variable=self.mode_1v1_boutton) \
             .grid(row=4, column=1, ipadx=10, sticky='n')
 
         # Réglage du nombre de générations
@@ -54,16 +62,17 @@ class Application():
             .grid(row=2, column=2, ipadx=10, sticky='n')
 
         self.nombre_generation_scale = tk.Scale(self.frm, from_=1, to=100,
-                                     orient=tk.HORIZONTAL)
+                                                orient=tk.HORIZONTAL)
         self.nombre_generation_scale.set(20)
-        self.nombre_generation_scale.grid(row=2, column=3, ipadx=10, sticky='n')
+        self.nombre_generation_scale.grid(row=2, column=3,
+                                          ipadx=10, sticky='n')
 
         # Réglage du nombre de gardiens
         tk.Label(self.frm, text="Nombre de gardiens :")\
             .grid(row=3, column=2, ipadx=10, sticky='n')
 
         self.nombre_gardien_scale = tk.Scale(self.frm, from_=1, to=6,
-                                     orient=tk.HORIZONTAL)
+                                             orient=tk.HORIZONTAL)
         self.nombre_gardien_scale.set(1)
         self.nombre_gardien_scale.grid(row=3, column=3, ipadx=10, sticky='n')
 
@@ -72,7 +81,7 @@ class Application():
             .grid(row=4, column=2, ipadx=10, sticky='n')
 
         self.nombre_individus_scale = tk.Scale(self.frm, from_=1, to=25,
-                                     orient=tk.HORIZONTAL)
+                                               orient=tk.HORIZONTAL)
         self.nombre_individus_scale.set(10)
         self.nombre_individus_scale.grid(row=4, column=3, ipadx=10, sticky='n')
 
@@ -81,28 +90,28 @@ class Application():
             .grid(row=5, column=2, ipadx=10, sticky='n')
 
         self.taux_mutation_scale = tk.Scale(self.frm, from_=0, to=20,
-                                     orient=tk.HORIZONTAL)
+                                            orient=tk.HORIZONTAL)
         self.taux_mutation_scale.set(10)
         self.taux_mutation_scale.grid(row=5, column=3, ipadx=10, sticky='n')
-        
+
         # Bouton créer map
         tk.Button(self.frm, text="Créer map", command=self.creer_map) \
             .grid(row=5, column=1, ipadx=10, pady=5, sticky='n')
-        
+
         # Écriture des scores
         self.aire_joueur, self.aire_ia = tk.StringVar(), tk.StringVar()
         self.aire_joueur.set('Aire joueur : 0')
         self.aire_ia.set('Aire IA : 0')
-        self.aire_joueur_label = tk.Label(self.wnd, 
-                                          textvariable=self.aire_joueur) \
-                                          .pack(side=tk.BOTTOM)
-        self.aire_ia_label = tk.Label(self.wnd, textvariable=self.aire_ia) \
-                                     .pack(side=tk.BOTTOM)
+        self.aire_joueur_label = tk.Label(self.wnd,
+                                          textvariable=self.aire_joueur)\
+            .pack(side=tk.BOTTOM)
+        self.aire_ia_label = tk.Label(self.wnd, textvariable=self.aire_ia)\
+            .pack(side=tk.BOTTOM)
 
         # Créer une map par defaut
         self.segments, self.sommets = polygone_predefini(self.cnv, None)
-        
-        # Définition des variables 
+
+        # Définition des variables
         self.aire_totale = aire_polygone(self.sommets)
         self.seuil_maximal = 1
         self.gardien_actuels = 0
@@ -113,7 +122,6 @@ class Application():
 
         self.wnd.mainloop()
 
-
     def creer_map(self):
         self.cnv.delete('all')
         self.map_aleatoire = self.map_aleatoire_boutton.get()
@@ -123,7 +131,6 @@ class Application():
         else:
             self.segments, self.sommets = polygone_predefini(self.cnv, None)
             self.aire_totale = aire_polygone(self.sommets)
-
 
     def jouer(self, event):
         # Récuperer les données de la fenêtre paramètres
@@ -138,10 +145,10 @@ class Application():
             self.cnv.delete('joueur')
             self.cnv.delete('ia')
             self.cnv.delete('lumiere')
-            self.aire_ia.set(f'Aire IA : 0')
+            self.aire_ia.set('Aire IA : 0')
 
         gardien = Point(event.x, event.y)
-        if point_in_polygon_classes(gardien, self.segments, self.cnv):
+        if point_in_polygon(gardien, self.segments, self.cnv):
             self.gardien_actuels += 1
 
             # création du gardien
@@ -149,17 +156,17 @@ class Application():
                                  gardien.y - self.taille_point,
                                  gardien.x + self.taille_point,
                                  gardien.y + self.taille_point,
-                            fill='blue', tag='joueur')
+                                 fill='blue', tag='joueur')
 
             polygone_lumiere = polygon_eclairage(gardien.return_tuple(),
                                                  self.sommets, self.cnv)
-            
+
             self.liste_polygones.append(polygone_lumiere)
             score_joueur = aire_multi_polygones(self.liste_polygones)
             self.aire_joueur.set(f'Aire joueur : {int(score_joueur)}   '
-                            f'({round(score_joueur/self.aire_totale * 100, 2)}'
-                            f'%)')
-            
+                        f'({round(score_joueur/self.aire_totale * 100, 2)}'
+                                 f'%)')
+
             self.wnd.update()
 
             if self.gardien_actuels == self.nombre_gardien:
@@ -170,47 +177,47 @@ class Application():
                 if self.mode_1v1 == 1:
                     self.generations_maximum = self.nombre_gardien * 30
                     self.seuil_maximal = score_joueur / self.aire_totale \
-                    * 1.0001
+                        * 1.0001
                 else:
                     self.seuil_maximal = 1
 
                 indiv, _, _, liste_sommets, score_ia = entrainement(
-                                                    self.nombre_individus,
-                                                    self.nombre_gardien,
-                                                    self.taux_mutation,
-                                                    self.seuil_maximal,
-                                                    self.generations_maximum,
-                                                    self.wnd,
-                                                    self.cnv,
-                                                    self.sommets)
+                    self.nombre_individus,
+                    self.nombre_gardien,
+                    self.taux_mutation,
+                    self.seuil_maximal,
+                    self.generations_maximum,
+                    self.wnd,
+                    self.cnv,
+                    self.sommets)
 
                 self.aire_ia.set(f'Aire IA : {int(score_ia)}   '
-                                 f'({round(score_ia/self.aire_totale * 100, 2)}'
-                                 f'%)')
-                
+                    f'({round(score_ia/self.aire_totale * 100, 2)}'
+                    f'%)')
+
                 # afficher le resultat
                 if type(indiv[0]) is list:
                     for gardien in indiv:
-                        self.cnv.create_polygon(polygon_eclairage(gardien, 
-                                                                  liste_sommets, 
-                                                                  self.cnv),
-                                                fill='yellow', tag='lumiere')
+                        self.cnv.create_polygon(
+                            polygon_eclairage(gardien, liste_sommets,
+                                              self.cnv), fill='yellow',
+                            tag='lumiere')
                     for gardien in indiv:
-                        self.cnv.create_oval(gardien[0] - self.taille_point, 
-                                             gardien[1] - self.taille_point, 
-                                             gardien[0] + self.taille_point, 
-                                             gardien[1] + self.taille_point, 
+                        self.cnv.create_oval(gardien[0] - self.taille_point,
+                                             gardien[1] - self.taille_point,
+                                             gardien[0] + self.taille_point,
+                                             gardien[1] + self.taille_point,
                                              fill='red', tag='ia')
                 else:
-                    self.cnv.create_polygon(polygon_eclairage(indiv, 
-                                                              liste_sommets, 
-                                                              self.cnv), 
+                    self.cnv.create_polygon(polygon_eclairage(indiv,
+                                                              liste_sommets,
+                                                              self.cnv),
                                             fill='yellow', tag='lumiere')
 
-                    self.cnv.create_oval(indiv[0] - self.taille_point, 
-                                         indiv[1] - self.taille_point, 
-                                         indiv[0] + self.taille_point, 
-                                         indiv[1] + self.taille_point, 
+                    self.cnv.create_oval(indiv[0] - self.taille_point,
+                                         indiv[1] - self.taille_point,
+                                         indiv[0] + self.taille_point,
+                                         indiv[1] + self.taille_point,
                                          fill='red', tag='ia')
 
                 self.cnv.tag_raise('joueur')

@@ -1,7 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Projet maths-info - Galerie d'art
+
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
+"""
+
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
-from shared import intersection_segments
-from aire_polygone import aire_polygone
+
 
 def aire_multi_polygones(polygones):
     """

@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
-# @author : ArthurM 
+"""
+Projet maths-info - Galerie d'art
+
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
+"""
 
 from shared import Point, Segment, angle_deux_points
-from point_in_polygon import point_in_polygon_classes
+from point_in_polygon import point_in_polygon
 import random
+
 
 def polygone_aleatoire(nombre_de_points, canvas):
     """
-    Arguments : 
-        - nombre_de_points : si None, le polygone à un nombre de points 
+    Arguments :
+        - nombre_de_points : si None, le polygone à un nombre de points
                              aleatoire compris entre 3 et 50 sinon,
                              le polygone à un nombre defini de points
-        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera 
-                   dessiné 
+        - canvas : objet de type tkinter.Canvas dans lequel le polygone sera
+                   dessiné
     Affiche :
         - un polygone connexe avec le nombre de points pris en argument
     Retourne :
@@ -21,7 +26,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
 
     liste_points, random_polygon = [], []
     sommets_polygon, liste_segments = [], []
-    
+
     width = canvas.winfo_width() - 6    # correction d'un comportement étrange
     height = canvas.winfo_height() - 6  # correction d'un comportement étrange
 
@@ -29,11 +34,11 @@ def polygone_aleatoire(nombre_de_points, canvas):
 
     if nombre_de_points is None:
         nombre_de_points = random.randint(3, 50)
-    
+
     for i in range(nombre_de_points):
         liste_points.append(Point(random.randint(1, width - 1),
                                   random.randint(1, height - 1)))
-    
+
     # centre du canvas
     C = Point(width // 2, height // 2)
 
@@ -53,7 +58,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
     B = sommets_polygon[-1]
     liste_segments.append(Segment(A, B))
 
-    if not point_in_polygon_classes(C, liste_segments, canvas):
+    if not point_in_polygon(C, liste_segments, canvas):
         polygone_aleatoire(nombre_de_points, canvas)
 
     # changement du type des données

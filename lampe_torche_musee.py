@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jun 21 14:48:30 2021
+Projet maths-info - Galerie d'art
 
-@author: Utilisateur
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
 """
-
 
 import tkinter as tk
 import random

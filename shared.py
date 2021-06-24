@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 23 22:07:19 2021
+Projet maths-info - Galerie d'art
 
-@author: hugob
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
 """
 
 import math

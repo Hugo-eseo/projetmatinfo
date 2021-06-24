@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 23 21:44:36 2021
+Projet maths-info - Galerie d'art
 
-@author: hugob
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
 """
-
 
 from shared import Point, Segment,\
     intersection_demi_droite_segment, dist,\

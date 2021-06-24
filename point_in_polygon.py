@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Apr 23 12:21:25 2021
+Projet maths-info - Galerie d'art
 
-@author: hugob
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
 """
 
 from shared import Point, Segment, signe,\
@@ -23,28 +23,29 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
     comme à l'extérieur')
     Retourne None en cas d'erreur"""
 
-    # Vérifications élémentaires
-    if not (type(point_to_check) == tuple or type(point_to_check) == list):
-        print("Error type - point_in_polygon")
-        return None
-    if not (len(point_to_check) == 2):
-        print("Error len - point_in_polygon")
-        return None
-
     if mode_demo:
         canvas.delete("demo")
         # Récupération des informations de la fenêtre
         width = canvas.winfo_width()
 
-    # Création d'une liste contenant les segments du polygon
     liste_segments_polygon = list()
-    A = Point(polygon[0][0], polygon[0][1])
-    for i in range(1, len(polygon)):
-        B = Point(polygon[i][0], polygon[i][1])
+    # Création d'une liste contenant les segments du polygon
+    if type(point_to_check) == 'shared.Point':
+        A = point_to_check
+        for i in range(1, len(polygon)):
+            B = polygon[i]
+            liste_segments_polygon.append(Segment(A, B))
+            A = B
+        B = polygon[0]
         liste_segments_polygon.append(Segment(A, B))
-        A = B
-    B = Point(polygon[0][0], polygon[0][1])
-    liste_segments_polygon.append(Segment(A, B))
+    else:
+        A = Point(polygon[0][0], polygon[0][1])
+        for i in range(1, len(polygon)):
+            B = Point(polygon[i][0], polygon[i][1])
+            liste_segments_polygon.append(Segment(A, B))
+            A = B
+        B = Point(polygon[0][0], polygon[0][1])
+        liste_segments_polygon.append(Segment(A, B))
 
     # Le point 0 dans tout l'algorithme correspond au point
     # dont nous souhaitons savoir si il est dans le poylgon

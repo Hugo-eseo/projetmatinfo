@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Projet maths-info - Galerie d'art
+
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
+"""
+
 import tkinter as tk
 import math
 from shared import Point, projection_point_cercle, dist

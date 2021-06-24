@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-# @author : ArthurM 
+"""
+Projet maths-info - Galerie d'art
+
+Groupe 12 : MEYNIEL Arthur, FOUCHÉ Hugo, BOUY Hugo
+"""
 
 import tkinter as tk
 import math
@@ -8,14 +12,14 @@ import math
 def dessiner_2D(cnv, carte, taille_mur, etage):
     """
     Arguments :
-        - cnv : objet de type tkinter.Canvas dans lequel sera dessiné le jeu 
+        - cnv : objet de type tkinter.Canvas dans lequel sera dessiné le jeu
                 en 2D
         - carte : matrice contenant la représentation de la carte
-        - taille_mur : int représentant la largeur et la longueur des murs 
+        - taille_mur : int représentant la largeur et la longueur des murs
                        (blocs carrés)
         - etage : int représentant l'étage actuel
     Affiche :
-        - Une vue de la carte en 2D 
+        - Une vue de la carte en 2D
     """
     for i in range(hauteur):
         for j in range(largeur):
@@ -23,31 +27,39 @@ def dessiner_2D(cnv, carte, taille_mur, etage):
             # mur
             if carte[etage][i][j] == 1:
                 cnv.create_rectangle(j * taille_mur, i * taille_mur,
-                                     (j+1) * taille_mur, (i+1) * taille_mur,
+                                     (j + 1) * taille_mur, (i + 1) *
+                                     taille_mur,
                                      fill="black", outline='grey', tag='2D')
-            
+
             # escalier
             elif carte[etage][i][j] == 2:
                 cnv.create_rectangle(j * taille_mur, i * taille_mur,
-                                     (j+1) * taille_mur, (i+1) * taille_mur,
+                                     (j + 1) * taille_mur, (i + 1) *
+                                     taille_mur,
                                      fill="brown", outline='grey', tag='2D')
 
             # porte
             elif carte[etage][i][j] == 3:
                 cnv.create_rectangle(j * taille_mur, i * taille_mur,
-                                     (j+1) * taille_mur, (i+1) * taille_mur,
+                                     (j + 1) * taille_mur, (i + 1) *
+                                     taille_mur,
                                      fill="grey", outline='grey', tag='2D')
-            
+
             # bouton porte
             elif carte[etage][i][j] == 4:
                 cnv.create_rectangle(j * taille_mur, i * taille_mur,
-                                     (j+1) * taille_mur, (i+1) * taille_mur,
-                                     fill="lightgrey", outline='grey', tag='2D')
+                                     (j + 1) * taille_mur, (i + 1) *
+                                     taille_mur,
+                                     fill="lightgrey", outline='grey',
+                                     tag='2D')
             # vide
             else:
                 cnv.create_rectangle(j * taille_mur, i * taille_mur,
-                                     (j+1) * taille_mur, (i+1) * taille_mur,
-                                     fill="white", outline='grey', tag='2D')
+                                     (j + 1) * taille_mur, (i + 1) *
+                                     taille_mur,
+                                     fill="white", outline='grey',
+                                     tag='2D')
+
 
 def dessine_joueur(cnv):
     """
@@ -58,31 +70,34 @@ def dessine_joueur(cnv):
         son regard
     """
     global joueur_x, joueur_y, angle_joueur
-    cnv.create_line(joueur_x, joueur_y, joueur_x+delta_x(angle_joueur),
-                    joueur_y+delta_y(angle_joueur), fill='yellow',
+    cnv.create_line(joueur_x, joueur_y, joueur_x + delta_x(angle_joueur),
+                    joueur_y + delta_y(angle_joueur), fill='yellow',
                     tag='joueur', width=3)
-    cnv.create_rectangle(joueur_x - 5, joueur_y - 5, joueur_x + 5, joueur_y + 5,
-                         fill='yellow', tag='joueur')
+    cnv.create_rectangle(joueur_x - 5, joueur_y - 5, joueur_x + 5,
+                         joueur_y + 5, fill='yellow', tag='joueur')
+
 
 def delta_x(angle_joueur):
     """
     Argument :
-        - angle_joueur : angle en radians representant la direction du joueur 
+        - angle_joueur : angle en radians representant la direction du joueur
                          dans le sens trigonométrique
     Retourne :
         - la longueur sur l'axe x de la ligne représentant le regard du joueur
     """
     return math.cos(angle_joueur) * 30
 
+
 def delta_y(angle_joueur):
     """
     Argument :
-        - angle_joueur : angle en radians representant la direction du joueur 
+        - angle_joueur : angle en radians representant la direction du joueur
                          dans le sens trigonométrique
     Retourne :
         - la longueur sur l'axe y de la ligne représentant le regard du joueur
     """
     return math.sin(angle_joueur) * 30
+
 
 def dessiner_rayon_2D(cnv, carte, rayons=False):
     """
@@ -92,12 +107,11 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
         - carte : matrice contenant la représentation de la carte
         - rayons : True si on vuet qu'ils soient visibles, False sinon
     Affiche :
-        - la représentation 3D de ce que voit le joueur 
+        - la représentation 3D de ce que voit le joueur
         - les rayons de lumière partants du joueur
     """
     global angle_joueur, distance_max
 
-    width = cnv.winfo_width()
     height = cnv.winfo_height()
 
     cnv3D.delete('decor')
@@ -120,15 +134,15 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
             cpt = largeur
         elif angle_rayon > math.pi:
             # on retire 0.0001 pour eviter les divisions par 0
-            rayon_y = (joueur_y // taille_mur) * taille_mur - 0.0001 
-            rayon_x = (joueur_y - rayon_y) * (-1 / math.tan(angle_rayon)) \
-                     + joueur_x
+            rayon_y = (joueur_y // taille_mur) * taille_mur - 0.0001
+            rayon_x = (joueur_y - rayon_y) * (-1 / math.tan(angle_rayon))\
+                + joueur_x
             yo = -taille_mur
             xo = -yo * (-1 / math.tan(angle_rayon))
         else:
-            rayon_y = (joueur_y // taille_mur) * taille_mur + taille_mur 
-            rayon_x = (joueur_y - rayon_y) * (-1 / math.tan(angle_rayon)) \
-                + joueur_x 
+            rayon_y = (joueur_y // taille_mur) * taille_mur + taille_mur
+            rayon_x = (joueur_y - rayon_y) * (-1 / math.tan(angle_rayon))\
+                + joueur_x
             yo = taille_mur
             xo = -yo * (-1 / math.tan(angle_rayon))
 
@@ -137,18 +151,18 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
             carte_x = int(rayon_x // taille_mur)
             carte_y = int(rayon_y // taille_mur)
             if carte_x < largeur and carte_y < hauteur \
-                and carte_y >= 0 and carte_x >= 0:
-                
+                    and carte_y >= 0 and carte_x >= 0:
+
                 # mur
                 if carte[etage][carte_y][carte_x] == 1:
                     type_mur = 'mur'
                     x_horizontal = rayon_x
                     y_horizontal = rayon_y
                     distance_horizontale = distance((joueur_x, joueur_y),
-                                                    (x_horizontal, 
+                                                    (x_horizontal,
                                                      y_horizontal))
                     cpt = largeur
-                
+
                 # porte
                 elif carte[etage][carte_y][carte_x] == 3:
                     type_mur = 'porte'
@@ -159,7 +173,7 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
                                                      y_horizontal))
                     cpt = largeur
 
-                else: 
+                else:
                     rayon_x += xo
                     rayon_y += yo
                     cpt += 1
@@ -168,7 +182,7 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
                 rayon_y += yo
                 cpt += 1
 
-        # calcul des intersections avec les lignes verticales 
+        # calcul des intersections avec les lignes verticales
         distance_vecticale = 10000000
         x_vectical = joueur_x
         y_vectical = joueur_y
@@ -181,13 +195,15 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
 
         elif angle_rayon > math.pi / 2 and angle_rayon < 3 * math.pi / 2:
             # on retire 0.0001 pour eviter les divisions par 0
-            rayon_x = (joueur_x // taille_mur) * taille_mur - 0.0001 
-            rayon_y = (joueur_x - rayon_x) * (-math.tan(angle_rayon)) + joueur_y
+            rayon_x = (joueur_x // taille_mur) * taille_mur - 0.0001
+            rayon_y = (joueur_x - rayon_x) * (-math.tan(angle_rayon)) +\
+                joueur_y
             xo = -taille_mur
             yo = -xo * (-math.tan(angle_rayon))
         else:
-            rayon_x = (joueur_x // taille_mur) * taille_mur + taille_mur 
-            rayon_y = (joueur_x - rayon_x) * (-math.tan(angle_rayon)) + joueur_y 
+            rayon_x = (joueur_x // taille_mur) * taille_mur + taille_mur
+            rayon_y = (joueur_x - rayon_x) * (-math.tan(angle_rayon)) +\
+                joueur_y
             xo = taille_mur
             yo = -xo * (-math.tan(angle_rayon))
 
@@ -196,7 +212,7 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
             carte_x = int(rayon_x // taille_mur)
             carte_y = int(rayon_y // taille_mur)
             if carte_x < largeur and carte_y < hauteur \
-                and carte_y >= 0 and carte_x >= 0:
+                    and carte_y >= 0 and carte_x >= 0:
 
                 # mur
                 if carte[etage][carte_y][carte_x] == 1:
@@ -224,11 +240,11 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
                 rayon_x += xo
                 rayon_y += yo
                 cpt += 1
-    
+
         if distance_horizontale > distance_vecticale:
             distance_max = distance_vecticale
             if rayons is True:
-                cnv.create_line(joueur_x, joueur_y, x_vectical, y_vectical, 
+                cnv.create_line(joueur_x, joueur_y, x_vectical, y_vectical,
                                 fill="yellow", width=3, tag='joueur')
         else:
             distance_max = distance_horizontale
@@ -241,13 +257,13 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
             angle_projection -= 2 * math.pi
         if angle_projection < 0:
             angle_projection += 2 * math.pi
-        
+
         # dessin des murs
         distance_max *= math.cos(angle_projection)
-        ratio = taille_mur * height / distance_max 
+        ratio = taille_mur * height / distance_max
         if ratio > height:
             ratio = height
-        decalage = height // 2  - ratio // 2
+        decalage = height // 2 - ratio // 2
         if distance_horizontale > distance_vecticale:
             if type_mur == "porte":
                 couleur = "brown"
@@ -258,7 +274,7 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
                 couleur = "brown"
             else:
                 couleur = "grey20"
-        
+
         # Ce facteur varie en fonction de la taille de la carte, je n'ai
         # cependant pas reussi à trouver un rapport, il doit donc etre ajusté
         # à la main.
@@ -268,16 +284,17 @@ def dessiner_rayon_2D(cnv, carte, rayons=False):
                           fill=couleur, width=5, tag='decor')
 
         angle_rayon += (math.pi / 180) / 2
-        
+
         if angle_rayon < 0:
             angle_rayon += 2 * math.pi
         elif angle_rayon > 2 * math.pi:
             angle_rayon -= 2 * math.pi
 
+
 def distance(a, b):
     """
     Arguments :
-        - a, b : tuples de forme (x, y) representant deux points 
+        - a, b : tuples de forme (x, y) representant deux points
     Retourne :
         - dist : la distance en pixel entre les deux points
     """
@@ -287,9 +304,11 @@ def distance(a, b):
     dist = math.sqrt(part1**2 + part2**2)
     return dist
 
+
 def move_up(event):
     """
-    Permet de deplacer le joueur à l'aide des touches directionnelles du clavier
+    Permet de deplacer le joueur à l'aide des touches directionnelles du
+    clavier
     """
     global joueur_y, joueur_x, angle_joueur, etage
     carte_localisation_avant = (int(joueur_x // taille_mur),
@@ -302,15 +321,16 @@ def move_up(event):
 
     # vide
     if carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
-        == 0 :
+            == 0:
         cnv.delete('joueur')
         dessine_joueur(cnv)
         dessiner_rayon_2D(cnv, carte)
 
     # escalier
-    elif carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
-         == 2 and carte[etage][carte_localisation_avant[1]]\
-         [carte_localisation_avant[0]] == 0:
+    elif carte[etage][carte_localisation_apres[1]]\
+        [carte_localisation_apres[0]]\
+        == 2 and carte[etage][carte_localisation_avant[1]]\
+            [carte_localisation_avant[0]] == 0:
         if etage == 0:
             etage += 1
         else:
@@ -321,8 +341,9 @@ def move_up(event):
         dessiner_rayon_2D(cnv, carte)
 
     # bouton porte
-    elif carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
-         == 4:
+    elif carte[etage][carte_localisation_apres[1]]\
+        [carte_localisation_apres[0]]\
+            == 4:
         cnv.delete('all')
         for i in range(hauteur):
             for j in range(largeur):
@@ -334,35 +355,37 @@ def move_up(event):
 
     # mur
     else:
-        joueur_x += math.sin(angle_joueur-math.pi / 2) * 10
-        joueur_y -= math.cos(angle_joueur-math.pi / 2) * 10
+        joueur_x += math.sin(angle_joueur - math.pi / 2) * 10
+        joueur_y -= math.cos(angle_joueur - math.pi / 2) * 10
 
-    
+
 def move_down(event):
     """
-    Permet de deplacer le joueur à l'aide des touches directionnelles du clavier
+    Permet de deplacer le joueur à l'aide des touches directionnelles du
+    clavier
     """
     global joueur_x, joueur_y, angle_joueur, etage
 
     carte_localisation_avant = (int(joueur_x // taille_mur),
                                 int(joueur_y // taille_mur))
 
-    joueur_x += math.sin(angle_joueur - math.pi/2) * 10
-    joueur_y -= math.cos(angle_joueur - math.pi/2) * 10
+    joueur_x += math.sin(angle_joueur - math.pi / 2) * 10
+    joueur_y -= math.cos(angle_joueur - math.pi / 2) * 10
     carte_localisation_apres = (int(joueur_x // taille_mur),
                                 int(joueur_y // taille_mur))
 
     # vide
     if carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
-         == 0:
+            == 0:
         cnv.delete('joueur')
         dessine_joueur(cnv)
         dessiner_rayon_2D(cnv, carte)
-    
+
     # escalier
-    elif carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
+    elif carte[etage][carte_localisation_apres[1]]\
+        [carte_localisation_apres[0]]\
         == 2 and carte[etage][carte_localisation_avant[1]]\
-        [carte_localisation_avant[0]] == 0:
+            [carte_localisation_avant[0]] == 0:
         if etage == 0:
             etage += 1
         else:
@@ -373,8 +396,9 @@ def move_down(event):
         dessiner_rayon_2D(cnv, carte)
 
     # bouton porte
-    elif carte[etage][carte_localisation_apres[1]][carte_localisation_apres[0]]\
-         == 4:
+    elif carte[etage][carte_localisation_apres[1]]\
+        [carte_localisation_apres[0]]\
+            == 4:
         cnv.delete('all')
         for i in range(hauteur):
             for j in range(largeur):
@@ -386,12 +410,13 @@ def move_down(event):
 
     # mur
     else:
-        joueur_x -= math.sin(angle_joueur-math.pi / 2) * 10
-        joueur_y += math.cos(angle_joueur-math.pi / 2) * 10
+        joueur_x -= math.sin(angle_joueur - math.pi / 2) * 10
+        joueur_y += math.cos(angle_joueur - math.pi / 2) * 10
+
 
 def turn_left(event):
     """
-    Permet de faire pivoter le joueur à l'aide des touches directionnelles du 
+    Permet de faire pivoter le joueur à l'aide des touches directionnelles du
     clavier
     """
     global angle_joueur
@@ -402,9 +427,10 @@ def turn_left(event):
     if angle_joueur < 0:
         angle_joueur = 2 * math.pi
 
+
 def turn_right(event):
     """
-    Permet de faire pivoter le joueur à l'aide des touches directionnelles du 
+    Permet de faire pivoter le joueur à l'aide des touches directionnelles du
     clavier
     """
     global angle_joueur
@@ -421,35 +447,36 @@ def turn_right(event):
 # 3 represente une porte
 # 4 represente un bouton pour ouvrir les portes
 
-carte =       [[[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
-                [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                [1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1],
-                [1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
-                [1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1],
-                [1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
 
-               [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 2, 1, 0, 3, 0, 0, 0, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
-                [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 4, 1],
-                [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
-                [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
-                [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
-                [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1],
-                [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1],
-                [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]]
+carte = [[[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
+         [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1],
+         [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+         [1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 1],
+         [1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+         [1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+         [1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 1],
+         [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]],
+
+         [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 2, 1, 0, 3, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1],
+         [1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 4, 1],
+         [1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+         [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1],
+         [1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+         [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1],
+         [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1],
+         [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1],
+         [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]]]
 
 
 largeur, hauteur = len(carte[0][0]), len(carte[0])
 # taille des murs en fonction de la taille de la carte
-taille_mur = 512 // max(largeur, hauteur) 
-# position de depart du joueur 
+taille_mur = 512 // max(largeur, hauteur)
+# position de depart du joueur
 joueur_x, joueur_y = taille_mur * 10.5, taille_mur * 9.5
 # étage de départ
 etage = 0
@@ -473,7 +500,7 @@ dessiner_2D(cnv, carte, taille_mur, etage)
 dessine_joueur(cnv)
 dessiner_rayon_2D(cnv, carte)
 
-# definition des touches de déplacement 
+# definition des touches de déplacement
 wnd.bind("<Up>", move_up)
 wnd.bind("<Down>", move_down)
 wnd.bind("<Right>", turn_right)
