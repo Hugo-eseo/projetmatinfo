@@ -148,7 +148,7 @@ class Application():
             self.aire_ia.set('Aire IA : 0')
 
         gardien = Point(event.x, event.y)
-        if point_in_polygon(gardien, self.segments, self.cnv):
+        if point_in_polygon(gardien.return_tuple(), self.sommets, self.cnv):
             self.gardien_actuels += 1
 
             # création du gardien

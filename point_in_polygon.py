@@ -30,7 +30,7 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
 
     liste_segments_polygon = list()
     # Création d'une liste contenant les segments du polygon
-    if type(point_to_check) == 'shared.Point':
+    if not (type(point_to_check) is tuple or type(point_to_check) is list):
         A = point_to_check
         for i in range(1, len(polygon)):
             B = polygon[i]
@@ -38,6 +38,9 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
             A = B
         B = polygon[0]
         liste_segments_polygon.append(Segment(A, B))
+        # Le point 0 dans tout l'algorithme correspond au point
+        # dont nous souhaitons savoir si il est dans le poylgon
+        O = point_to_check
     else:
         A = Point(polygon[0][0], polygon[0][1])
         for i in range(1, len(polygon)):
@@ -47,9 +50,9 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
         B = Point(polygon[0][0], polygon[0][1])
         liste_segments_polygon.append(Segment(A, B))
 
-    # Le point 0 dans tout l'algorithme correspond au point
-    # dont nous souhaitons savoir si il est dans le poylgon
-    O = Point(point_to_check[0], point_to_check[1])
+        # Le point 0 dans tout l'algorithme correspond au point
+        # dont nous souhaitons savoir si il est dans le poylgon
+        O = Point(point_to_check[0], point_to_check[1])
 
     # Cette fonction se base sur l'algorithme présenté dans cet article
     # https://towardsdatascience.com/is-the-point-inside-the-polygon-574b86472119
@@ -75,6 +78,7 @@ def point_in_polygon(point_to_check, polygon, canvas=None, mode_demo=False):
     for segment in liste_segments_polygon:
         # Si le point appartient à un segment du polygon, il n'est donc pas
         # considéré comme appartenant au polygon
+
         if point_appartient_segment(O, segment):
             return False
         I = intersection_demi_droite_segment(segment_horizontal, segment)
