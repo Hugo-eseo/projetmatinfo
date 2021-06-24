@@ -472,8 +472,6 @@ class Application:
         self.width_canvas, self.height_canvas = width, height
         self.width_frame, self.height_frame = 100, height
 
-        puissance_gardien = 50
-
         self.wnd = tk.Tk()
         self.cnv = tk.Canvas(self.wnd, width=self.width_canvas,
                              height=self.height_canvas)

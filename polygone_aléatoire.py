@@ -24,7 +24,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
         - Une liste d'objets de type 'segment' dans leur ordre d'apparition
     """
 
-    liste_points, random_polygon = [], []
+    liste_points, random_polygon, liste_points_tuple = [], [], []
     sommets_polygon, liste_segments = [], []
 
     width = canvas.winfo_width() - 6    # correction d'un comportement étrange
@@ -38,6 +38,8 @@ def polygone_aleatoire(nombre_de_points, canvas):
     for i in range(nombre_de_points):
         liste_points.append(Point(random.randint(1, width - 1),
                                   random.randint(1, height - 1)))
+    for point in liste_points:
+        liste_points_tuple.append(point.return_tuple())
 
     # centre du canvas
     C = Point(width // 2, height // 2)
@@ -58,7 +60,7 @@ def polygone_aleatoire(nombre_de_points, canvas):
     B = sommets_polygon[-1]
     liste_segments.append(Segment(A, B))
 
-    if not point_in_polygon(C, liste_segments, canvas):
+    if not point_in_polygon(C.return_tuple(), liste_points_tuple, canvas):
         polygone_aleatoire(nombre_de_points, canvas)
 
     # changement du type des données
