@@ -510,7 +510,7 @@ class Application:
                 Gardien(Point(self.emplacements_gardiens[i][0],
                               self.emplacements_gardiens[i][1]),
                         self.emplacements_gardiens[i][2],
-                        puissance_gardien,
+                        50,
                         i,
                         self,
                         self.emplacements_gardiens[i][3],
