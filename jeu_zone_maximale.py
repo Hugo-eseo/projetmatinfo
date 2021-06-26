@@ -109,7 +109,7 @@ class Application():
             .pack(side=tk.BOTTOM)
 
         # Créer une map par defaut
-        self.segments, self.sommets = polygone_predefini(self.cnv, None)
+        self.segments, self.sommets = polygone_predefini(self.cnv, 0)
 
         # Définition des variables
         self.aire_totale = aire_polygone(self.sommets)

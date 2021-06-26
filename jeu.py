@@ -150,7 +150,7 @@ class Gardien:
         if self.app.in_game:
             self.turn_left()
             self.app.voleur.test_defaite()
-            self.app.cnv.after(500, self.toupie)
+            self.app.cnv.after(50, self.toupie)
 
     def ronde(self):
         """
@@ -166,7 +166,7 @@ class Gardien:
                 if self.direction >= 360:
                     self.direction -= 360
             self.app.voleur.test_defaite()
-            self.app.cnv.after(500, self.ronde)
+            self.app.cnv.after(50, self.ronde)
 
 
 class Voleur:
@@ -178,7 +178,7 @@ class Voleur:
             - app : objet de type 'Application'
         """
         self.position = Point
-        self.vitesse = 4
+        self.vitesse = 10
         self.score = 0
         self.inventaire = list()
         self.nb_tableaux_restants = app.nb_tableaux
@@ -417,7 +417,7 @@ class Lampe:
         self.torche_tuple = []
         torche_infinie = intersections_rayons_obstacles(self.app.cnv,
                                                         self.localisation,
-                                                        30, 360,
+                                                        20, 360,
                                                         0,
                                                         self.app.
                                                         liste_segments,
@@ -487,7 +487,7 @@ class Application:
         self.liste_segments, self.liste_points, self.emplacement_victoire,\
             self.emplacements_gardiens, self.emplacements_lampes,\
             self.emplacements_boutons,\
-            self.emplacements_tableaux = generateur(self.cnv, None)
+            self.emplacements_tableaux = generateur(self.cnv, 0)
         self.in_game = True
 
         # initialisation de variables
@@ -510,7 +510,7 @@ class Application:
                 Gardien(Point(self.emplacements_gardiens[i][0],
                               self.emplacements_gardiens[i][1]),
                         self.emplacements_gardiens[i][2],
-                        50,
+                        100,
                         i,
                         self,
                         self.emplacements_gardiens[i][3],
